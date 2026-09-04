@@ -62,9 +62,12 @@ function Reveal({ children, className }: { children: ReactNode; className?: stri
     const el = ref.current;
     if (!el) return;
     const io = new IntersectionObserver(
-      ([entry]) => entry.isIntersecting && el.classList.add("is-visible"),
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) el.classList.add("is-visible");
+      },
       { threshold: 0.12 },
     );
+
     io.observe(el);
     return () => io.disconnect();
   }, []);
