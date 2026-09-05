@@ -11,7 +11,7 @@ const bi = (fr: string, ar: string): Bi => ({ fr, ar });
 export const identity = {
   candidate: bi("Al ABASS Omar", "عمر العباس"),
   party: bi("Parti des Democrates Nouveaux", "حزب الديمقراطيين الجدد"),
-  district: bi("Circonscription de Rabat-Ocean", "دائرة الرباط المحيط"),
+  district: bi("Programme electoral 2026", "البرنامج الانتخابي 2026"),
   slogan: bi("Un Maroc souverain, numerique et solidaire", "مغرب سيادي، رقمي ومتضامن"),
   positioning: bi(
     "Peu d'ideologie, beaucoup d'efficacite et de performance.",
@@ -506,7 +506,6 @@ export const engagementsOfAxis = (id: AxisId) => engagements.filter((e) => e.axi
 export const programContext = `
 CANDIDAT : ${identity.candidate.fr} / ${identity.candidate.ar}
 PARTI : ${identity.party.fr} / ${identity.party.ar}
-CIRCONSCRIPTION : ${identity.district.fr} / ${identity.district.ar}
 MESSAGE CENTRAL : ${identity.slogan.fr} / ${identity.slogan.ar}
 POSITIONNEMENT : ${identity.positioning.fr} / ${identity.positioning.ar}
 
