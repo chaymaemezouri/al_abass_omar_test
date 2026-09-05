@@ -1,11 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowRight,
+  BookOpenCheck,
+  BriefcaseBusiness,
+  Droplets,
   ExternalLink,
+  GraduationCap,
   Languages,
   MessageCircle,
   Mic,
+  Scale,
   Send,
   ShieldCheck,
+  Sparkles,
+  Stethoscope,
+  Store,
   Volume2,
   X,
 } from "lucide-react";
@@ -16,6 +25,7 @@ import { suggestions, ui, useLang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 type Msg = { role: "user" | "assistant"; content: string };
+type Bi = { fr: string; ar: string };
 type SpeechRecognitionLike = {
   lang: string;
   interimResults: boolean;
@@ -31,18 +41,104 @@ type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
 export const OPEN_CHAT_EVENT = "open-campaign-chat";
 export const openChat = () => window.dispatchEvent(new Event(OPEN_CHAT_EVENT));
 
-const assistantIntro = {
-  fr: "Bonjour, je suis l assistant numerique du programme electoral 2026. Je peux vous expliquer les propositions concernant l emploi, la sante, l education, l eau, le numerique, la justice, la famille ou la souverainete nationale.",
-  ar: "مرحبا، أنا المساعد الرقمي للبرنامج الانتخابي 2026. أستطيع شرح المقترحات المتعلقة بالتشغيل والصحة والتعليم والماء والرقمنة والعدالة والأسرة والسيادة الوطنية.",
+const bi = (fr: string, ar: string): Bi => ({ fr, ar });
+
+const chatCopy = {
+  subtitle: bi("Assistant IA base sur le programme officiel", "مساعد ذكي مبني على البرنامج الرسمي"),
+  welcomeTitle: bi("Assistant IA officiel du programme 2026", "المساعد الذكي الرسمي لبرنامج 2026"),
+  welcomeLead: bi(
+    "Posez une question claire. Je reponds avec les mesures, les objectifs et les sources du programme valide.",
+    "اطرح سؤالا واضحا. أجيبك بالإجراءات والأهداف والمصادر الموجودة في البرنامج المعتمد.",
+  ),
+  sourceBadge: bi("Sources verifiees", "مصادر موثقة"),
+  limitBadge: bi("Programme uniquement", "البرنامج فقط"),
+  privacyBadge: bi("Dialogue direct", "حوار مباشر"),
+  usefulQuestions: bi("Questions utiles", "أسئلة مفيدة"),
+  themes: bi("Themes du programme", "مواضيع البرنامج"),
+  sourceRuleTitle: bi("Regle de fiabilite", "قاعدة الموثوقية"),
+  sourceRule: bi(
+    "Les reponses citent le programme et refusent les informations absentes de la base validee.",
+    "الأجوبة تعتمد على البرنامج وترفض المعلومات غير الموجودة في القاعدة المعتمدة.",
+  ),
+  quickStart: bi("Commencer rapidement", "ابدأ بسرعة"),
+  listening: bi(
+    "Transcription en cours. Vous pouvez corriger le texte avant l'envoi.",
+    "جاري تحويل الصوت إلى نص. يمكنك تصحيح النص قبل الإرسال.",
+  ),
+  loading: bi("L'assistant consulte la base validee", "المساعد يراجع القاعدة المعتمدة"),
+  read: bi("Ecouter", "استمع"),
+  seeCommitment: bi("Voir l'engagement complet", "عرض الالتزام كاملا"),
+  source: bi("Source", "المصدر"),
+  micUnsupported: bi(
+    "Le micro n'est pas pris en charge par ce navigateur.",
+    "الميكروفون غير مدعوم في هذا المتصفح.",
+  ),
+  inputHint: bi(
+    "L'assistant repond uniquement a partir du programme officiel 2026.",
+    "المساعد يجيب فقط انطلاقا من البرنامج الرسمي 2026.",
+  ),
+  officialBase: bi("Base officielle", "قاعدة رسمية"),
+  session: bi("Session de dialogue", "جلسة الحوار"),
 };
 
-const sourceByContent = (content: string) => {
+const topicCards = [
+  {
+    label: bi("Emploi", "التشغيل"),
+    prompt: bi(
+      "Que propose le programme pour l'emploi des jeunes ?",
+      "ماذا يقترح البرنامج لتشغيل الشباب؟",
+    ),
+    icon: BriefcaseBusiness,
+  },
+  {
+    label: bi("Sante", "الصحة"),
+    prompt: bi("Comment ameliorer le systeme de sante ?", "كيف يقترح البرنامج تحسين منظومة الصحة؟"),
+    icon: Stethoscope,
+  },
+  {
+    label: bi("Education", "التعليم"),
+    prompt: bi("Que prevoit le programme pour l'education ?", "ماذا يتضمن البرنامج بخصوص التعليم؟"),
+    icon: GraduationCap,
+  },
+  {
+    label: bi("Eau", "الماء"),
+    prompt: bi(
+      "Comment garantir la securite hydrique ?",
+      "كيف يمكن ضمان الأمن المائي حسب البرنامج؟",
+    ),
+    icon: Droplets,
+  },
+  {
+    label: bi("PME", "المقاولات"),
+    prompt: bi(
+      "Quelles sont les mesures pour les petites entreprises ?",
+      "ما هي الإجراءات الموجهة للمقاولات الصغيرة؟",
+    ),
+    icon: Store,
+  },
+  {
+    label: bi("Justice", "العدالة"),
+    prompt: bi(
+      "Quelles mesures concernent la justice et la confiance ?",
+      "ما هي إجراءات العدالة وتعزيز الثقة؟",
+    ),
+    icon: Scale,
+  },
+];
+
+const sourceByContent = (content: string): Bi => {
   const lower = content.toLowerCase();
   if (lower.includes("pme") || lower.includes("entrepreneur") || lower.includes("marche")) {
-    return "Plateforme electorale actualisee 2026, objectif PME et marches publics";
+    return bi(
+      "Plateforme electorale actualisee 2026, objectif PME et marches publics",
+      "المنصة الانتخابية المحينة 2026، هدف المقاولات والصفقات العمومية",
+    );
   }
   if (lower.includes("eau") || lower.includes("hydrique") || lower.includes("dessalement")) {
-    return "Plateforme electorale actualisee 2026, objectifs securite hydrique et reutilisation des eaux";
+    return bi(
+      "Plateforme electorale actualisee 2026, securite hydrique et reutilisation des eaux",
+      "المنصة الانتخابية المحينة 2026، الأمن المائي وإعادة استعمال المياه",
+    );
   }
   if (
     lower.includes("digital") ||
@@ -50,12 +146,18 @@ const sourceByContent = (content: string) => {
     lower.includes("5g") ||
     lower.includes("administr")
   ) {
-    return "Plateforme electorale actualisee 2026, axe transformation numerique";
+    return bi(
+      "Plateforme electorale actualisee 2026, axe transformation numerique",
+      "المنصة الانتخابية المحينة 2026، محور التحول الرقمي",
+    );
   }
   if (lower.includes("culture") || lower.includes("identite") || lower.includes("famille")) {
-    return "Plateforme electorale actualisee 2026, axe identite et unite nationale";
+    return bi(
+      "Plateforme electorale actualisee 2026, axe identite et unite nationale",
+      "المنصة الانتخابية المحينة 2026، محور الهوية والوحدة الوطنية",
+    );
   }
-  return "Plateforme electorale actualisee 2026";
+  return bi("Plateforme electorale actualisee 2026", "المنصة الانتخابية المحينة 2026");
 };
 
 export function ChatWidget() {
@@ -68,6 +170,7 @@ export function ChatWidget() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const quickSuggestions = useMemo(() => suggestions.slice(0, 4), []);
 
   useEffect(() => {
     const handler = () => setOpen(true);
@@ -132,13 +235,7 @@ export function ChatWidget() {
     const Ctor = win.SpeechRecognition ?? win.webkitSpeechRecognition;
 
     if (!Ctor) {
-      setInput(
-        (value) =>
-          value ||
-          (lang === "ar"
-            ? "الميكروفون غير مدعوم في هذا المتصفح."
-            : "Le micro n'est pas pris en charge par ce navigateur."),
-      );
+      setInput((value) => value || t(chatCopy.micUnsupported));
       return;
     }
 
@@ -182,116 +279,190 @@ export function ChatWidget() {
       </button>
 
       {open && (
-        <div dir={dir} className="fixed inset-0 z-50 flex flex-col bg-background text-foreground">
-          <header className="border-b border-border bg-navy text-white">
-            <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4">
+        <div dir={dir} className="fixed inset-0 z-50 flex flex-col bg-ivory text-foreground">
+          <header className="border-b border-white/10 bg-navy text-white shadow-elegant">
+            <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
               <div className="flex min-w-0 items-center gap-3">
-                <img src={assistantAvatar} alt="" className="h-11 w-11 rounded-md object-cover" />
+                <div className="relative grid h-12 w-12 place-items-center rounded-full bg-white/10 ring-1 ring-white/15">
+                  <img
+                    src={assistantAvatar}
+                    alt=""
+                    className="h-10 w-10 rounded-full object-cover"
+                  />
+                  <span className="absolute bottom-1 end-1 h-3 w-3 rounded-full border-2 border-navy bg-emerald-400" />
+                </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-extrabold">{t(ui.chatTitle)}</p>
-                  <p className="truncate text-xs text-white/72">
-                    Assistant IA basé sur le programme officiel
-                  </p>
+                  <p className="truncate text-sm font-extrabold sm:text-base">{t(ui.chatTitle)}</p>
+                  <p className="truncate text-xs text-white/72">{t(chatCopy.subtitle)}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label={t(ui.closeChat)}
-                className="grid h-10 w-10 place-items-center rounded-sm border border-white/20 text-white transition-colors hover:bg-white/10"
+                className="grid h-11 w-11 place-items-center rounded-sm border border-white/20 text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
           </header>
 
-          <div className="mx-auto grid min-h-0 w-full max-w-7xl flex-1 gap-0 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="mx-auto grid min-h-0 w-full max-w-7xl flex-1 lg:grid-cols-[minmax(0,1fr)_340px]">
             <section className="flex min-h-0 flex-col border-border lg:border-r">
               <div
                 ref={scrollRef}
-                className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-ivory p-4 sm:p-6"
+                className="min-h-0 flex-1 overflow-y-auto bg-[radial-gradient(circle_at_20%_0%,rgba(194,15,26,0.08),transparent_28%),linear-gradient(180deg,#fbfaf5_0%,#f5f1e7_100%)] p-4 sm:p-6"
               >
                 {messages.length === 0 && (
-                  <div className="mx-auto max-w-3xl rounded-md border border-border bg-card p-6 shadow-card">
-                    <div className="flex items-start gap-4">
-                      <img
-                        src={assistantAvatar}
-                        alt=""
-                        className="h-14 w-14 rounded-md object-cover"
-                      />
-                      <div>
-                        <h2 className="text-2xl leading-tight text-navy">
-                          {lang === "ar" ? assistantIntro.ar : assistantIntro.fr}
-                        </h2>
-                        <div className="mt-5 flex flex-wrap gap-2">
-                          {["Darija", "العربية", "Français"].map((label) => (
-                            <span
-                              key={label}
-                              className="rounded-sm border border-border px-3 py-2 text-sm font-bold"
+                  <div className="mx-auto grid max-w-4xl gap-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                    <div className="rounded-md border border-border bg-card p-5 shadow-card sm:p-6">
+                      <div className="grid gap-5 md:grid-cols-[auto_minmax(0,1fr)]">
+                        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-navy/95 ring-4 ring-white shadow-card">
+                          <img
+                            src={assistantAvatar}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="mb-3 flex flex-wrap gap-2">
+                            {[chatCopy.sourceBadge, chatCopy.limitBadge, chatCopy.privacyBadge].map(
+                              (badge) => (
+                                <span
+                                  key={badge.fr}
+                                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1 text-xs font-extrabold text-navy"
+                                >
+                                  <ShieldCheck className="h-3.5 w-3.5 text-morocco" />
+                                  {t(badge)}
+                                </span>
+                              ),
+                            )}
+                          </div>
+                          <h2 className="max-w-2xl text-2xl font-black leading-tight text-navy sm:text-3xl">
+                            {t(chatCopy.welcomeTitle)}
+                          </h2>
+                          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                            {t(chatCopy.welcomeLead)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 lg:grid-cols-[1fr_1.05fr]">
+                      <div className="rounded-md border border-border bg-card p-4 shadow-card">
+                        <p className="mb-3 flex items-center gap-2 text-sm font-extrabold text-navy">
+                          <Sparkles className="h-4 w-4 text-morocco" />
+                          {t(chatCopy.quickStart)}
+                        </p>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          {quickSuggestions.map((suggestion) => (
+                            <button
+                              key={suggestion.fr}
+                              type="button"
+                              onClick={() => send(t(suggestion))}
+                              className="group flex min-h-16 items-center justify-between gap-3 rounded-sm border border-border bg-background px-3 py-2 text-start text-sm font-bold text-navy transition-colors hover:border-morocco hover:bg-morocco/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-morocco"
                             >
-                              {label}
-                            </span>
+                              <span>{t(suggestion)}</span>
+                              <ArrowRight
+                                className={cn(
+                                  "h-4 w-4 shrink-0 text-morocco transition-transform group-hover:translate-x-0.5",
+                                  dir === "rtl" && "-scale-x-100",
+                                )}
+                              />
+                            </button>
                           ))}
+                        </div>
+                      </div>
+
+                      <div className="rounded-md border border-border bg-navy p-4 text-white shadow-elegant">
+                        <p className="mb-3 flex items-center gap-2 text-sm font-extrabold">
+                          <BookOpenCheck className="h-4 w-4 text-morocco" />
+                          {t(chatCopy.themes)}
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                          {topicCards.map((topic) => {
+                            const Icon = topic.icon;
+                            return (
+                              <button
+                                key={topic.label.fr}
+                                type="button"
+                                onClick={() => send(t(topic.prompt))}
+                                className="group rounded-sm border border-white/15 bg-white/7 p-3 text-start transition-colors hover:border-white/35 hover:bg-white/12 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                              >
+                                <Icon className="mb-2 h-5 w-5 text-morocco" />
+                                <span className="text-sm font-extrabold">{t(topic.label)}</span>
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {messages.map((message, index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      "flex",
-                      message.role === "user" ? "justify-end" : "justify-start",
-                    )}
-                  >
+                <div className="mx-auto mt-4 max-w-4xl space-y-4">
+                  {messages.map((message, index) => (
                     <div
+                      key={index}
                       className={cn(
-                        "max-w-[min(760px,92%)] rounded-md px-4 py-3 text-sm leading-relaxed shadow-card",
-                        message.role === "user"
-                          ? "bg-navy text-white"
-                          : "bg-card text-card-foreground",
+                        "flex animate-in fade-in slide-in-from-bottom-2 duration-300",
+                        message.role === "user" ? "justify-end" : "justify-start",
                       )}
                     >
-                      <p className="whitespace-pre-wrap">{message.content || "..."}</p>
-                      {message.role === "assistant" && message.content && (
-                        <div className="mt-4 border-t border-border pt-3">
-                          <p className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                            <ShieldCheck className="h-4 w-4 text-morocco" />
-                            Source : {sourceByContent(message.content)}
-                          </p>
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              onClick={() => speak(message.content)}
-                              className="inline-flex items-center gap-2 rounded-sm border border-border px-3 py-2 text-xs font-bold hover:bg-secondary"
-                            >
-                              <Volume2 className="h-4 w-4" />
-                              Écouter
-                            </button>
-                            <a
-                              href="#programme"
-                              onClick={() => setOpen(false)}
-                              className="inline-flex items-center gap-2 rounded-sm border border-border px-3 py-2 text-xs font-bold hover:bg-secondary"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              Voir l'engagement complet
-                            </a>
+                      <div
+                        className={cn(
+                          "max-w-[min(760px,92%)] rounded-md px-4 py-3 text-sm leading-relaxed shadow-card",
+                          message.role === "user"
+                            ? "bg-navy text-white"
+                            : "border border-border bg-card text-card-foreground",
+                        )}
+                      >
+                        <p className="whitespace-pre-wrap">{message.content || "..."}</p>
+                        {message.role === "assistant" && message.content && (
+                          <div className="mt-4 border-t border-border pt-3">
+                            <p className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+                              <ShieldCheck className="h-4 w-4 text-morocco" />
+                              {t(chatCopy.source)} : {t(sourceByContent(message.content))}
+                            </p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={() => speak(message.content)}
+                                className="inline-flex items-center gap-2 rounded-sm border border-border px-3 py-2 text-xs font-bold hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-morocco"
+                              >
+                                <Volume2 className="h-4 w-4" />
+                                {t(chatCopy.read)}
+                              </button>
+                              <a
+                                href="#programme"
+                                onClick={() => setOpen(false)}
+                                className="inline-flex items-center gap-2 rounded-sm border border-border px-3 py-2 text-xs font-bold hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-morocco"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                {t(chatCopy.seeCommitment)}
+                              </a>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-                {loading && messages.at(-1)?.role === "user" && (
-                  <div className="flex justify-start">
-                    <div className="animate-pulse rounded-md bg-card px-4 py-3 text-sm text-muted-foreground shadow-card">
-                      L'assistant consulte la base validée...
+                  {loading && messages.at(-1)?.role === "user" && (
+                    <div className="flex justify-start">
+                      <div className="rounded-md border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-card">
+                        <span className="inline-flex items-center gap-2 font-bold">
+                          {t(chatCopy.loading)}
+                          <span className="flex gap-1">
+                            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-morocco" />
+                            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-morocco [animation-delay:120ms]" />
+                            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-morocco [animation-delay:240ms]" />
+                          </span>
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               <form
@@ -299,71 +470,101 @@ export function ChatWidget() {
                   event.preventDefault();
                   send(input);
                 }}
-                className="border-t border-border bg-card p-4"
+                className="border-t border-border bg-card p-3 shadow-[0_-14px_28px_rgba(2,25,55,0.06)] sm:p-4"
               >
-                <div className="mx-auto flex max-w-4xl items-end gap-2">
-                  <button
-                    type="button"
-                    onClick={toggleListening}
-                    aria-label="Microphone"
-                    className={cn(
-                      "grid h-11 w-11 shrink-0 place-items-center rounded-sm border border-border transition-colors hover:bg-secondary",
-                      listening && "border-morocco bg-morocco/10 text-morocco",
-                    )}
-                  >
-                    <Mic className="h-5 w-5" />
-                  </button>
-                  <textarea
-                    ref={inputRef}
-                    rows={1}
-                    value={input}
-                    onChange={(event) => setInput(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && !event.shiftKey) {
-                        event.preventDefault();
-                        send(input);
-                      }
-                    }}
-                    placeholder={t(ui.placeholder)}
-                    className="max-h-32 min-h-11 flex-1 resize-none rounded-sm border border-input bg-background px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading || !input.trim()}
-                    aria-label={t(ui.send)}
-                    className="grid h-11 w-11 shrink-0 place-items-center rounded-sm bg-morocco text-white transition-opacity disabled:opacity-40"
-                  >
-                    <Send className={cn("h-5 w-5", dir === "rtl" && "-scale-x-100")} />
-                  </button>
-                </div>
-                {listening && (
-                  <p className="mx-auto mt-2 max-w-4xl text-xs font-semibold text-morocco">
-                    Transcription en cours. Vous pouvez corriger le texte avant l'envoi.
+                <div className="mx-auto max-w-4xl">
+                  <div className="flex items-end gap-2 rounded-md border border-border bg-background p-2 shadow-card focus-within:ring-2 focus-within:ring-ring">
+                    <button
+                      type="button"
+                      onClick={toggleListening}
+                      aria-label="Microphone"
+                      className={cn(
+                        "grid h-11 w-11 shrink-0 place-items-center rounded-sm border border-border transition-colors hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-morocco",
+                        listening && "border-morocco bg-morocco/10 text-morocco",
+                      )}
+                    >
+                      <Mic className="h-5 w-5" />
+                    </button>
+                    <textarea
+                      ref={inputRef}
+                      rows={1}
+                      value={input}
+                      onChange={(event) => setInput(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && !event.shiftKey) {
+                          event.preventDefault();
+                          send(input);
+                        }
+                      }}
+                      placeholder={t(ui.placeholder)}
+                      className="max-h-32 min-h-11 flex-1 resize-none border-0 bg-transparent px-2 py-3 text-sm outline-none placeholder:text-muted-foreground"
+                    />
+                    <button
+                      type="submit"
+                      disabled={loading || !input.trim()}
+                      aria-label={t(ui.send)}
+                      className="grid h-11 w-11 shrink-0 place-items-center rounded-sm bg-morocco text-white transition-colors hover:bg-morocco-dark disabled:bg-muted disabled:text-muted-foreground"
+                    >
+                      <Send className={cn("h-5 w-5", dir === "rtl" && "-scale-x-100")} />
+                    </button>
+                  </div>
+                  <p className="mt-2 text-xs font-semibold text-muted-foreground">
+                    {listening ? t(chatCopy.listening) : t(chatCopy.inputHint)}
                   </p>
-                )}
+                </div>
               </form>
             </section>
 
-            <aside className="hidden min-h-0 overflow-y-auto bg-background p-6 lg:block">
+            <aside className="hidden min-h-0 overflow-y-auto bg-background p-5 lg:block">
               <div className="rounded-md border border-border bg-card p-5 shadow-card">
                 <p className="flex items-center gap-2 text-sm font-extrabold text-navy">
                   <Languages className="h-4 w-4 text-morocco" />
                   Darija العربية Français
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  Les réponses signalent leurs sources et refusent les informations absentes de la
-                  base validée.
+                  {t(chatCopy.sourceRule)}
                 </p>
               </div>
-              <div className="mt-5 rounded-md border border-border bg-card p-5 shadow-card">
-                <p className="text-sm font-extrabold text-navy">Questions utiles</p>
+
+              <div className="mt-4 rounded-md border border-border bg-navy p-5 text-white shadow-elegant">
+                <p className="text-sm font-extrabold">{t(chatCopy.session)}</p>
+                <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-bold">
+                  <span className="rounded-sm bg-white/10 px-3 py-2">
+                    {t(chatCopy.officialBase)}
+                  </span>
+                  <span className="rounded-sm bg-white/10 px-3 py-2">2026</span>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-md border border-border bg-card p-5 shadow-card">
+                <p className="text-sm font-extrabold text-navy">{t(chatCopy.themes)}</p>
+                <div className="mt-4 grid gap-2">
+                  {topicCards.map((topic) => {
+                    const Icon = topic.icon;
+                    return (
+                      <button
+                        key={topic.label.fr}
+                        type="button"
+                        onClick={() => send(t(topic.prompt))}
+                        className="flex items-center gap-3 rounded-sm border border-border px-3 py-2 text-start text-sm font-semibold transition-colors hover:border-morocco hover:bg-morocco/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-morocco"
+                      >
+                        <Icon className="h-4 w-4 shrink-0 text-morocco" />
+                        <span>{t(topic.label)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-md border border-border bg-card p-5 shadow-card">
+                <p className="text-sm font-extrabold text-navy">{t(chatCopy.usefulQuestions)}</p>
                 <div className="mt-4 grid gap-2">
                   {suggestions.map((suggestion) => (
                     <button
                       key={suggestion.fr}
                       type="button"
                       onClick={() => send(t(suggestion))}
-                      className="rounded-sm border border-border px-3 py-2 text-start text-sm font-semibold transition-colors hover:border-morocco hover:bg-morocco/5"
+                      className="rounded-sm border border-border px-3 py-2 text-start text-sm font-semibold transition-colors hover:border-morocco hover:bg-morocco/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-morocco"
                     >
                       {t(suggestion)}
                     </button>
@@ -371,7 +572,7 @@ export function ChatWidget() {
                 </div>
               </div>
               <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-                {identity.party.fr}
+                {lang === "ar" ? identity.party.ar : identity.party.fr}
               </p>
             </aside>
           </div>
