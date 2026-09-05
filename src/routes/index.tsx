@@ -513,7 +513,7 @@ function Page() {
             <img
               src={campaignLogo}
               alt={`Logo ${t(identity.candidate)}`}
-              className="h-11 w-11 shrink-0 rounded-sm object-contain"
+              className="h-9 w-9 shrink-0 rounded-sm object-contain sm:h-11 sm:w-11"
             />
             <span className="min-w-0">
               <span className="block truncate text-sm font-extrabold text-navy sm:text-base">
@@ -573,7 +573,7 @@ function Page() {
             />
             <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(255,255,255,0.96)_0%,rgba(255,255,255,0.9)_43%,rgba(255,255,255,0.38)_72%,rgba(255,255,255,0.2)_100%)]" />
             <div className="absolute right-0 top-0 -z-10 hidden h-full w-1/3 bg-[radial-gradient(circle_at_70%_20%,rgba(9,28,57,0.08),transparent_42%)] lg:block" />
-            <div className="mx-auto grid max-w-[1440px] items-center gap-5 px-4 py-5 sm:px-6 lg:min-h-[500px] lg:grid-cols-[minmax(0,0.98fr)_minmax(420px,0.82fr)] lg:px-8 lg:py-0">
+            <div className="hero-shell mx-auto grid max-w-[1440px] items-center gap-4 px-4 py-4 sm:gap-5 sm:px-6 lg:min-h-[500px] lg:grid-cols-[minmax(0,0.98fr)_minmax(420px,0.82fr)] lg:px-8 lg:py-0">
               <Reveal className="relative z-10 max-w-3xl">
                 <p className="inline-flex items-center gap-3 rounded-md border border-navy/12 bg-white/86 px-3 py-2 text-xs font-extrabold uppercase text-navy shadow-card backdrop-blur">
                   <span className="grid h-7 w-7 place-items-center rounded-full bg-morocco text-white">
@@ -590,7 +590,7 @@ function Page() {
                 <p className="mt-3 max-w-2xl text-lg leading-snug text-royal sm:text-xl">
                   {t(copy.heroLead)}
                 </p>
-                <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
+                <div className="hero-features mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
                   {heroFeatures.map((item) => (
                     <div key={item.label.fr} className="text-center sm:text-start">
                       <item.icon className="mx-auto h-6 w-6 text-[#b57905] sm:mx-0" />
@@ -620,25 +620,25 @@ function Page() {
                   </button>
                 </div>
               </Reveal>
-              <Reveal className="relative z-10 min-h-[330px] overflow-hidden sm:min-h-[420px] lg:min-h-[500px]">
+              <Reveal className="hero-portrait relative z-10 min-h-[300px] overflow-hidden sm:min-h-[420px] lg:min-h-[500px]">
                 <div className="absolute bottom-0 right-0 h-16 w-[80%] rounded-[100%] bg-navy/16 blur-2xl" />
                 <img
                   src={candidatePortrait}
                   alt={t(copy.heroCandidateName)}
-                  className="absolute -bottom-4 left-1/2 h-[360px] w-full max-w-[390px] -translate-x-1/2 object-contain object-bottom drop-shadow-[0_28px_58px_rgba(9,28,57,0.22)] sm:h-[440px] sm:max-w-[480px] lg:-bottom-8 lg:left-auto lg:right-2 lg:h-[535px] lg:max-w-[585px] lg:translate-x-0"
+                  className="hero-candidate-img absolute -bottom-4 left-1/2 h-[340px] w-full max-w-[390px] -translate-x-1/2 object-contain object-bottom drop-shadow-[0_28px_58px_rgba(9,28,57,0.22)] sm:h-[440px] sm:max-w-[480px] lg:-bottom-8 lg:left-auto lg:right-2 lg:h-[535px] lg:max-w-[585px] lg:translate-x-0"
                 />
               </Reveal>
             </div>
           </div>
 
           <div className="relative z-20 bg-navy text-white">
-            <div className="relative mx-auto grid max-w-[1440px] items-center gap-4 px-4 py-3 sm:px-6 md:grid-cols-[140px_minmax(0,1fr)] lg:px-8">
+            <div className="assistant-home-panel relative mx-auto grid max-w-[1440px] items-center gap-3 px-4 py-4 sm:px-6 md:grid-cols-[140px_minmax(0,1fr)] lg:px-8">
               <div className="hidden absolute inset-y-0 right-0 w-64 opacity-[0.06] [background-image:radial-gradient(circle_at_center,white_1px,transparent_1px)] [background-size:18px_18px] lg:block" />
               <Reveal className="flex justify-center md:border-r md:border-white/24">
                 <img
                   src={assistantPortrait}
                   alt={t(copy.assistantNote)}
-                  className="h-20 w-20 rounded-full border border-white/30 object-cover shadow-elegant sm:h-24 sm:w-24"
+                  className="h-16 w-16 rounded-full border border-white/30 object-cover shadow-elegant sm:h-24 sm:w-24"
                 />
               </Reveal>
               <Reveal className="relative z-10">
@@ -692,7 +692,7 @@ function Page() {
             </div>
           </div>
         </section>
-        <section id="engagements" className="relative overflow-hidden bg-white py-16 sm:py-20">
+        <section id="engagements" className="relative overflow-hidden bg-white py-10 sm:py-20">
           <div className="absolute inset-x-0 top-0 h-px bg-navy/10" />
           <div className="mx-auto max-w-7xl px-4">
             <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
@@ -732,7 +732,7 @@ function Page() {
             </div>
           </div>
         </section>
-        <section id="programme" className="relative overflow-hidden bg-ivory py-16 sm:py-20">
+        <section id="programme" className="relative overflow-hidden bg-ivory py-10 sm:py-20">
           <div className="absolute inset-y-10 right-0 hidden w-1/3 rounded-l-full bg-white/70 blur-3xl lg:block" />
           <div className="relative mx-auto max-w-7xl px-4">
             <SectionHeading
@@ -836,7 +836,7 @@ function Page() {
             </div>
           </div>
         </section>
-        <section className="bg-white py-16 sm:py-20">
+        <section className="bg-white py-10 sm:py-20">
           <div className="mx-auto max-w-7xl px-4">
             <SectionHeading title={t(copy.compareTitle)} lead={t(identity.positioning)} />
             <div className="mt-8 grid gap-3">
@@ -883,7 +883,7 @@ function Page() {
             </div>
           </div>
         </section>
-        <section className="relative overflow-hidden bg-navy py-16 text-white sm:py-20">
+        <section className="relative overflow-hidden bg-navy py-10 text-white sm:py-20">
           <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(90deg,white_1px,transparent_1px),linear-gradient(0deg,white_1px,transparent_1px)] [background-size:36px_36px]" />
           <div className="relative mx-auto max-w-7xl px-4">
             <SectionHeading title={t(copy.timeline)} lead={t(copy.proofLead)} inverted />
@@ -905,7 +905,7 @@ function Page() {
             </div>
           </div>
         </section>
-        <section className="bg-ivory py-16 sm:py-20">
+        <section className="bg-ivory py-10 sm:py-20">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 lg:grid-cols-[0.95fr_1.05fr]">
             <div>
               <SectionHeading title={t(financing.title)} lead={t(financing.note)} />
