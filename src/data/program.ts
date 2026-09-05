@@ -1,31 +1,29 @@
 /**
- * Contenu éditable du site et du programme électoral.
- * Pour mettre à jour le programme : modifier UNIQUEMENT ce fichier.
- * (Contenu provisoire crédible — à remplacer par le contenu officiel.)
+ * Contenu editable du site et du programme electoral.
+ * Source de reference : plateforme electorale actualisee 2026.
  */
 
-export type Lang = "fr" | "ar";
+export type Lang = "fr" | "ar" | "darija";
 export type Bi = { fr: string; ar: string };
 
+const bi = (fr: string, ar: string): Bi => ({ fr, ar });
+
 export const identity = {
-  candidate: { fr: "Nom Prénom", ar: "الاسم الكامل" } as Bi,
-  party: { fr: "Parti — Élections législatives 2026", ar: "الحزب — الانتخابات التشريعية 2026" } as Bi,
-  district: { fr: "Circonscription de Rabat-Océan", ar: "دائرة الرباط المحيط" } as Bi,
-  slogan: {
-    fr: "Un Maroc qui produit, innove et protège ses citoyens",
-    ar: "مغرب ينتج، يبتكر، ويحمي مواطنيه",
-  } as Bi,
-  positioning: {
-    fr: "Le programme politique que chaque citoyen peut comprendre et interroger.",
-    ar: "برنامج سياسي يفهمه كل مواطن ويستطيع أن يسائله.",
-  } as Bi,
-  pitch: {
-    fr: "Découvrez les 25 engagements concrets du programme, ou posez directement votre question à l'assistant.",
-    ar: "اكتشف 25 التزاما ملموسا في البرنامج، أو اطرح سؤالك مباشرة على المساعد.",
-  } as Bi,
+  candidate: bi("Al ABASS Omar", "عمر العباس"),
+  party: bi("Parti des Democrates Nouveaux", "حزب الديمقراطيين الجدد"),
+  district: bi("Circonscription de Rabat-Ocean", "دائرة الرباط المحيط"),
+  slogan: bi("Un Maroc souverain, numerique et solidaire", "مغرب سيادي، رقمي ومتضامن"),
+  positioning: bi(
+    "Peu d'ideologie, beaucoup d'efficacite et de performance.",
+    "قليل من الإيديولوجيا، وكثير من الفعالية والإنجاز.",
+  ),
+  pitch: bi(
+    "Produire la richesse, repondre aux besoins essentiels et renforcer l'unite nationale grace a des politiques publiques fondees sur l'efficacite, la justice et la responsabilite.",
+    "إنتاج الثروة، الاستجابة للحاجيات الأساسية، وتعزيز الوحدة الوطنية عبر سياسات عمومية مبنية على الفعالية والعدالة والمسؤولية.",
+  ),
 };
 
-export type AxisId = "richesse" | "souverainete" | "digital" | "pme" | "gouvernance";
+export type AxisId = "richesse" | "besoins" | "identite";
 
 export type Axis = {
   id: AxisId;
@@ -41,56 +39,49 @@ export const axes: Axis[] = [
     id: "richesse",
     number: 1,
     icon: "factory",
-    title: { fr: "Production de richesse et emploi", ar: "إنتاج الثروة والتشغيل" },
-    summary: {
-      fr: "Relancer la production nationale et créer des emplois durables dans les territoires.",
-      ar: "إنعاش الإنتاج الوطني وخلق مناصب شغل مستدامة في الجهات.",
+    title: bi(
+      "Produire la richesse et renforcer la souverainete economique",
+      "إنتاج الثروة وتعزيز السيادة الاقتصادية",
+    ),
+    summary: bi(
+      "Construire une economie productive, numerique et durable, capable de soutenir les entreprises marocaines et de proteger les ressources strategiques du pays.",
+      "بناء اقتصاد منتج ورقمي ومستدام، قادر على دعم المقاولات المغربية وحماية الموارد الاستراتيجية للبلاد.",
+    ),
+    stat: {
+      value: "100 MMDH",
+      label: bi("generes par la transformation numerique", "من التحول الرقمي"),
     },
-    stat: { value: "2030", label: { fr: "Horizon du plan productif", ar: "أفق المخطط الإنتاجي" } },
   },
   {
-    id: "souverainete",
+    id: "besoins",
     number: 2,
     icon: "shield",
-    title: { fr: "Souveraineté économique", ar: "السيادة الاقتصادية" },
-    summary: {
-      fr: "Réduire les dépendances stratégiques et sécuriser les secteurs vitaux du pays.",
-      ar: "تقليص التبعية الاستراتيجية وتأمين القطاعات الحيوية.",
+    title: bi("Repondre aux besoins essentiels", "الاستجابة للحاجيات الأساسية"),
+    summary: bi(
+      "Garantir a chaque citoyenne et citoyen un acces equitable a la sante, a l'education, a la protection sociale, a l'emploi et a une justice efficace.",
+      "ضمان ولوج منصف لكل مواطنة ومواطن إلى الصحة والتعليم والحماية الاجتماعية والتشغيل وعدالة فعالة.",
+    ),
+    stat: {
+      value: "100 000",
+      label: bi("jeunes formes au numerique chaque annee", "شاب يتكونون رقمياً كل سنة"),
     },
-    stat: { value: "100%", label: { fr: "Données publiques hébergées au Maroc", ar: "معطيات عمومية مستضافة بالمغرب" } },
   },
   {
-    id: "digital",
+    id: "identite",
     number: 3,
-    icon: "monitor",
-    title: { fr: "Administration en 5 minutes", ar: "إدارة في 5 دقائق" },
-    summary: {
-      fr: "Une administration simple, rapide et transparente, accessible depuis un téléphone.",
-      ar: "إدارة بسيطة وسريعة وشفافة، في متناول المواطن عبر هاتفه.",
-    },
-    stat: { value: "80%", label: { fr: "Démarches dématérialisées avant 2029", ar: "من المساطر مرقمنة قبل 2029" } },
-  },
-  {
-    id: "pme",
-    number: 4,
-    icon: "store",
-    title: { fr: "PME, TPE et jeunes entrepreneurs", ar: "المقاولات الصغرى والشباب المقاول" },
-    summary: {
-      fr: "Financer, digitaliser et protéger le tissu des petites entreprises.",
-      ar: "تمويل ورقمنة وحماية نسيج المقاولات الصغيرة.",
-    },
-    stat: { value: "60j", label: { fr: "Délai maximal de paiement public", ar: "أقصى أجل لأداء الصفقات العمومية" } },
-  },
-  {
-    id: "gouvernance",
-    number: 5,
     icon: "scale",
-    title: { fr: "Gouvernance, intégrité et économie informelle", ar: "الحكامة والنزاهة والاقتصاد غير المهيكل" },
-    summary: {
-      fr: "Intégrer progressivement l'informel, renforcer la vigilance numérique et l'intégrité publique.",
-      ar: "الإدماج التدريجي للقطاع غير المهيكل وتعزيز اليقظة الرقمية والنزاهة.",
+    title: bi(
+      "Enrichir l'identite et renforcer l'unite nationale",
+      "إغناء الهوية وتعزيز الوحدة الوطنية",
+    ),
+    summary: bi(
+      "Consolider les fondements du Royaume, valoriser son identite plurielle et renforcer la cohesion familiale, culturelle et territoriale.",
+      "ترسيخ أسس المملكة، تثمين هويتها المتعددة، وتعزيز التماسك الأسري والثقافي والترابي.",
+    ),
+    stat: {
+      value: "2030",
+      label: bi("horizon des objectifs structurants", "أفق الأهداف المهيكلة"),
     },
-    stat: { value: "0", label: { fr: "Tolérance envers la corruption", ar: "تسامح مع الفساد" } },
   },
 ];
 
@@ -108,476 +99,441 @@ export type Engagement = {
   first100?: boolean;
 };
 
+const source = bi(
+  "Source : plateforme electorale actualisee 2026.",
+  "المصدر: المنصة الانتخابية المحينة 2026.",
+);
+
 export const engagements: Engagement[] = [
-  // AXE 1 — Production de richesse et emploi
   {
     n: 1,
     axis: "richesse",
-    title: { fr: "Plan industriel des régions", ar: "مخطط صناعي جهوي" },
-    promise: { fr: "Un plan industriel chiffré par région avant fin 2027.", ar: "مخطط صناعي مرقم لكل جهة قبل نهاية 2027." },
-    problem: { fr: "L'industrie reste concentrée sur deux axes urbains, laissant des régions sans base productive.", ar: "تتركز الصناعة في محورين حضريين، وتبقى جهات بدون قاعدة إنتاجية." },
-    proposal: { fr: "Doter chaque région d'un plan industriel avec filières prioritaires, foncier mobilisé et guichet unique d'investissement.", ar: "تزويد كل جهة بمخطط صناعي يحدد القطاعات ذات الأولوية والوعاء العقاري وشباك موحد للاستثمار." },
-    beneficiaries: { fr: "Industriels, jeunes diplômés, régions à faible activité.", ar: "الصناعيون، الشباب الحاصلون على الشهادات، الجهات الأقل نشاطا." },
-    funding: { fr: "Redéploiement du fonds d'investissement régional, sans nouvel impôt.", ar: "إعادة توجيه صندوق الاستثمار الجهوي، دون ضريبة جديدة." },
-    calendar: "2027–2029",
-    indicator: { fr: "Nombre d'unités productives créées par région.", ar: "عدد الوحدات الإنتاجية المحدثة في كل جهة." },
+    title: bi("Transformation numerique", "التحول الرقمي"),
+    promise: bi(
+      "Placer le Maroc parmi les 50 premiers pays au monde en administration electronique d'ici 2030.",
+      "جعل المغرب ضمن أفضل 50 دولة عالمياً في الإدارة الإلكترونية في أفق 2030.",
+    ),
+    problem: bi(
+      "Les demarches publiques restent fragmentees, lentes et insuffisamment interconnectees.",
+      "ما تزال المساطر العمومية متفرقة وبطيئة وضعيفة الترابط.",
+    ),
+    proposal: bi(
+      "Interconnecter les administrations, dematerialiser les demarches et reviser la loi 55.19.",
+      "ربط الإدارات فيما بينها، رقمنة المساطر، ومراجعة القانون 55.19.",
+    ),
+    beneficiaries: bi(
+      "Citoyens, entreprises, administrations et usagers des services publics.",
+      "المواطنون والمقاولات والإدارات ومرتفقو الخدمات العمومية.",
+    ),
+    funding: source,
+    calendar: "2030",
+    indicator: bi(
+      "Maroc dans le Top 50 mondial de l'administration electronique.",
+      "المغرب ضمن أفضل 50 عالمياً في الإدارة الإلكترونية.",
+    ),
+    first100: true,
   },
   {
     n: 2,
     axis: "richesse",
-    title: { fr: "Préférence nationale à l'achat public", ar: "الأفضلية الوطنية في الشراء العمومي" },
-    promise: { fr: "40% de la commande publique réservée à la production nationale.", ar: "40% من الطلبيات العمومية للإنتاج الوطني." },
-    problem: { fr: "Une part importante de la dépense publique alimente des importations substituables.", ar: "جزء مهم من النفقات العمومية يمول واردات يمكن تعويضها." },
-    proposal: { fr: "Fixer un seuil minimal de contenu local dans les marchés publics et publier chaque année le taux atteint.", ar: "تحديد عتبة دنيا للمحتوى المحلي في الصفقات العمومية ونشر النسبة المحققة سنويا." },
-    beneficiaries: { fr: "Industriels locaux, sous-traitants, emploi ouvrier.", ar: "الصناعيون المحليون، المناولون، الشغل الصناعي." },
-    funding: { fr: "À budget constant : réorientation de la dépense existante.", ar: "بميزانية ثابتة: إعادة توجيه النفقات الحالية." },
-    calendar: "2027–2028",
-    indicator: { fr: "Part de contenu local dans les marchés publics.", ar: "نسبة المحتوى المحلي في الصفقات العمومية." },
+    title: bi("Competences numeriques", "الكفاءات الرقمية"),
+    promise: bi(
+      "Former 100 000 jeunes chaque annee aux competences numeriques a l'horizon 2030.",
+      "تكوين 100 ألف شاب سنوياً في المهارات الرقمية في أفق 2030.",
+    ),
+    problem: bi(
+      "Le marche du travail manque de profils formes au numerique et a l'intelligence artificielle.",
+      "سوق الشغل يحتاج إلى كفاءات مؤهلة في الرقمنة والذكاء الاصطناعي.",
+    ),
+    proposal: bi(
+      "Developper des partenariats universites-entreprises, former a l'IA et soutenir les talents marocains.",
+      "تطوير شراكات بين الجامعات والمقاولات، التكوين في الذكاء الاصطناعي، ودعم المواهب المغربية.",
+    ),
+    beneficiaries: bi(
+      "Jeunes, etudiants, entreprises technologiques et ecosysteme d'innovation.",
+      "الشباب والطلبة والمقاولات التكنولوجية ومنظومة الابتكار.",
+    ),
+    funding: source,
+    calendar: "2030",
+    indicator: bi(
+      "100 000 jeunes formes au numerique chaque annee.",
+      "100 ألف شاب يتكونون رقمياً كل سنة.",
+    ),
+    first100: true,
   },
   {
     n: 3,
     axis: "richesse",
-    title: { fr: "Formation aux métiers d'avenir", ar: "التكوين في مهن المستقبل" },
-    promise: { fr: "100 000 jeunes formés aux métiers techniques et numériques d'ici 2030.", ar: "تكوين 100 ألف شاب في المهن التقنية والرقمية في أفق 2030." },
-    problem: { fr: "Les entreprises ne trouvent pas les profils techniques dont elles ont besoin.", ar: "المقاولات لا تجد الكفاءات التقنية التي تحتاجها." },
-    proposal: { fr: "Contrats de formation cofinancés entreprise-État, avec engagement d'embauche.", ar: "عقود تكوين بتمويل مشترك بين المقاولة والدولة مع التزام بالتشغيل." },
-    beneficiaries: { fr: "Jeunes de 18 à 30 ans, entreprises industrielles et numériques.", ar: "الشباب من 18 إلى 30 سنة، المقاولات الصناعية والرقمية." },
-    funding: { fr: "Fonds de la formation professionnelle, redéployé et évalué.", ar: "صندوق التكوين المهني، معاد توجيهه ومقيَّم." },
-    calendar: "2027–2030",
-    indicator: { fr: "Taux d'insertion à 12 mois après la formation.", ar: "نسبة الإدماج بعد 12 شهرا من التكوين." },
+    title: bi("PME et marches publics", "المقاولات الصغرى والمتوسطة والصفقات العمومية"),
+    promise: bi(
+      "Garantir aux PME leur part legale de 20 % des commandes publiques.",
+      "ضمان حصة قانونية قدرها 20% للمقاولات الصغرى والمتوسطة من الطلبيات العمومية.",
+    ),
+    problem: bi(
+      "Les petites et moyennes entreprises n'accedent pas suffisamment aux marches publics.",
+      "المقاولات الصغرى والمتوسطة لا تستفيد بما يكفي من الصفقات العمومية.",
+    ),
+    proposal: bi(
+      "Adopter les textes d'application, creer une loi pour les petites entreprises et simplifier les procedures fiscales et financieres.",
+      "اعتماد النصوص التطبيقية، إحداث قانون خاص بالمقاولات الصغيرة، وتبسيط المساطر الجبائية والمالية.",
+    ),
+    beneficiaries: bi(
+      "PME, tres petites entreprises, entrepreneurs et emplois locaux.",
+      "المقاولات الصغرى والمتوسطة والمقاولون وفرص الشغل المحلية.",
+    ),
+    funding: source,
+    calendar: "Prochaine legislature",
+    indicator: bi(
+      "20 % des commandes publiques effectivement reservees aux PME.",
+      "تخصيص 20% فعلياً من الطلبيات العمومية للمقاولات الصغرى والمتوسطة.",
+    ),
+    first100: true,
   },
   {
     n: 4,
     axis: "richesse",
-    title: { fr: "Valorisation locale des ressources", ar: "التثمين المحلي للموارد" },
-    promise: { fr: "Transformer localement au moins 50% des ressources extraites.", ar: "تحويل 50% على الأقل من الموارد المستخرجة محليا." },
-    problem: { fr: "Trop de ressources partent brutes et la valeur ajoutée se crée ailleurs.", ar: "موارد كثيرة تصدَّر خاما وتُخلق القيمة المضافة خارج البلاد." },
-    proposal: { fr: "Conditionner les autorisations d'exploitation à un engagement de transformation locale.", ar: "ربط رخص الاستغلال بالتزام بالتحويل المحلي." },
-    beneficiaries: { fr: "Territoires producteurs, industrie de transformation.", ar: "المناطق المنتجة، صناعة التحويل." },
-    funding: { fr: "Aucun coût budgétaire : mesure réglementaire.", ar: "بدون كلفة على الميزانية: إجراء تنظيمي." },
-    calendar: "2028–2030",
-    indicator: { fr: "Part des ressources transformées au Maroc.", ar: "نسبة الموارد المحوَّلة داخل المغرب." },
+    title: bi("Couverture 5G", "تغطية الجيل الخامس"),
+    promise: bi(
+      "Couvrir 70 % de la population par la 5G avant 2030.",
+      "تغطية 70% من السكان بشبكة الجيل الخامس قبل 2030.",
+    ),
+    problem: bi(
+      "L'acces aux infrastructures numeriques avancees reste inegal selon les territoires.",
+      "الولوج إلى البنيات الرقمية المتقدمة ما يزال غير متكافئ بين المجالات.",
+    ),
+    proposal: bi(
+      "Partager les infrastructures, prioriser les zones industrielles et technologiques et reduire la dependance envers un fournisseur unique.",
+      "تقاسم البنيات التحتية، إعطاء الأولوية للمناطق الصناعية والتكنولوجية، وتقليص الاعتماد على مزود واحد.",
+    ),
+    beneficiaries: bi(
+      "Citoyens, entreprises, territoires industriels et services numeriques.",
+      "المواطنون والمقاولات والمناطق الصناعية والخدمات الرقمية.",
+    ),
+    funding: source,
+    calendar: "Avant 2030",
+    indicator: bi(
+      "70 % de la population couverte par la 5G.",
+      "70% من السكان مشمولون بتغطية الجيل الخامس.",
+    ),
   },
   {
     n: 5,
     axis: "richesse",
-    title: { fr: "Emploi rural et économie de proximité", ar: "التشغيل القروي والاقتصاد القربي" },
-    promise: { fr: "Un dispositif d'appui à l'emploi dans chaque commune rurale prioritaire.", ar: "آلية لدعم التشغيل في كل جماعة قروية ذات أولوية." },
-    problem: { fr: "L'exode rural s'accélère faute d'activité économique locale.", ar: "تسارع الهجرة القروية بسبب غياب النشاط الاقتصادي المحلي." },
-    proposal: { fr: "Coopératives accompagnées, accès aux marchés et logistique mutualisée.", ar: "تعاونيات مواكَبة، وولوج إلى الأسواق، ولوجستيك مشترك." },
-    beneficiaries: { fr: "Agriculteurs, coopératives, femmes en milieu rural.", ar: "الفلاحون، التعاونيات، النساء في العالم القروي." },
-    funding: { fr: "Programmes de développement rural existants, mieux ciblés.", ar: "برامج التنمية القروية الحالية، باستهداف أدق." },
-    calendar: "2027–2030",
-    indicator: { fr: "Emplois déclarés créés en milieu rural.", ar: "مناصب الشغل المصرح بها في العالم القروي." },
+    title: bi("Securite hydrique", "الأمن المائي"),
+    promise: bi(
+      "Couvrir 60 % des besoins en eau grace au dessalement d'ici 2030.",
+      "تغطية 60% من الحاجيات المائية عبر تحلية مياه البحر في أفق 2030.",
+    ),
+    problem: bi(
+      "Le stress hydrique menace les citoyens, l'agriculture et l'industrie.",
+      "الإجهاد المائي يهدد المواطنين والفلاحة والصناعة.",
+    ),
+    proposal: bi(
+      "Alimenter les stations par energie renouvelable, fabriquer localement les equipements et soutenir l'innovation dans les technologies de l'eau.",
+      "تشغيل المحطات بالطاقة المتجددة، تصنيع التجهيزات محلياً، ودعم الابتكار في تقنيات الماء.",
+    ),
+    beneficiaries: bi(
+      "Menages, agriculteurs, industries et territoires touches par le stress hydrique.",
+      "الأسر والفلاحون والصناعات والمجالات المتضررة من الإجهاد المائي.",
+    ),
+    funding: source,
+    calendar: "2030",
+    indicator: bi(
+      "60 % des besoins en eau couverts par le dessalement.",
+      "60% من الحاجيات المائية مغطاة عبر التحلية.",
+    ),
+    first100: true,
   },
-
-  // AXE 2 — Souveraineté économique
   {
     n: 6,
-    axis: "souverainete",
-    title: { fr: "Sécurité alimentaire", ar: "الأمن الغذائي" },
-    promise: { fr: "Couvrir 80% des besoins nationaux en produits de base.", ar: "تغطية 80% من الحاجيات الوطنية من المواد الأساسية." },
-    problem: { fr: "La dépendance aux importations expose les prix aux chocs extérieurs.", ar: "التبعية للواردات تعرض الأسعار للصدمات الخارجية." },
-    proposal: { fr: "Plan céréalier et maraîcher, stockage stratégique et contractualisation avec les producteurs.", ar: "مخطط للحبوب والخضروات، وتخزين استراتيجي، وتعاقد مع المنتجين." },
-    beneficiaries: { fr: "Consommateurs, agriculteurs, filières agroalimentaires.", ar: "المستهلكون، الفلاحون، الصناعات الغذائية." },
-    funding: { fr: "Réallocation des subventions agricoles vers les cultures stratégiques.", ar: "إعادة توجيه الدعم الفلاحي نحو الزراعات الاستراتيجية." },
-    calendar: "2027–2030",
-    indicator: { fr: "Taux de couverture des besoins de base.", ar: "نسبة تغطية الحاجيات الأساسية." },
+    axis: "richesse",
+    title: bi("Reutilisation des eaux usees", "إعادة استعمال المياه العادمة"),
+    promise: bi(
+      "Mobiliser 100 millions de metres cubes d'eaux usees traitees par an d'ici 2027.",
+      "تعبئة 100 مليون متر مكعب سنوياً من المياه العادمة المعالجة في أفق 2027.",
+    ),
+    problem: bi(
+      "Une partie des ressources en eau pourrait etre economisee par une meilleure reutilisation.",
+      "يمكن اقتصاد جزء مهم من الموارد المائية عبر إعادة الاستعمال.",
+    ),
+    proposal: bi(
+      "Utiliser les eaux traitees pour les espaces verts, les usages industriels et la protection des ressources potables.",
+      "استعمال المياه المعالجة في المساحات الخضراء والاستعمال الصناعي وحماية موارد الماء الشروب.",
+    ),
+    beneficiaries: bi(
+      "Collectivites, industries, espaces verts et usagers de l'eau potable.",
+      "الجماعات والصناعات والمساحات الخضراء ومستعملو الماء الصالح للشرب.",
+    ),
+    funding: source,
+    calendar: "2027",
+    indicator: bi(
+      "100 millions de m3 d'eaux usees traitees mobilises par an.",
+      "100 مليون متر مكعب من المياه المعالجة سنوياً.",
+    ),
   },
   {
     n: 7,
-    axis: "souverainete",
-    title: { fr: "Souveraineté hydrique", ar: "السيادة المائية" },
-    promise: { fr: "Zéro perte évitable sur les réseaux d'eau urbains d'ici 2030.", ar: "صفر ضياع قابل للتفادي في شبكات الماء الحضرية في أفق 2030." },
-    problem: { fr: "Une part significative de l'eau potable est perdue dans des réseaux vétustes.", ar: "جزء مهم من الماء الصالح للشرب يضيع في شبكات متقادمة." },
-    proposal: { fr: "Programme de rénovation des réseaux, télérelève et réutilisation des eaux traitées.", ar: "برنامج لتجديد الشبكات، والقياس عن بعد، وإعادة استعمال المياه المعالجة." },
-    beneficiaries: { fr: "Tous les usagers, agriculture irriguée, industries.", ar: "جميع المستعملين، الفلاحة المسقية، الصناعات." },
-    funding: { fr: "Contrats-programmes avec les régies et bailleurs de développement.", ar: "عقود برامج مع الوكالات والممولين التنمويين." },
-    calendar: "2027–2030",
-    indicator: { fr: "Rendement des réseaux d'eau potable.", ar: "مردودية شبكات الماء الصالح للشرب." },
+    axis: "richesse",
+    title: bi("Ammoniac vert", "الأمونياك الأخضر"),
+    promise: bi(
+      "Produire 1 million de tonnes en 2027 puis 3 millions de tonnes en 2032.",
+      "إنتاج مليون طن سنة 2027 ثم 3 ملايين طن سنة 2032.",
+    ),
+    problem: bi(
+      "La dependance aux importations fragilise la souverainete energetique et alimentaire.",
+      "الاعتماد على الواردات يضعف السيادة الطاقية والغذائية.",
+    ),
+    proposal: bi(
+      "Developper une filiere d'ammoniac vert pour reduire la dependance externe et soutenir les besoins strategiques du pays.",
+      "تطوير سلسلة وطنية للأمونياك الأخضر لتقليص التبعية ودعم الحاجيات الاستراتيجية للبلاد.",
+    ),
+    beneficiaries: bi(
+      "Agriculture, industrie, energie et souverainete nationale.",
+      "الفلاحة والصناعة والطاقة والسيادة الوطنية.",
+    ),
+    funding: source,
+    calendar: "2027-2032",
+    indicator: bi(
+      "1 million de tonnes en 2027, 3 millions de tonnes en 2032.",
+      "مليون طن في 2027، و3 ملايين طن في 2032.",
+    ),
   },
   {
     n: 8,
-    axis: "souverainete",
-    title: { fr: "Énergie et industrie propre", ar: "الطاقة والصناعة النظيفة" },
-    promise: { fr: "Alimenter les zones industrielles en électricité renouvelable compétitive.", ar: "تزويد المناطق الصناعية بكهرباء متجددة تنافسية." },
-    problem: { fr: "Le coût de l'énergie pèse sur la compétitivité industrielle.", ar: "كلفة الطاقة تثقل تنافسية الصناعة." },
-    proposal: { fr: "Autoproduction autorisée et raccordement prioritaire des zones industrielles.", ar: "الترخيص بالإنتاج الذاتي وأولوية الربط للمناطق الصناعية." },
-    beneficiaries: { fr: "Industriels, exportateurs, emploi industriel.", ar: "الصناعيون، المصدرون، الشغل الصناعي." },
-    funding: { fr: "Investissement privé encadré, sans subvention directe.", ar: "استثمار خاص مؤطر، دون دعم مباشر." },
-    calendar: "2027–2030",
-    indicator: { fr: "Prix moyen du kWh industriel.", ar: "متوسط ثمن الكيلوواط ساعة الصناعي." },
+    axis: "besoins",
+    title: bi("Internet dans le monde rural", "الإنترنت في العالم القروي"),
+    promise: bi(
+      "Connecter 1 800 communes rurales a l'internet a haut debit.",
+      "ربط 1800 جماعة قروية بالإنترنت عالي الصبيب.",
+    ),
+    problem: bi(
+      "La fracture numerique territoriale limite l'acces aux services et aux opportunites.",
+      "الفجوة الرقمية الترابية تحد من الولوج إلى الخدمات والفرص.",
+    ),
+    proposal: bi(
+      "Soutenir le cout des equipements pour les familles vulnerables et garantir un acces equitable aux services numeriques.",
+      "دعم تكلفة التجهيزات للأسر الهشة وضمان ولوج منصف للخدمات الرقمية.",
+    ),
+    beneficiaries: bi(
+      "Communes rurales, familles vulnerables, eleves, entrepreneurs et services publics.",
+      "الجماعات القروية والأسر الهشة والتلاميذ والمقاولون والخدمات العمومية.",
+    ),
+    funding: source,
+    calendar: "Prochaine legislature",
+    indicator: bi(
+      "1 800 communes rurales connectees au haut debit.",
+      "1800 جماعة قروية مرتبطة بالإنترنت عالي الصبيب.",
+    ),
   },
   {
     n: 9,
-    axis: "souverainete",
-    title: { fr: "Souveraineté des données publiques", ar: "سيادة المعطيات العمومية" },
-    promise: { fr: "100% des données publiques sensibles hébergées au Maroc.", ar: "100% من المعطيات العمومية الحساسة مستضافة بالمغرب." },
-    problem: { fr: "Des données publiques sensibles sont hébergées hors du territoire national.", ar: "معطيات عمومية حساسة مستضافة خارج التراب الوطني." },
-    proposal: { fr: "Cloud souverain public et obligation d'hébergement local pour les administrations.", ar: "سحابة سيادية عمومية وإلزام الإدارات بالاستضافة المحلية." },
-    beneficiaries: { fr: "Citoyens, administrations, entreprises du numérique.", ar: "المواطنون، الإدارات، مقاولات الرقمي." },
-    funding: { fr: "Mutualisation des budgets informatiques de l'État.", ar: "تجميع الميزانيات المعلوماتية للدولة." },
-    calendar: "2027–2029",
-    indicator: { fr: "Part des données publiques hébergées localement.", ar: "نسبة المعطيات العمومية المستضافة محليا." },
-  },
-  {
-    n: 10,
-    axis: "souverainete",
-    title: { fr: "Réserve stratégique et prix", ar: "المخزون الاستراتيجي والأسعار" },
-    promise: { fr: "Publier chaque trimestre l'état des réserves stratégiques.", ar: "نشر وضعية المخزون الاستراتيجي كل ثلاثة أشهر." },
-    problem: { fr: "Les citoyens subissent des flambées de prix sans information claire.", ar: "المواطنون يتحملون ارتفاع الأسعار دون معلومة واضحة." },
-    proposal: { fr: "Transparence trimestrielle sur les stocks et suivi public des marges.", ar: "شفافية فصلية حول المخزون وتتبع عمومي للهوامش." },
-    beneficiaries: { fr: "Consommateurs, distributeurs de bonne foi.", ar: "المستهلكون، الموزعون النزهاء." },
-    funding: { fr: "Sans coût significatif : publication de données existantes.", ar: "بدون كلفة تذكر: نشر معطيات متوفرة." },
-    calendar: "2027",
-    indicator: { fr: "Publication effective de 4 rapports par an.", ar: "نشر 4 تقارير في السنة فعليا." },
-    first100: true,
-  },
-
-  // AXE 3 — Administration en 5 minutes
-  {
-    n: 11,
-    axis: "digital",
-    title: { fr: "Administration en 5 minutes", ar: "إدارة في 5 دقائق" },
-    promise: { fr: "Dématérialiser 80% des démarches courantes avant 2029.", ar: "رقمنة 80% من المساطر اليومية قبل 2029." },
-    problem: { fr: "Les démarches courantes exigent encore des déplacements et des délais imprévisibles.", ar: "المساطر اليومية ما زالت تتطلب التنقل وآجالا غير متوقعة." },
-    proposal: { fr: "Portail unique, identité numérique et suppression des pièces déjà détenues par l'administration.", ar: "بوابة موحدة، وهوية رقمية، وحذف الوثائق التي تتوفر عليها الإدارة." },
-    beneficiaries: { fr: "Tous les citoyens, entreprises, MRE.", ar: "جميع المواطنين، المقاولات، مغاربة العالم." },
-    funding: { fr: "Budget de transformation numérique de l'État, à périmètre constant.", ar: "ميزانية التحول الرقمي للدولة، دون زيادة." },
-    calendar: "2027–2029",
-    indicator: { fr: "Réduction de 30% des délais administratifs.", ar: "تقليص 30% من الآجال الإدارية." },
-    first100: true,
-  },
-  {
-    n: 12,
-    axis: "digital",
-    title: { fr: "Délais opposables", ar: "آجال ملزمة" },
-    promise: { fr: "Chaque démarche publie un délai maximal opposable.", ar: "كل مسطرة تنشر أجلا أقصى ملزما." },
-    problem: { fr: "Le citoyen ignore quand sa demande sera traitée et n'a aucun recours simple.", ar: "المواطن يجهل متى ستعالَج طلباته وليس له طعن بسيط." },
-    proposal: { fr: "Publication des délais, accusé de réception automatique et accord tacite en cas de dépassement.", ar: "نشر الآجال، وإشعار آلي بالتوصل، وموافقة ضمنية عند تجاوز الأجل." },
-    beneficiaries: { fr: "Citoyens, entreprises, investisseurs.", ar: "المواطنون، المقاولات، المستثمرون." },
-    funding: { fr: "Mesure réglementaire, sans coût direct.", ar: "إجراء تنظيمي، بدون كلفة مباشرة." },
-    calendar: "2027–2028",
-    indicator: { fr: "Part des demandes traitées dans le délai annoncé.", ar: "نسبة الطلبات المعالَجة داخل الأجل المعلن." },
-    first100: true,
-  },
-  {
-    n: 13,
-    axis: "digital",
-    title: { fr: "Interopérabilité des administrations", ar: "التقائية الإدارات" },
-    promise: { fr: "Ne plus jamais redemander un document déjà détenu par l'État.", ar: "عدم طلب أي وثيقة تتوفر عليها الدولة مرة أخرى." },
-    problem: { fr: "Les administrations ne partagent pas leurs données et le citoyen fait le facteur.", ar: "الإدارات لا تتبادل معطياتها والمواطن يقوم بدور الساعي." },
-    proposal: { fr: "Plateforme d'échange sécurisée entre administrations, avec traçabilité des accès.", ar: "منصة تبادل آمنة بين الإدارات مع تتبع الولوجات." },
-    beneficiaries: { fr: "Citoyens, agents publics, entreprises.", ar: "المواطنون، الموظفون، المقاولات." },
-    funding: { fr: "Mutualisation informatique interministérielle.", ar: "تجميع الوسائل المعلوماتية بين القطاعات." },
-    calendar: "2028–2029",
-    indicator: { fr: "Nombre de pièces justificatives supprimées.", ar: "عدد الوثائق المحذوفة." },
-  },
-  {
-    n: 14,
-    axis: "digital",
-    title: { fr: "Accès numérique pour tous", ar: "ولوج رقمي للجميع" },
-    promise: { fr: "Un point d'accompagnement numérique dans chaque commune.", ar: "نقطة مواكبة رقمية في كل جماعة." },
-    problem: { fr: "La digitalisation risque d'exclure les personnes peu connectées ou peu alphabétisées.", ar: "الرقمنة قد تقصي غير المتصلين أو غير المتمدرسين." },
-    proposal: { fr: "Agents d'accompagnement, interfaces en darija et service téléphonique.", ar: "أعوان مواكبة، وواجهات بالدارجة، وخدمة هاتفية." },
-    beneficiaries: { fr: "Personnes âgées, milieu rural, publics fragiles.", ar: "المسنون، العالم القروي، الفئات الهشة." },
-    funding: { fr: "Redéploiement d'agents publics et partenariat avec les communes.", ar: "إعادة انتشار الموظفين وشراكة مع الجماعات." },
-    calendar: "2027–2029",
-    indicator: { fr: "Nombre de citoyens accompagnés par an.", ar: "عدد المواطنين المواكَبين سنويا." },
-  },
-  {
-    n: 15,
-    axis: "digital",
-    title: { fr: "Protection des données personnelles", ar: "حماية المعطيات الشخصية" },
-    promise: { fr: "Un contrôle indépendant et des sanctions effectives en cas de fuite.", ar: "مراقبة مستقلة وعقوبات فعلية عند تسريب المعطيات." },
-    problem: { fr: "Les citoyens n'ont aucune visibilité sur l'usage de leurs données.", ar: "المواطنون لا يعرفون كيف تُستعمل معطياتهم." },
-    proposal: { fr: "Renforcer l'autorité de protection, journal d'accès consultable par le citoyen.", ar: "تقوية سلطة الحماية وسجل ولوج يطلع عليه المواطن." },
-    beneficiaries: { fr: "Tous les usagers des services publics numériques.", ar: "جميع مستعملي الخدمات العمومية الرقمية." },
-    funding: { fr: "Budget de l'autorité de contrôle, renforcé.", ar: "ميزانية سلطة المراقبة، معززة." },
-    calendar: "2028",
-    indicator: { fr: "Délai moyen de traitement des plaintes.", ar: "متوسط أجل معالجة الشكايات." },
-  },
-
-  // AXE 4 — PME / TPE
-  {
-    n: 16,
-    axis: "pme",
-    title: { fr: "Financement simplifié des TPE", ar: "تمويل مبسط للمقاولات الصغرى جدا" },
-    promise: { fr: "Une réponse de financement en 15 jours maximum avec garantie publique.", ar: "جواب حول التمويل في 15 يوما كأقصى حد مع ضمان عمومي." },
-    problem: { fr: "Les très petites entreprises sont écartées du crédit faute de garanties.", ar: "المقاولات الصغرى جدا تُقصى من القروض لغياب الضمانات." },
-    proposal: { fr: "Garantie publique renforcée, dossier standardisé et décision encadrée dans le temps.", ar: "ضمان عمومي معزز، وملف موحد، وقرار داخل أجل محدد." },
-    beneficiaries: { fr: "TPE, artisans, commerçants, auto-entrepreneurs.", ar: "المقاولات الصغرى، الصناع التقليديون، التجار، المقاولون الذاتيون." },
-    funding: { fr: "Fonds de garantie existant, recapitalisé par redéploiement.", ar: "صندوق الضمان الحالي، معاد رسملته بإعادة التوجيه." },
-    calendar: "2027–2028",
-    indicator: { fr: "Délai moyen de réponse et taux d'accord.", ar: "متوسط أجل الجواب ونسبة الموافقة." },
-    first100: true,
-  },
-  {
-    n: 17,
-    axis: "pme",
-    title: { fr: "Délais de paiement public", ar: "آجال الأداء العمومي" },
-    promise: { fr: "Paiement des factures publiques en 60 jours, intérêts automatiques au-delà.", ar: "أداء الفواتير العمومية في 60 يوما، مع فوائد آلية بعد ذلك." },
-    problem: { fr: "Les retards de paiement de l'État asphyxient la trésorerie des PME.", ar: "تأخر أداء الدولة يخنق خزينة المقاولات." },
-    proposal: { fr: "Compteur public des délais par administration et intérêts de retard versés d'office.", ar: "عداد عمومي للآجال حسب الإدارة وفوائد تأخير تُصرف تلقائيا." },
-    beneficiaries: { fr: "PME et TPE fournisseurs de l'État.", ar: "المقاولات الموردة للدولة." },
-    funding: { fr: "Meilleure programmation budgétaire, sans dépense nouvelle.", ar: "برمجة ميزانياتية أفضل، دون نفقات جديدة." },
-    calendar: "2027",
-    indicator: { fr: "Délai moyen de paiement par administration.", ar: "متوسط أجل الأداء حسب الإدارة." },
-    first100: true,
-  },
-  {
-    n: 18,
-    axis: "pme",
-    title: { fr: "Digitalisation accompagnée", ar: "رقمنة مواكَبة" },
-    promise: { fr: "Accompagner 50 000 petites entreprises à la facturation électronique.", ar: "مواكبة 50 ألف مقاولة صغيرة نحو الفوترة الإلكترونية." },
-    problem: { fr: "La facturation électronique est vécue comme une contrainte sans appui.", ar: "الفوترة الإلكترونية تُعاش كإكراه دون دعم." },
-    proposal: { fr: "Outils gratuits, formation courte et assistance en darija.", ar: "أدوات مجانية، وتكوين قصير، ومساعدة بالدارجة." },
-    beneficiaries: { fr: "TPE, commerçants, professions libérales.", ar: "المقاولات الصغرى، التجار، المهن الحرة." },
-    funding: { fr: "Partenariat public-privé avec les opérateurs numériques.", ar: "شراكة بين القطاعين العام والخاص مع المتعهدين الرقميين." },
-    calendar: "2027–2029",
-    indicator: { fr: "Nombre d'entreprises équipées et actives.", ar: "عدد المقاولات المجهزة والنشيطة." },
-  },
-  {
-    n: 19,
-    axis: "pme",
-    title: { fr: "Fiscalité lisible et stable", ar: "جباية واضحة ومستقرة" },
-    promise: { fr: "Aucune modification fiscale rétroactive pour les TPE.", ar: "لا تعديل جبائي بأثر رجعي على المقاولات الصغرى." },
-    problem: { fr: "L'instabilité fiscale décourage la formalisation et l'investissement.", ar: "عدم استقرار الجباية يثبط الهيكلة والاستثمار." },
-    proposal: { fr: "Régime simplifié pluriannuel, taux connus trois ans à l'avance.", ar: "نظام مبسط متعدد السنوات، بأسعار معروفة قبل ثلاث سنوات." },
-    beneficiaries: { fr: "TPE, auto-entrepreneurs, jeunes créateurs.", ar: "المقاولات الصغرى، المقاولون الذاتيون، الشباب المحدثون." },
-    funding: { fr: "Neutre : élargissement de l'assiette par la formalisation.", ar: "محايد: توسيع الوعاء عبر الهيكلة." },
-    calendar: "2028",
-    indicator: { fr: "Nombre de nouvelles entreprises formalisées.", ar: "عدد المقاولات الجديدة المهيكلة." },
-  },
-  {
-    n: 20,
-    axis: "pme",
-    title: { fr: "Jeunes entrepreneurs", ar: "الشباب المقاول" },
-    promise: { fr: "Création d'entreprise en 24 heures et sans frais la première année.", ar: "إحداث مقاولة في 24 ساعة وبدون رسوم في السنة الأولى." },
-    problem: { fr: "Les démarches et les frais découragent les jeunes porteurs de projet.", ar: "المساطر والرسوم تثبط حاملي المشاريع الشباب." },
-    proposal: { fr: "Création 100% en ligne, exonération de frais initiaux et mentorat.", ar: "إحداث رقمي كامل، وإعفاء من الرسوم الأولية، ومواكبة." },
-    beneficiaries: { fr: "Jeunes de moins de 35 ans, étudiants, diaspora.", ar: "الشباب دون 35 سنة، الطلبة، مغاربة العالم." },
-    funding: { fr: "Coût limité, compensé par l'élargissement de la base fiscale.", ar: "كلفة محدودة يعوضها توسيع الوعاء الجبائي." },
-    calendar: "2027–2028",
-    indicator: { fr: "Délai réel de création et taux de survie à 3 ans.", ar: "الأجل الفعلي للإحداث ونسبة الاستمرار بعد 3 سنوات." },
-  },
-
-  // AXE 5 — Gouvernance
-  {
-    n: 21,
-    axis: "gouvernance",
-    title: { fr: "Statut simplifié pour l'informel", ar: "نظام مبسط للقطاع غير المهيكل" },
-    promise: { fr: "Un statut simple avec couverture sociale, sans redressement rétroactif.", ar: "نظام بسيط مع تغطية اجتماعية، دون مراجعة بأثر رجعي." },
-    problem: { fr: "Des millions d'actifs travaillent sans protection ni accès au crédit.", ar: "ملايين النشيطين يعملون دون حماية ولا ولوج للتمويل." },
-    proposal: { fr: "Inscription simplifiée, cotisation forfaitaire progressive et amnistie d'entrée.", ar: "تسجيل مبسط، ومساهمة جزافية تدريجية، وعفو عند الانخراط." },
-    beneficiaries: { fr: "Travailleurs informels, familles, artisans.", ar: "العاملون في القطاع غير المهيكل، الأسر، الصناع." },
-    funding: { fr: "Financement progressif par les cotisations nouvelles.", ar: "تمويل تدريجي عبر المساهمات الجديدة." },
-    calendar: "2027–2030",
-    indicator: { fr: "Nombre d'actifs nouvellement couverts.", ar: "عدد النشيطين المشمولين حديثا." },
-  },
-  {
-    n: 22,
-    axis: "gouvernance",
-    title: { fr: "Transparence des marchés publics", ar: "شفافية الصفقات العمومية" },
-    promise: { fr: "Tous les marchés publics publiés en données ouvertes.", ar: "نشر جميع الصفقات العمومية في شكل معطيات مفتوحة." },
-    problem: { fr: "Le contrôle citoyen de la dépense publique reste difficile.", ar: "المراقبة المواطنة للنفقات العمومية تبقى صعبة." },
-    proposal: { fr: "Portail unique des marchés, attributaires et avenants, téléchargeable.", ar: "بوابة موحدة للصفقات والفائزين والملحقات، قابلة للتحميل." },
-    beneficiaries: { fr: "Citoyens, journalistes, entreprises candidates.", ar: "المواطنون، الصحافيون، المقاولات المتنافسة." },
-    funding: { fr: "Extension du portail existant.", ar: "توسيع البوابة الحالية." },
-    calendar: "2027",
-    indicator: { fr: "Part des marchés publiés en données ouvertes.", ar: "نسبة الصفقات المنشورة كمعطيات مفتوحة." },
-    first100: true,
-  },
-  {
-    n: 23,
-    axis: "gouvernance",
-    title: { fr: "Lutte contre la corruption", ar: "محاربة الفساد" },
-    promise: { fr: "Protection effective des lanceurs d'alerte et sanctions publiées.", ar: "حماية فعلية للمبلغين ونشر العقوبات." },
-    problem: { fr: "Signaler la corruption expose plus qu'il ne protège.", ar: "التبليغ عن الفساد يعرّض أكثر مما يحمي." },
-    proposal: { fr: "Canal de signalement sécurisé, anonymat garanti et suivi public des suites.", ar: "قناة تبليغ آمنة، وضمان السرية، وتتبع عمومي للمآلات." },
-    beneficiaries: { fr: "Agents publics intègres, usagers, entreprises honnêtes.", ar: "الموظفون النزهاء، المرتفقون، المقاولات النزيهة." },
-    funding: { fr: "Instance nationale existante, moyens renforcés.", ar: "الهيئة الوطنية الحالية، بموارد معززة." },
-    calendar: "2027–2028",
-    indicator: { fr: "Nombre de signalements traités et suites données.", ar: "عدد التبليغات المعالجة والمآلات." },
-  },
-  {
-    n: 24,
-    axis: "gouvernance",
-    title: { fr: "Vigilance numérique", ar: "اليقظة الرقمية" },
-    promise: { fr: "Un service public de signalement des arnaques en ligne, réponse en 48h.", ar: "خدمة عمومية للتبليغ عن النصب الرقمي، بجواب في 48 ساعة." },
-    problem: { fr: "Les fraudes en ligne se multiplient sans recours accessible.", ar: "تتكاثر عمليات النصب الرقمي دون طعن في المتناول." },
-    proposal: { fr: "Guichet unique de signalement, coopération avec banques et plateformes.", ar: "شباك موحد للتبليغ، وتعاون مع الأبناك والمنصات." },
-    beneficiaries: { fr: "Consommateurs, commerçants en ligne, familles.", ar: "المستهلكون، التجار الرقميون، الأسر." },
-    funding: { fr: "Redéploiement au sein des services de contrôle.", ar: "إعادة انتشار داخل مصالح المراقبة." },
-    calendar: "2028",
-    indicator: { fr: "Délai moyen de première réponse.", ar: "متوسط أجل الجواب الأول." },
-  },
-  {
-    n: 25,
-    axis: "gouvernance",
-    title: { fr: "Reddition des comptes annuelle", ar: "المحاسبة السنوية" },
-    promise: { fr: "Un bilan public annuel de chaque engagement, chiffres à l'appui.", ar: "حصيلة عمومية سنوية لكل التزام، بالأرقام." },
-    problem: { fr: "Les promesses électorales ne sont jamais évaluées publiquement.", ar: "الوعود الانتخابية لا تُقيَّم عموميا أبدا." },
-    proposal: { fr: "Tableau de bord en ligne, mis à jour et présenté chaque année aux citoyens.", ar: "لوحة قيادة رقمية، تُحدَّث وتُقدَّم سنويا للمواطنين." },
-    beneficiaries: { fr: "Tous les citoyens de la circonscription.", ar: "جميع مواطني الدائرة." },
-    funding: { fr: "Sur les moyens de la permanence parlementaire.", ar: "من موارد المكتب البرلماني." },
-    calendar: "2027–2031",
-    indicator: { fr: "Publication effective du bilan chaque année.", ar: "نشر الحصيلة فعليا كل سنة." },
-    first100: true,
+    axis: "identite",
+    title: bi("Economie culturelle", "الاقتصاد الثقافي"),
+    promise: bi(
+      "Contribuer a la creation de 100 000 emplois dans les metiers creatifs d'ici 2030.",
+      "المساهمة في خلق 100 ألف منصب شغل في المهن الإبداعية في أفق 2030.",
+    ),
+    problem: bi(
+      "Les industries culturelles disposent d'un potentiel economique encore insuffisamment structure.",
+      "الصناعات الثقافية تتوفر على إمكان اقتصادي غير مهيكل بما يكفي.",
+    ),
+    proposal: bi(
+      "Mettre en place des incitations fiscales, soutenir le cinema et les industries culturelles et creer un passeport culturel numerique pour les jeunes.",
+      "إقرار تحفيزات ضريبية، دعم السينما والصناعات الثقافية، وإحداث جواز ثقافي رقمي للشباب.",
+    ),
+    beneficiaries: bi(
+      "Jeunes, artistes, createurs, industries culturelles et territoires.",
+      "الشباب والفنانون والمبدعون والصناعات الثقافية والمجالات الترابية.",
+    ),
+    funding: source,
+    calendar: "2030",
+    indicator: bi(
+      "100 000 emplois soutenus dans les metiers creatifs.",
+      "دعم 100 ألف منصب شغل في المهن الإبداعية.",
+    ),
   },
 ];
 
 export const firstHundredDays: { day: string; title: Bi; detail: Bi }[] = [
   {
-    day: "J+15",
-    title: { fr: "Permanence citoyenne ouverte", ar: "فتح المكتب المواطن" },
-    detail: {
-      fr: "Une permanence hebdomadaire dans la circonscription, sans rendez-vous.",
-      ar: "مكتب أسبوعي بالدائرة، بدون موعد مسبق.",
-    },
+    day: "Priorite 1",
+    title: bi("Administration efficace", "إدارة فعالة"),
+    detail: bi(
+      "Adopter le cadre legal de numerisation des services publics et interconnecter les administrations.",
+      "اعتماد الإطار القانوني لرقمنة الخدمات العمومية وربط الإدارات فيما بينها.",
+    ),
   },
   {
-    day: "J+30",
-    title: { fr: "Compteur des délais de paiement", ar: "عداد آجال الأداء" },
-    detail: {
-      fr: "Publication du premier relevé des délais de paiement publics (engagement 17).",
-      ar: "نشر أول كشف لآجال الأداء العمومي (الالتزام 17).",
-    },
+    day: "Priorite 2",
+    title: bi("Soutien aux petites entreprises", "دعم المقاولات الصغيرة"),
+    detail: bi(
+      "Appliquer la part de 20 % des commandes publiques destinee aux PME et creer une loi specifique pour les petites entreprises.",
+      "تفعيل حصة 20% من الطلبيات العمومية للمقاولات الصغرى والمتوسطة وإحداث قانون خاص بالمقاولات الصغيرة.",
+    ),
   },
   {
-    day: "J+45",
-    title: { fr: "Proposition de loi : délais opposables", ar: "مقترح قانون: آجال ملزمة" },
-    detail: {
-      fr: "Dépôt du texte instaurant des délais administratifs opposables (engagement 12).",
-      ar: "إيداع نص يقر آجالا إدارية ملزمة (الالتزام 12).",
-    },
+    day: "Priorite 3",
+    title: bi("Urgence hydrique", "الاستعجال المائي"),
+    detail: bi(
+      "Accelerer le dessalement, la reutilisation des eaux usees et la fabrication locale des equipements.",
+      "تسريع التحلية وإعادة استعمال المياه العادمة وتصنيع التجهيزات محلياً.",
+    ),
   },
   {
-    day: "J+60",
-    title: { fr: "Marchés publics en données ouvertes", ar: "الصفقات العمومية كمعطيات مفتوحة" },
-    detail: {
-      fr: "Demande officielle de publication intégrale des marchés (engagement 22).",
-      ar: "طلب رسمي بنشر كامل الصفقات (الالتزام 22).",
-    },
+    day: "Priorite 4",
+    title: bi("Sante et education", "الصحة والتعليم"),
+    detail: bi(
+      "Renforcer les structures sanitaires territoriales, ameliorer les conditions des professionnels et faire evoluer l'ecole vers l'apprentissage des competences.",
+      "تعزيز البنيات الصحية الترابية، تحسين أوضاع المهنيين، وتطوير المدرسة نحو تعلم الكفاءات.",
+    ),
   },
   {
-    day: "J+90",
-    title: { fr: "Premier rapport public", ar: "أول تقرير عمومي" },
-    detail: {
-      fr: "Bilan des 100 premiers jours publié en ligne et présenté aux citoyens (engagement 25).",
-      ar: "حصيلة أول 100 يوم تُنشر رقميا وتُقدَّم للمواطنين (الالتزام 25).",
-    },
+    day: "Priorite 5",
+    title: bi("Transparence et justice", "الشفافية والعدالة"),
+    detail: bi(
+      "Numeriser les tribunaux, lutter contre les intermediaires et renforcer l'independance administrative et financiere de la justice.",
+      "رقمنة المحاكم، محاربة الوسطاء، وتعزيز الاستقلال الإداري والمالي للعدالة.",
+    ),
   },
 ];
 
 export const candidate = {
-  title: { fr: "Le candidat", ar: "المرشح" },
-  intro: {
-    fr: "Ingénieur de formation, chef d'entreprise pendant quinze ans, engagé depuis dix ans dans la vie associative de la circonscription.",
-    ar: "مهندس التكوين، مقاول لمدة خمس عشرة سنة، منخرط منذ عشر سنوات في العمل الجمعوي بالدائرة.",
-  } as Bi,
+  title: bi("Le candidat", "المرشح"),
+  intro: bi(
+    "La plateforme presente Al ABASS Omar dans le cadre du programme electoral 2026 du Parti des Democrates Nouveaux, avec une approche nationale fondee sur l'efficacite, la justice et l'unite nationale.",
+    "تقدم المنصة عمر العباس في إطار البرنامج الانتخابي 2026 لحزب الديمقراطيين الجدد، بمقاربة وطنية مبنية على الفعالية والعدالة والوحدة الوطنية.",
+  ),
   path: [
-    { year: "2004", label: { fr: "Diplôme d'ingénieur, puis premières années en industrie", ar: "دبلوم مهندس، ثم سنوات أولى في الصناعة" } },
-    { year: "2010", label: { fr: "Création d'une PME industrielle, 80 emplois", ar: "إحداث مقاولة صناعية، 80 منصب شغل" } },
-    { year: "2016", label: { fr: "Président d'une association d'appui aux jeunes entrepreneurs", ar: "رئيس جمعية لدعم الشباب المقاول" } },
-    { year: "2021", label: { fr: "Conseiller communal, en charge du développement économique", ar: "مستشار جماعي مكلف بالتنمية الاقتصادية" } },
-    { year: "2026", label: { fr: "Candidat aux élections législatives", ar: "مرشح للانتخابات التشريعية" } },
+    {
+      year: "2014",
+      label: bi("Fondation du Parti des Democrates Nouveaux.", "تأسيس حزب الديمقراطيين الجدد."),
+    },
+    {
+      year: "2026",
+      label: bi(
+        "Plateforme electorale nationale actualisee pour les elections legislatives.",
+        "منصة انتخابية وطنية محينة للانتخابات التشريعية.",
+      ),
+    },
+    {
+      year: "2030",
+      label: bi(
+        "Horizon des objectifs numeriques, hydriques, culturels et administratifs structurants.",
+        "أفق الأهداف الرقمية والمائية والثقافية والإدارية المهيكلة.",
+      ),
+    },
   ] as { year: string; label: Bi }[],
   values: [
-    { fr: "Dire ce que l'on fera, et rendre compte de ce que l'on a fait.", ar: "قول ما سنفعله، والمحاسبة على ما فعلناه." },
-    { fr: "Aucun engagement sans chiffre, sans calendrier et sans financement.", ar: "لا التزام بدون رقم وجدولة وتمويل." },
-    { fr: "Le respect de l'adversaire et le refus de toute stigmatisation.", ar: "احترام الخصم ورفض كل وصم." },
+    bi("Efficacite et performance", "الفعالية والإنجاز"),
+    bi("Responsabilite et transparence", "المسؤولية والشفافية"),
+    bi("Justice sociale et territoriale", "العدالة الاجتماعية والترابية"),
+    bi("Souverainete nationale", "السيادة الوطنية"),
+    bi("Innovation et ouverture", "الابتكار والانفتاح"),
+    bi("Identite marocaine plurielle", "الهوية المغربية المتعددة"),
   ] as Bi[],
 };
 
 export const financing = {
-  title: { fr: "Comment ce programme est financé", ar: "كيف يُموَّل هذا البرنامج" },
+  title: bi(
+    "Une politique fondee sur l'efficacite et la responsabilite",
+    "سياسة مبنية على الفعالية والمسؤولية",
+  ),
   items: [
     {
-      label: { fr: "Redéploiement budgétaire", ar: "إعادة توجيه الميزانية" },
-      share: "60%",
-      detail: { fr: "Réorientation de dépenses existantes vers les priorités du programme.", ar: "إعادة توجيه نفقات قائمة نحو أولويات البرنامج." },
+      label: bi("Responsabilite", "المسؤولية"),
+      share: "01",
+      detail: bi(
+        "Reddition des comptes, transparence et evaluation des politiques publiques.",
+        "ربط المسؤولية بالمحاسبة والشفافية وتقييم السياسات العمومية.",
+      ),
     },
     {
-      label: { fr: "Élargissement de l'assiette", ar: "توسيع الوعاء" },
-      share: "25%",
-      detail: { fr: "Recettes issues de la formalisation progressive de l'informel.", ar: "مداخيل ناتجة عن الهيكلة التدريجية للقطاع غير المهيكل." },
+      label: bi("Efficacite institutionnelle", "فعالية المؤسسات"),
+      share: "02",
+      detail: bi(
+        "Modernisation de l'administration, simplification des procedures et services publics plus performants.",
+        "تحديث الإدارة وتبسيط المساطر وخدمات عمومية أكثر نجاعة.",
+      ),
     },
     {
-      label: { fr: "Partenariats et investissement privé", ar: "الشراكات والاستثمار الخاص" },
-      share: "15%",
-      detail: { fr: "Investissement privé encadré, sans garantie budgétaire cachée.", ar: "استثمار خاص مؤطر، دون ضمانات ميزانياتية خفية." },
+      label: bi("Droits et libertes", "الحقوق والحريات"),
+      share: "03",
+      detail: bi(
+        "Protection des droits, justice sociale et renforcement de la confiance publique.",
+        "حماية الحقوق وتحقيق العدالة الاجتماعية وتعزيز الثقة العامة.",
+      ),
     },
   ],
-  note: {
-    fr: "Aucun engagement de ce programme ne repose sur une hausse de la pression fiscale sur les ménages.",
-    ar: "لا يعتمد أي التزام في هذا البرنامج على رفع الضغط الجبائي على الأسر.",
-  } as Bi,
+  note: bi(
+    "Fonde en septembre 2014, le Parti des Democrates Nouveaux defend une approche pragmatique de l'action publique, centree sur l'efficacite des institutions, la responsabilite et la protection des droits et libertes.",
+    "تأسس حزب الديمقراطيين الجدد في شتنبر 2014، ويدافع عن مقاربة عملية للفعل العمومي تركز على فعالية المؤسسات والمسؤولية وحماية الحقوق والحريات.",
+  ),
 };
 
 export const news: { date: string; title: Bi; place: Bi }[] = [
   {
-    date: "2026-08-28",
-    title: { fr: "Rencontre avec les commerçants du marché central", ar: "لقاء مع تجار السوق المركزي" },
-    place: { fr: "Rabat-Océan", ar: "الرباط المحيط" },
+    date: "A documenter",
+    title: bi(
+      "Ajouter ici une vraie activite de terrain avec photo, date et lieu verifies.",
+      "تضاف هنا أنشطة ميدانية حقيقية مع صورة وتاريخ ومكان موثقين.",
+    ),
+    place: bi("Source requise", "مصدر مطلوب"),
   },
   {
-    date: "2026-08-20",
-    title: { fr: "Atelier avec de jeunes porteurs de projets", ar: "ورشة مع شباب حاملي المشاريع" },
-    place: { fr: "Espace jeunesse", ar: "فضاء الشباب" },
-  },
-  {
-    date: "2026-08-12",
-    title: { fr: "Visite d'une unité industrielle locale", ar: "زيارة وحدة صناعية محلية" },
-    place: { fr: "Zone industrielle", ar: "المنطقة الصناعية" },
+    date: "A documenter",
+    title: bi(
+      "Ne publier que des rencontres, visites ou actions confirmees par l'equipe de campagne.",
+      "لا تنشر إلا اللقاءات أو الزيارات أو الأنشطة المؤكدة من فريق الحملة.",
+    ),
+    place: bi("Source requise", "مصدر مطلوب"),
   },
 ];
 
 export const contact = {
-  email: "contact@campagne2026.ma",
-  phone: "+212 5 00 00 00 00",
-  whatsapp: "212500000000",
-  address: { fr: "Siège de campagne, Rabat, Maroc", ar: "المقر المركزي للحملة، الرباط، المغرب" } as Bi,
+  email: "",
+  phone: "",
+  whatsapp: "",
+  address: bi(
+    "Informations pratiques a ajouter uniquement si elles sont validees par l'equipe de campagne.",
+    "تضاف المعلومات العملية فقط إذا تم اعتمادها من فريق الحملة.",
+  ),
 };
 
 export const axisById = (id: AxisId) => axes.find((a) => a.id === id)!;
 export const engagementsOfAxis = (id: AxisId) => engagements.filter((e) => e.axis === id);
 
-/** Programme complet injecté dans le prompt système de l'assistant. */
+/** Programme complet injecte dans le prompt systeme de l'assistant. */
 export const programContext = `
 CANDIDAT : ${identity.candidate.fr} / ${identity.candidate.ar}
-PARTI : ${identity.party.fr}
+PARTI : ${identity.party.fr} / ${identity.party.ar}
 CIRCONSCRIPTION : ${identity.district.fr} / ${identity.district.ar}
-SLOGAN : ${identity.slogan.fr} — ${identity.slogan.ar}
-POSITIONNEMENT : ${identity.positioning.fr}
+MESSAGE CENTRAL : ${identity.slogan.fr} / ${identity.slogan.ar}
+POSITIONNEMENT : ${identity.positioning.fr} / ${identity.positioning.ar}
 
-PARCOURS DU CANDIDAT : ${candidate.intro.fr}
-${candidate.path.map((p) => `- ${p.year} : ${p.label.fr}`).join("\n")}
-VALEURS : ${candidate.values.map((v) => v.fr).join(" ")}
+ASSISTANT : repondre exclusivement a partir de la plateforme electorale actualisee 2026 du Parti des Democrates Nouveaux. Ne pas inventer de chiffres, d'adresses, de calendrier local, de financement 60/25/15 ou de plan officiel des 100 jours.
 
-AXES :
-${axes.map((a) => `Axe ${a.number} — ${a.title.fr} (${a.title.ar}) : ${a.summary.fr} [chiffre clé : ${a.stat.value} — ${a.stat.label.fr}]`).join("\n")}
+AXES OFFICIELS :
+${axes.map((a) => `Axe ${a.number} - ${a.title.fr} / ${a.title.ar} : ${a.summary.fr} / ${a.summary.ar} [${a.stat.value} - ${a.stat.label.fr} / ${a.stat.label.ar}]`).join("\n")}
 
-LES 25 ENGAGEMENTS :
+OBJECTIFS CHIFFRES DU PROGRAMME :
 ${engagements
   .map(
-    (e) => `Engagement ${e.n} (axe ${axisById(e.axis).number} — ${axisById(e.axis).title.fr}) : ${e.title.fr} / ${e.title.ar}
-  Promesse : ${e.promise.fr} — ${e.promise.ar}
-  Problème actuel : ${e.problem.fr}
-  Proposition : ${e.proposal.fr}
-  Bénéficiaires : ${e.beneficiaries.fr}
-  Financement : ${e.funding.fr}
-  Calendrier : ${e.calendar}
-  Indicateur de réussite : ${e.indicator.fr}`,
+    (
+      e,
+    ) => `Objectif ${e.n} (axe ${axisById(e.axis).number} - ${axisById(e.axis).title.fr}) : ${e.title.fr} / ${e.title.ar}
+  Proposition principale : ${e.promise.fr} / ${e.promise.ar}
+  Mesures : ${e.proposal.fr} / ${e.proposal.ar}
+  Public concerne : ${e.beneficiaries.fr} / ${e.beneficiaries.ar}
+  Echeance : ${e.calendar}
+  Indicateur : ${e.indicator.fr} / ${e.indicator.ar}
+  Source : plateforme electorale actualisee 2026`,
   )
   .join("\n")}
 
-LES 100 PREMIERS JOURS :
-${firstHundredDays.map((d) => `${d.day} : ${d.title.fr} — ${d.detail.fr}`).join("\n")}
+PRIORITES DE LA PROCHAINE LEGISLATURE :
+${firstHundredDays.map((d) => `${d.title.fr} / ${d.title.ar} : ${d.detail.fr} / ${d.detail.ar}`).join("\n")}
 
-FINANCEMENT DU PROGRAMME :
-${financing.items.map((i) => `${i.label.fr} : ${i.share} — ${i.detail.fr}`).join("\n")}
+VISION ET VALEURS :
 ${financing.note.fr}
-
-CONTACT : ${contact.email} — ${contact.phone} — ${contact.address.fr}
-`.trim();
+${candidate.values.map((v) => `- ${v.fr} / ${v.ar}`).join("\n")}
+`;

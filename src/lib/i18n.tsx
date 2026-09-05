@@ -12,7 +12,7 @@ const LangContext = createContext<Ctx>({
 
 export function LangProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>("fr");
-  const dir = lang === "ar" ? "rtl" : "ltr";
+  const dir = lang === "ar" || lang === "darija" ? "rtl" : "ltr";
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -20,7 +20,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
   }, [lang, dir]);
 
   const value = useMemo<Ctx>(
-    () => ({ lang, setLang, dir, t: (b: Bi) => (lang === "ar" ? b.ar : b.fr) }),
+    () => ({ lang, setLang, dir, t: (b: Bi) => (lang === "fr" ? b.fr : b.ar) }),
     [lang, dir],
   );
 
@@ -42,8 +42,8 @@ export const ui = {
   keyFigures: { fr: "Chiffres clés", ar: "أرقام أساسية" },
   programTitle: { fr: "Notre programme électoral", ar: "برنامجنا الانتخابي" },
   programLead: {
-    fr: "Cinq axes, des engagements concrets et mesurables.",
-    ar: "خمسة محاور، والتزامات ملموسة وقابلة للقياس.",
+    fr: "Trois axes officiels : produire la richesse, repondre aux besoins essentiels et renforcer l unite nationale.",
+    ar: "ثلاثة محاور رسمية: إنتاج الثروة، تلبية الحاجيات الأساسية وتعزيز الوحدة الوطنية.",
   },
   contactLead: {
     fr: "Une question, une proposition ? Écrivez-nous.",
@@ -70,7 +70,19 @@ export const ui = {
 };
 
 export const suggestions: Bi[] = [
-  { fr: "Quelles mesures pour les PME ?", ar: "شنو هو البرنامج ديال الاقتصاد؟" },
-  { fr: "Comment digitaliser l'administration ?", ar: "كيفاش غادي ترقمنو الإدارة؟" },
-  { fr: "Que proposez-vous pour l'emploi des jeunes ?", ar: "أشنو كاين لتشغيل الشباب؟" },
+  {
+    fr: "Que propose le programme pour l emploi des jeunes ?",
+    ar: "ماذا يقترح البرنامج لتشغيل الشباب؟",
+  },
+  { fr: "Comment ameliorer le systeme de sante ?", ar: "كيف يمكن تحسين منظومة الصحة؟" },
+  {
+    fr: "Quelles sont les mesures pour les petites entreprises ?",
+    ar: "ما هي الإجراءات الخاصة بالمقاولات الصغيرة؟",
+  },
+  { fr: "Comment garantir la securite hydrique ?", ar: "كيف يضمن البرنامج الأمن المائي؟" },
+  { fr: "Que prevoit le programme pour l education ?", ar: "ماذا يقترح البرنامج للتعليم؟" },
+  {
+    fr: "Quelles propositions concernent la femme et la famille ?",
+    ar: "ما هي المقترحات المتعلقة بالمرأة والأسرة؟",
+  },
 ];
