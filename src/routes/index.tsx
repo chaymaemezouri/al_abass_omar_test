@@ -97,7 +97,7 @@ const copy = {
   proofTitle: bi("Objectifs chiffres de la plateforme electorale", "الأهداف الرقمية للأرضية الانتخابية"),
   proofLead: bi(
     "Neuf objectifs nationaux, formules avec leurs echeances et leur source : plateforme electorale actualisee 2026.",
-    "تسعة أهداف وطنية مع آجالها ومصدرها: المنصة الانتخابية المحينة 2026.",
+    "تسعة أهداف وطنية مع آجالها ومصدرها: الأرضية الانتخابية 2026.",
   ),
   trustLine: bi(
     "Des réponses fiables, basées uniquement sur la plateforme electorale validée.",
@@ -159,7 +159,7 @@ const copy = {
   theme: bi("Theme", "الموضوع"),
   mainProposal: bi("Proposition principale", "المقترح الرئيسي"),
   deadline: bi("Echeance", "الأجل"),
-  sourceShort: bi("Plateforme electorale actualisee 2026", "المنصة الانتخابية المحينة 2026"),
+  sourceShort: bi("Plateforme electorale actualisee 2026", "الأرضية الانتخابية 2026"),
   askPrecision: bi("Demander une precision a la version numerique", "اطلب توضيحا من النسخة الرقمية"),
 };
 

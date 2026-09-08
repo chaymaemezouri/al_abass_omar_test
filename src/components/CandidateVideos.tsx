@@ -407,13 +407,13 @@ export function CandidateVideos() {
             {/* Mobile: carousel glued under the video */}
             <div className="vd-mobile-rail">
               <div className="vd-mobile-rail-head">
-                <p>
+                <p className="vd-mobile-rail-meta">
                   {String(activeIndex + 1).padStart(2, "0")} / {candidateVideos.length}
                   <span> · {themeLabel(active.theme)}</span>
                 </p>
                 <button type="button" className="vd-mobile-all" onClick={() => setSheetOpen(true)}>
-                  <List size={15} />
-                  {ar ? "الكل" : "Tout"}
+                  <List size={15} aria-hidden />
+                  <span>{ar ? "الكل" : "Tout"}</span>
                 </button>
               </div>
               <div
