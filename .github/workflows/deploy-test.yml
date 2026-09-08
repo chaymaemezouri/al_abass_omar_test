@@ -1,0 +1,95 @@
+name: Deploy TEST (test-avatar)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-test-avatar
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to VPS (test-avatar)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script_stop: true
+          command_timeout: 20m
+          script: |
+            set -euo pipefail
+
+            DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
+            if [ -z "$DEPLOY_PATH" ]; then
+              DEPLOY_PATH="/var/www/avatar-candidat/app"
+            fi
+
+            SHARED_ENV="/var/www/avatar-candidat/shared/.env"
+            APP_NAME="avatar-candidat"
+            BRANCH="main"
+
+            echo "==> Deploy path: $DEPLOY_PATH"
+            cd "$DEPLOY_PATH"
+
+            if [ ! -f "$SHARED_ENV" ]; then
+              echo "ERROR: missing $SHARED_ENV on the VPS. Create it before CI/CD deploy."
+              exit 1
+            fi
+
+            ln -sfn "$SHARED_ENV" "$DEPLOY_PATH/.env"
+
+            echo "==> Sync git ($BRANCH)"
+            git fetch --prune origin
+            git checkout "$BRANCH"
+            git reset --hard "origin/$BRANCH"
+
+            echo "==> Install dependencies"
+            npm install --no-fund --no-audit
+
+            echo "==> Build (Nitro node-server)"
+            npm run build
+
+            echo "==> Reload PM2 ($APP_NAME only)"
+            if pm2 describe "$APP_NAME" >/dev/null 2>&1; then
+              pm2 reload "$APP_NAME" --update-env
+            else
+              pm2 start deploy/ecosystem.config.cjs
+            fi
+            pm2 save
+
+            echo "==> Healthcheck"
+            HEALTH_URL="${{ secrets.HEALTHCHECK_URL }}"
+            if [ -z "$HEALTH_URL" ]; then
+              HEALTH_URL="https://test-avatar.academyskills.net/api/health"
+            fi
+
+            ok=0
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              code=$(curl -sS -o /tmp/avatar-health.json -w "%{http_code}" "$HEALTH_URL" || true)
+              if [ "$code" = "200" ]; then
+                echo "Healthcheck OK (HTTP $code) attempt $i"
+                cat /tmp/avatar-health.json || true
+                ok=1
+                break
+              fi
+              echo "Healthcheck attempt $i failed (HTTP ${code:-000}), retry in 3s..."
+              sleep 3
+            done
+
+            if [ "$ok" != "1" ]; then
+              echo "ERROR: healthcheck failed after deploy: $HEALTH_URL"
+              pm2 logs "$APP_NAME" --lines 80 --nostream || true
+              exit 1
+            fi
+
+            echo "==> Deploy TEST succeeded"

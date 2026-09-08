@@ -1,3 +1,8 @@
+# Env (secrets stay on the VPS only)
+.env
+.env.*
+!.env.example
+
 # Logs
 logs
 *.log
