@@ -77,16 +77,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Al ABASS Omar - Programme électoral 2026" },
+      { title: "Al ABASS Omar - Plateforme électorale 2026" },
       {
         name: "description",
-        content: "Plateforme officielle pour comprendre et interroger le programme électoral 2026.",
+        content: "Plateforme officielle pour comprendre et interroger la plateforme électorale 2026.",
       },
       { name: "author", content: "Equipe de campagne" },
       { property: "og:title", content: "Al ABASS Omar" },
       {
         property: "og:description",
-        content: "Programme électoral, engagements, candidat et assistant IA officiel.",
+        content: "Plateforme électorale, engagements, candidat et assistant IA officiel.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -96,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Reem+Kufi:wght@400;500;600;700&display=swap",
       },
       {
         rel: "stylesheet",
@@ -113,7 +113,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl">
       <head>
         <HeadContent />
       </head>

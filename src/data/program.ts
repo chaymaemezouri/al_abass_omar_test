@@ -1,5 +1,5 @@
 /**
- * Contenu editable du site et du programme electoral.
+ * Contenu editable du site et de la plateforme electorale.
  * Source de reference : plateforme electorale actualisee 2026.
  */
 
@@ -11,7 +11,7 @@ const bi = (fr: string, ar: string): Bi => ({ fr, ar });
 export const identity = {
   candidate: bi("Al ABASS Omar", "عمر العباس"),
   party: bi("Parti des Democrates Nouveaux", "حزب الديمقراطيين الجدد"),
-  district: bi("Programme electoral 2026", "البرنامج الانتخابي 2026"),
+  district: bi("Plateforme electorale 2026", "الأرضية الانتخابية 2026"),
   slogan: bi("Un Maroc souverain, numerique et solidaire", "مغرب سيادي، رقمي ومتضامن"),
   positioning: bi(
     "Peu d'ideologie, beaucoup d'efficacite et de performance.",
@@ -97,6 +97,9 @@ export type Engagement = {
   calendar: string;
   indicator: Bi;
   first100?: boolean;
+  bigNumber: string;
+  bigUnit: Bi;
+  cardBg: number; // 1-9 maps to carte1 (1).png - carte1 (9).png
 };
 
 const source = bi(
@@ -132,6 +135,9 @@ export const engagements: Engagement[] = [
       "المغرب ضمن أفضل 50 عالمياً في الإدارة الإلكترونية.",
     ),
     first100: true,
+    bigNumber: "50",
+    bigUnit: bi("parmi les meilleurs au monde", "ضمن أفضل 50 دولة عالمياً"),
+    cardBg: 3,
   },
   {
     n: 2,
@@ -160,6 +166,9 @@ export const engagements: Engagement[] = [
       "100 ألف شاب يتكونون رقمياً كل سنة.",
     ),
     first100: true,
+    bigNumber: "100K",
+    bigUnit: bi("jeunes formés au numérique / an", "شاب يتكوّنون رقمياً كل سنة"),
+    cardBg: 1,
   },
   {
     n: 3,
@@ -188,6 +197,9 @@ export const engagements: Engagement[] = [
       "تخصيص 20% فعلياً من الطلبيات العمومية للمقاولات الصغرى والمتوسطة.",
     ),
     first100: true,
+    bigNumber: "20%",
+    bigUnit: bi("des commandes publiques aux PME", "من الصفقات العمومية للمقاولات الصغرى"),
+    cardBg: 2,
   },
   {
     n: 4,
@@ -215,6 +227,9 @@ export const engagements: Engagement[] = [
       "70 % de la population couverte par la 5G.",
       "70% من السكان مشمولون بتغطية الجيل الخامس.",
     ),
+    bigNumber: "70%",
+    bigUnit: bi("couverture 5G de la population", "من السكان مشمولون بتغطية 5G"),
+    cardBg: 4,
   },
   {
     n: 5,
@@ -243,6 +258,9 @@ export const engagements: Engagement[] = [
       "60% من الحاجيات المائية مغطاة عبر التحلية.",
     ),
     first100: true,
+    bigNumber: "60%",
+    bigUnit: bi("des besoins en eau par dessalement", "من الحاجيات المائية عبر التحلية"),
+    cardBg: 5,
   },
   {
     n: 6,
@@ -270,6 +288,9 @@ export const engagements: Engagement[] = [
       "100 millions de m3 d'eaux usees traitees mobilises par an.",
       "100 مليون متر مكعب من المياه المعالجة سنوياً.",
     ),
+    bigNumber: "100M",
+    bigUnit: bi("m³ d'eaux usées réutilisés / an", "متر مكعب من المياه المعالجة سنوياً"),
+    cardBg: 6,
   },
   {
     n: 7,
@@ -297,6 +318,9 @@ export const engagements: Engagement[] = [
       "1 million de tonnes en 2027, 3 millions de tonnes en 2032.",
       "مليون طن في 2027، و3 ملايين طن في 2032.",
     ),
+    bigNumber: "3M",
+    bigUnit: bi("tonnes d'ammoniac vert en 2032", "طن من الأمونياك الأخضر في 2032"),
+    cardBg: 7,
   },
   {
     n: 8,
@@ -324,6 +348,9 @@ export const engagements: Engagement[] = [
       "1 800 communes rurales connectees au haut debit.",
       "1800 جماعة قروية مرتبطة بالإنترنت عالي الصبيب.",
     ),
+    bigNumber: "1800",
+    bigUnit: bi("communes rurales connectées", "جماعة قروية مرتبطة بالإنترنت"),
+    cardBg: 8,
   },
   {
     n: 9,
@@ -351,12 +378,23 @@ export const engagements: Engagement[] = [
       "100 000 emplois soutenus dans les metiers creatifs.",
       "دعم 100 ألف منصب شغل في المهن الإبداعية.",
     ),
+    bigNumber: "100K",
+    bigUnit: bi("emplois créatifs soutenus", "منصب شغل إبداعي"),
+    cardBg: 9,
   },
 ];
 
 export const firstHundredDays: { day: string; title: Bi; detail: Bi }[] = [
   {
     day: "Priorite 1",
+    title: bi("Plateforme electorale", "الأرضية الانتخابية"),
+    detail: bi(
+      "Document de reference actualise 2026, fonde sur trois axes : produire la richesse, repondre aux besoins essentiels et renforcer l'unite nationale.",
+      "وثيقة مرجعية محيّنة 2026، قائمة على ثلاثة محاور: إنتاج الثروة، تلبية الحاجيات الأساسية، وتعزيز الوحدة الوطنية.",
+    ),
+  },
+  {
+    day: "Priorite 2",
     title: bi("Administration efficace", "إدارة فعالة"),
     detail: bi(
       "Adopter le cadre legal de numerisation des services publics et interconnecter les administrations.",
@@ -364,23 +402,23 @@ export const firstHundredDays: { day: string; title: Bi; detail: Bi }[] = [
     ),
   },
   {
-    day: "Priorite 2",
-    title: bi("Soutien aux petites entreprises", "دعم المقاولات الصغيرة"),
-    detail: bi(
-      "Appliquer la part de 20 % des commandes publiques destinee aux PME et creer une loi specifique pour les petites entreprises.",
-      "تفعيل حصة 20% من الطلبيات العمومية للمقاولات الصغرى والمتوسطة وإحداث قانون خاص بالمقاولات الصغيرة.",
-    ),
-  },
-  {
     day: "Priorite 3",
-    title: bi("Urgence hydrique", "الاستعجال المائي"),
+    title: bi("Emploi et soutien aux entreprises", "تشغيل ودعم المقاولات"),
     detail: bi(
-      "Accelerer le dessalement, la reutilisation des eaux usees et la fabrication locale des equipements.",
-      "تسريع التحلية وإعادة استعمال المياه العادمة وتصنيع التجهيزات محلياً.",
+      "Activer la part legale de 20 % des marches publics pour les PME, proteger la liquidite des petites entreprises et soutenir la creation d'emplois.",
+      "تفعيل الحصة القانونية 20% من الصفقات العمومية للمقاولات الصغرى، حماية سيولتها المالية، ودعم خلق فرص الشغل.",
     ),
   },
   {
     day: "Priorite 4",
+    title: bi("Foncier et habitat", "الإسكان والعقار"),
+    detail: bi(
+      "Creer une plateforme geographique numerique du foncier industriel, avec une carte interactive du foncier public pour lutter contre la speculation et proteger les droits de propriete.",
+      "إحداث منصة جغرافية رقمية للعقار الصناعي، مع خريطة تفاعلية للوعاء العقاري لمحاربة المضاربة وحماية حقوق الملكية.",
+    ),
+  },
+  {
+    day: "Priorite 5",
     title: bi("Sante et education", "الصحة والتعليم"),
     detail: bi(
       "Renforcer les structures sanitaires territoriales, ameliorer les conditions des professionnels et faire evoluer l'ecole vers l'apprentissage des competences.",
@@ -388,7 +426,7 @@ export const firstHundredDays: { day: string; title: Bi; detail: Bi }[] = [
     ),
   },
   {
-    day: "Priorite 5",
+    day: "Priorite 6",
     title: bi("Transparence et justice", "الشفافية والعدالة"),
     detail: bi(
       "Numeriser les tribunaux, lutter contre les intermediaires et renforcer l'independance administrative et financiere de la justice.",
@@ -400,8 +438,8 @@ export const firstHundredDays: { day: string; title: Bi; detail: Bi }[] = [
 export const candidate = {
   title: bi("Le candidat", "المرشح"),
   intro: bi(
-    "La plateforme presente Al ABASS Omar dans le cadre du programme electoral 2026 du Parti des Democrates Nouveaux, avec une approche nationale fondee sur l'efficacite, la justice et l'unite nationale.",
-    "تقدم المنصة عمر العباس في إطار البرنامج الانتخابي 2026 لحزب الديمقراطيين الجدد، بمقاربة وطنية مبنية على الفعالية والعدالة والوحدة الوطنية.",
+    "La plateforme electorale presente Al ABASS Omar dans le cadre de la plateforme electorale 2026 du Parti des Democrates Nouveaux, avec une approche nationale fondee sur l'efficacite, la justice et l'unite nationale.",
+    "تقدم المنصة عمر العباس في إطار الأرضية الانتخابية 2026 لحزب الديمقراطيين الجدد، بمقاربة وطنية مبنية على الفعالية والعدالة والوحدة الوطنية.",
   ),
   path: [
     {

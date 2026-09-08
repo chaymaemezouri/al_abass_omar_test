@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import assistantAvatar from "@/assets/assistant-avatar.png";
+import { Logo, BasmaMark, basmaLogo } from "@/components/Logo";
 import { identity } from "@/data/program";
 import { suggestions, ui, useLang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -40,32 +41,34 @@ type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
 
 export const OPEN_CHAT_EVENT = "open-campaign-chat";
 export const openChat = () => window.dispatchEvent(new Event(OPEN_CHAT_EVENT));
+export const openChatWithQuestion = (question: string) =>
+  window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT, { detail: question }));
 
 const bi = (fr: string, ar: string): Bi => ({ fr, ar });
 
 const chatCopy = {
-  subtitle: bi("Assistant IA base sur le programme officiel", "مساعد ذكي مبني على البرنامج الرسمي"),
-  welcomeTitle: bi("Assistant IA officiel du programme 2026", "المساعد الذكي الرسمي لبرنامج 2026"),
+  subtitle: bi("Version numerique basee sur la plateforme electorale officielle", "نسخة رقمية مبنية على الأرضية الانتخابية الرسمية"),
+  welcomeTitle: bi("Version numerique d'Omar Al Abass", "النسخة الرقمية لعمر العباس"),
   welcomeLead: bi(
-    "Posez une question claire. Je reponds avec les mesures, les objectifs et les sources du programme valide.",
-    "اطرح سؤالا واضحا. أجيبك بالإجراءات والأهداف والمصادر الموجودة في البرنامج المعتمد.",
+    "Posez une question claire. Je reponds avec les mesures, les objectifs et les sources de la plateforme electorale validee.",
+    "اطرح سؤالا واضحا. أجيبك بالإجراءات والأهداف والمصادر الموجودة في الأرضية الانتخابية المعتمدة.",
   ),
   sourceBadge: bi("Sources verifiees", "مصادر موثقة"),
-  limitBadge: bi("Programme uniquement", "البرنامج فقط"),
+  limitBadge: bi("Plateforme electorale uniquement", "الأرضية الانتخابية فقط"),
   privacyBadge: bi("Dialogue direct", "حوار مباشر"),
   usefulQuestions: bi("Questions utiles", "أسئلة مفيدة"),
-  themes: bi("Themes du programme", "مواضيع البرنامج"),
+  themes: bi("Themes de la plateforme electorale", "مواضيع الأرضية الانتخابية"),
   sourceRuleTitle: bi("Regle de fiabilite", "قاعدة الموثوقية"),
   sourceRule: bi(
-    "Les reponses citent le programme et refusent les informations absentes de la base validee.",
-    "الأجوبة تعتمد على البرنامج وترفض المعلومات غير الموجودة في القاعدة المعتمدة.",
+    "Les reponses citent la plateforme electorale et refusent les informations absentes de la base validee.",
+    "الأجوبة تعتمد على الأرضية الانتخابية وترفض المعلومات غير الموجودة في القاعدة المعتمدة.",
   ),
   quickStart: bi("Commencer rapidement", "ابدأ بسرعة"),
   listening: bi(
     "Transcription en cours. Vous pouvez corriger le texte avant l'envoi.",
     "جاري تحويل الصوت إلى نص. يمكنك تصحيح النص قبل الإرسال.",
   ),
-  loading: bi("L'assistant consulte la base validee", "المساعد يراجع القاعدة المعتمدة"),
+  loading: bi("La version numerique consulte la base validee", "النسخة الرقمية تراجع القاعدة المعتمدة"),
   read: bi("Ecouter", "استمع"),
   seeCommitment: bi("Voir l'engagement complet", "عرض الالتزام كاملا"),
   source: bi("Source", "المصدر"),
@@ -74,8 +77,8 @@ const chatCopy = {
     "الميكروفون غير مدعوم في هذا المتصفح.",
   ),
   inputHint: bi(
-    "L'assistant repond uniquement a partir du programme officiel 2026.",
-    "المساعد يجيب فقط انطلاقا من البرنامج الرسمي 2026.",
+    "La version numerique repond uniquement a partir de la plateforme electorale officielle 2026.",
+    "النسخة الرقمية تجيب فقط انطلاقا من الأرضية الانتخابية الرسمية 2026.",
   ),
   officialBase: bi("Base officielle", "قاعدة رسمية"),
   session: bi("Session de dialogue", "جلسة الحوار"),
@@ -85,26 +88,26 @@ const topicCards = [
   {
     label: bi("Emploi", "التشغيل"),
     prompt: bi(
-      "Que propose le programme pour l'emploi des jeunes ?",
-      "ماذا يقترح البرنامج لتشغيل الشباب؟",
+      "Que propose la plateforme electorale pour l'emploi des jeunes ?",
+      "ماذا تقترح الأرضية الانتخابية لتشغيل الشباب؟",
     ),
     icon: BriefcaseBusiness,
   },
   {
     label: bi("Sante", "الصحة"),
-    prompt: bi("Comment ameliorer le systeme de sante ?", "كيف يقترح البرنامج تحسين منظومة الصحة؟"),
+    prompt: bi("Comment ameliorer le systeme de sante ?", "كيف تقترح الأرضية الانتخابية تحسين منظومة الصحة؟"),
     icon: Stethoscope,
   },
   {
     label: bi("Education", "التعليم"),
-    prompt: bi("Que prevoit le programme pour l'education ?", "ماذا يتضمن البرنامج بخصوص التعليم؟"),
+    prompt: bi("Que prevoit la plateforme electorale pour l'education ?", "ماذا تتضمن الأرضية الانتخابية بخصوص التعليم؟"),
     icon: GraduationCap,
   },
   {
     label: bi("Eau", "الماء"),
     prompt: bi(
       "Comment garantir la securite hydrique ?",
-      "كيف يمكن ضمان الأمن المائي حسب البرنامج؟",
+      "كيف يمكن ضمان الأمن المائي حسب الأرضية الانتخابية؟",
     ),
     icon: Droplets,
   },
@@ -173,7 +176,10 @@ export function ChatWidget() {
   const quickSuggestions = useMemo(() => suggestions.slice(0, 4), []);
 
   useEffect(() => {
-    const handler = () => setOpen(true);
+    const handler = (event: Event) => {
+      if (event instanceof CustomEvent && typeof event.detail === "string") setInput(event.detail);
+      setOpen(true);
+    };
     window.addEventListener(OPEN_CHAT_EVENT, handler);
     return () => window.removeEventListener(OPEN_CHAT_EVENT, handler);
   }, []);
@@ -264,19 +270,43 @@ export function ChatWidget() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label={t(ui.openChat)}
+      <div
         className={cn(
-          "fixed bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 flex max-w-[calc(100vw-2rem)] items-center gap-3 rounded-sm bg-morocco px-4 py-3 text-sm font-extrabold text-white shadow-elegant transition-colors hover:bg-morocco-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy",
+          "fixed bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 flex max-w-[calc(100vw-2rem)] flex-col items-center gap-2",
           dir === "rtl" ? "left-4 sm:left-5" : "right-4 sm:right-5",
           open && "hidden",
         )}
       >
-        <MessageCircle className="h-5 w-5" />
-        <span className="hidden sm:inline">{t(ui.nav.chat)}</span>
-      </button>
+        <div className="flex flex-col items-center gap-2 px-1">
+          <img
+            src={basmaLogo}
+            alt=""
+            aria-hidden
+            className="h-14 w-14 object-contain drop-shadow-sm sm:hidden"
+          />
+          <Logo
+            decorative
+            className="hidden h-20 w-20 rounded-sm shadow-card sm:block sm:h-24 sm:w-24"
+          />
+          <div
+            className="text-center text-base font-extrabold leading-snug text-navy drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] sm:text-lg"
+            dir="rtl"
+          >
+            <p>صوتوا على الشباب</p>
+            <p>صوتوا على رمز البصمة</p>
+            <p className="text-morocco">#عمل_جيم_للشباب</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label={t(ui.openChat)}
+          className="inline-flex items-center justify-center gap-3 rounded-sm bg-morocco px-4 py-3 text-sm font-extrabold text-white shadow-elegant transition-colors hover:bg-morocco-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+        >
+          <MessageCircle className="h-5 w-5" />
+          <span className="hidden sm:inline">{t(ui.nav.chat)}</span>
+        </button>
+      </div>
 
       {open && (
         <div dir={dir} className="fixed inset-0 z-50 flex flex-col bg-ivory text-foreground">
@@ -296,14 +326,17 @@ export function ChatWidget() {
                   <p className="truncate text-xs text-white/72">{t(chatCopy.subtitle)}</p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label={t(ui.closeChat)}
-                className="grid h-11 w-11 place-items-center rounded-sm border border-white/20 text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                <Logo decorative className="hidden h-10 w-auto sm:block" />
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  aria-label={t(ui.closeChat)}
+                  className="grid h-11 w-11 place-items-center rounded-sm border border-white/20 text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
           </header>
 
@@ -311,12 +344,18 @@ export function ChatWidget() {
             <section className="flex min-h-0 flex-col border-border lg:border-r">
               <div
                 ref={scrollRef}
-                className="min-h-0 flex-1 overflow-y-auto bg-[radial-gradient(circle_at_20%_0%,rgba(194,15,26,0.08),transparent_28%),linear-gradient(180deg,#fbfaf5_0%,#f5f1e7_100%)] p-4 sm:p-6"
+                className="relative min-h-0 flex-1 overflow-y-auto bg-[radial-gradient(circle_at_20%_0%,rgba(194,15,26,0.08),transparent_28%),linear-gradient(180deg,#fbfaf5_0%,#f5f1e7_100%)] p-4 sm:p-6"
               >
+                <BasmaMark
+                  tone="navy"
+                  size="xl"
+                  className="pointer-events-none fixed bottom-24 end-4 opacity-[0.05] sm:end-10"
+                />
                 {messages.length === 0 && (
-                  <div className="mx-auto grid max-w-4xl gap-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
-                    <div className="rounded-md border border-border bg-card p-5 shadow-card sm:p-6">
-                      <div className="grid gap-5 md:grid-cols-[auto_minmax(0,1fr)]">
+                  <div className="relative mx-auto grid max-w-4xl gap-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
+                    <div className="relative overflow-hidden rounded-md border border-border bg-card p-5 shadow-card sm:p-6">
+                      <BasmaMark tone="teal" size="sm" className="-end-4 -top-2 rotate-12" />
+                      <div className="relative grid gap-5 md:grid-cols-[auto_minmax(0,1fr)]">
                         <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full bg-navy/95 ring-4 ring-white shadow-card">
                           <img
                             src={assistantAvatar}
@@ -477,7 +516,7 @@ export function ChatWidget() {
                     <button
                       type="button"
                       onClick={toggleListening}
-                      aria-label="Microphone"
+                      aria-label={lang === "ar" ? "ميكروفون" : "Microphone"}
                       className={cn(
                         "grid h-11 w-11 shrink-0 place-items-center rounded-sm border border-border transition-colors hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-morocco",
                         listening && "border-morocco bg-morocco/10 text-morocco",

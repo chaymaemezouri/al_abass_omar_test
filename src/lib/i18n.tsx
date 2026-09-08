@@ -4,14 +4,14 @@ import type { Bi, Lang } from "@/data/program";
 type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (b: Bi) => string; dir: "ltr" | "rtl" };
 
 const LangContext = createContext<Ctx>({
-  lang: "fr",
+  lang: "ar",
   setLang: () => {},
-  t: (b) => b.fr,
-  dir: "ltr",
+  t: (b) => b.ar,
+  dir: "rtl",
 });
 
 export function LangProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>("fr");
+  const [lang, setLang] = useState<Lang>("ar");
   const dir = lang === "ar" || lang === "darija" ? "rtl" : "ltr";
 
   useEffect(() => {
@@ -31,16 +31,16 @@ export const useLang = () => useContext(LangContext);
 
 export const ui = {
   nav: {
-    program: { fr: "Le programme", ar: "البرنامج الانتخابي" },
+    program: { fr: "La plateforme electorale", ar: "الأرضية الانتخابية" },
     about: { fr: "Qui sommes-nous", ar: "من نحن" },
     axes: { fr: "Axes prioritaires", ar: "المحاور الأساسية" },
     contact: { fr: "Contact", ar: "تواصل معنا" },
-    chat: { fr: "Assistant IA", ar: "اسأل المساعد" },
+    chat: { fr: "Version numerique", ar: "النسخة الرقمية" },
   },
-  ctaProgram: { fr: "Découvrir le programme", ar: "اكتشف البرنامج" },
-  ctaChat: { fr: "Parler à l'assistant", ar: "تحدث مع المساعد" },
+  ctaProgram: { fr: "Découvrir la plateforme electorale", ar: "اكتشف الأرضية الانتخابية" },
+  ctaChat: { fr: "Parler a la version numerique", ar: "تحدث مع النسخة الرقمية" },
   keyFigures: { fr: "Chiffres clés", ar: "أرقام أساسية" },
-  programTitle: { fr: "Notre programme électoral", ar: "برنامجنا الانتخابي" },
+  programTitle: { fr: "Notre plateforme électorale", ar: "أرضيتنا الانتخابية" },
   programLead: {
     fr: "Trois axes officiels : produire la richesse, repondre aux besoins essentiels et renforcer l unite nationale.",
     ar: "ثلاثة محاور رسمية: إنتاج الثروة، تلبية الحاجيات الأساسية وتعزيز الوحدة الوطنية.",
@@ -49,11 +49,11 @@ export const ui = {
     fr: "Une question, une proposition ? Écrivez-nous.",
     ar: "سؤال أو اقتراح؟ راسلونا.",
   },
-  chatTitle: { fr: "Assistant du programme", ar: "مساعد البرنامج" },
+  chatTitle: { fr: "Version numerique d'Omar Al Abass", ar: "النسخة الرقمية لعمر العباس" },
   online: { fr: "En ligne", ar: "متصل" },
   chatIntro: {
-    fr: "Posez votre question en français, en arabe ou en darija. Je réponds uniquement à partir du programme.",
-    ar: "اطرح سؤالك بالفرنسية أو العربية أو الدارجة. أجيب فقط انطلاقا من البرنامج.",
+    fr: "Posez votre question en français, en arabe ou en darija. Je réponds uniquement à partir de la plateforme electorale.",
+    ar: "اطرح سؤالك بالفرنسية أو العربية أو الدارجة. أجيب فقط انطلاقا من الأرضية الانتخابية.",
   },
   placeholder: { fr: "Écrivez votre question…", ar: "اكتب سؤالك…" },
   send: { fr: "Envoyer", ar: "إرسال" },
@@ -61,26 +61,38 @@ export const ui = {
     fr: "Désolé, une erreur est survenue. Merci de réessayer.",
     ar: "عذرا، وقع خطأ. المرجو المحاولة مرة أخرى.",
   },
-  openChat: { fr: "Ouvrir l'assistant", ar: "فتح المساعد" },
+  openChat: { fr: "Ouvrir la version numerique", ar: "فتح النسخة الرقمية" },
   closeChat: { fr: "Fermer", ar: "إغلاق" },
   footer: {
     fr: "Site officiel de campagne — Élections législatives 2026",
     ar: "الموقع الرسمي للحملة — الانتخابات التشريعية 2026",
   },
+  footerNav: { fr: "Navigation", ar: "التنقل" },
+  footerActions: { fr: "Actions", ar: "إجراءات" },
+  footerLegal: {
+    fr: "Les reponses de la version numerique s'appuient uniquement sur la plateforme electorale officielle 2026.",
+    ar: "إجابات النسخة الرقمية مبنية فقط على الأرضية الانتخابية الرسمية 2026.",
+  },
+  footerBuiltBy: { fr: "Realise avec", ar: "من إنجاز" },
+  footerCompany: { fr: "Expertise & Consulting Company", ar: "Expertise & Consulting Company" },
+  footerRights: {
+    fr: "© 2026 — Tous droits reserves",
+    ar: "© 2026 — جميع الحقوق محفوظة",
+  },
 };
 
 export const suggestions: Bi[] = [
   {
-    fr: "Que propose le programme pour l emploi des jeunes ?",
-    ar: "ماذا يقترح البرنامج لتشغيل الشباب؟",
+    fr: "Que propose la plateforme electorale pour l emploi des jeunes ?",
+    ar: "ماذا تقترح الأرضية الانتخابية لتشغيل الشباب؟",
   },
   { fr: "Comment ameliorer le systeme de sante ?", ar: "كيف يمكن تحسين منظومة الصحة؟" },
   {
     fr: "Quelles sont les mesures pour les petites entreprises ?",
     ar: "ما هي الإجراءات الخاصة بالمقاولات الصغيرة؟",
   },
-  { fr: "Comment garantir la securite hydrique ?", ar: "كيف يضمن البرنامج الأمن المائي؟" },
-  { fr: "Que prevoit le programme pour l education ?", ar: "ماذا يقترح البرنامج للتعليم؟" },
+  { fr: "Comment garantir la securite hydrique ?", ar: "كيف تضمن الأرضية الانتخابية الأمن المائي؟" },
+  { fr: "Que prevoit la plateforme electorale pour l education ?", ar: "ماذا تقترح الأرضية الانتخابية للتعليم؟" },
   {
     fr: "Quelles propositions concernent la femme et la famille ?",
     ar: "ما هي المقترحات المتعلقة بالمرأة والأسرة؟",
