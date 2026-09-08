@@ -18,7 +18,6 @@ import {
   Mic,
   MonitorSmartphone,
   RadioTower,
-  Newspaper,
   Scale,
   Send,
   ShieldCheck,
@@ -45,7 +44,6 @@ import {
   financing,
   firstHundredDays,
   identity,
-  news,
   type Bi,
   type Engagement,
 } from "@/data/program";
@@ -147,12 +145,6 @@ const copy = {
   financingTitle: bi(
     "Une politique fondee sur l efficacite et la responsabilite",
     "سياسة قائمة على الفعالية والمسؤولية",
-  ),
-  fieldTitle: bi("Présence sur le terrain", "الحضور الميداني"),
-  participationTitle: bi("Participation citoyenne", "مشاركة المواطنين"),
-  participationLead: bi(
-    "Cette section doit etre alimentee uniquement avec de vraies photos, dates et activites verifiables de la campagne.",
-    "يجب ملء هذا القسم فقط بصور وتواريخ وأنشطة حقيقية قابلة للتحقق.",
   ),
   compareTitle: bi("Explorer la plateforme electorale par theme", "استكشاف الأرضية الانتخابية حسب الموضوع"),
   currentProblem: bi("Constat", "المعطى"),
@@ -1292,58 +1284,24 @@ function Page() {
         </section>
         <section className="relative overflow-hidden bg-ivory py-10 sm:py-20">
           <BasmaMark tone="teal" size="lg" className="left-1/2 top-8 -translate-x-1/2 opacity-[0.09]" />
-          <div className="relative mx-auto grid max-w-7xl gap-8 px-4 lg:grid-cols-[0.95fr_1.05fr]">
-            <div>
-              <SectionHeading title={t(financing.title)} lead={t(financing.note)} />
-              <div className="mt-8 grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-                {financing.items.map((item) => (
-                  <Reveal key={item.share}>
-                    <article className="group rounded-md border border-border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-morocco/40">
-                      <div className="flex items-center justify-between gap-4">
-                        <h3 className="text-base text-navy">{t(item.label)}</h3>
-                        <span className="grid h-11 w-11 place-items-center rounded-md bg-morocco/10 text-xl font-extrabold text-morocco">
-                          {item.share}
-                        </span>
-                      </div>
-                      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                        {t(item.detail)}
-                      </p>
-                    </article>
-                  </Reveal>
-                ))}
-              </div>
-            </div>
-            <div>
-              <SectionHeading title={t(copy.fieldTitle)} lead={t(copy.participationLead)} />
-              <div className="mt-8 grid gap-4">
-                {news.map((item) => (
-                  <Reveal key={`${item.date}-${item.title.fr}`}>
-                    <article className="group flex gap-4 rounded-md border border-dashed border-navy/25 bg-white p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-morocco/50">
-                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-navy text-white transition-colors group-hover:bg-morocco">
-                        <Newspaper className="h-5 w-5" />
+          <div className="relative mx-auto max-w-7xl px-4">
+            <SectionHeading title={t(financing.title)} lead={t(financing.note)} />
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              {financing.items.map((item) => (
+                <Reveal key={item.share}>
+                  <article className="group rounded-md border border-border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-morocco/40">
+                    <div className="flex items-center justify-between gap-4">
+                      <h3 className="text-base text-navy">{t(item.label)}</h3>
+                      <span className="grid h-11 w-11 place-items-center rounded-md bg-morocco/10 text-xl font-extrabold text-morocco">
+                        {item.share}
                       </span>
-                      <span className="min-w-0">
-                        <span className="text-xs font-extrabold uppercase text-morocco">
-                          {item.date} · {t(item.place)}
-                        </span>
-                        <span className="mt-2 block text-sm font-semibold leading-relaxed text-navy">
-                          {t(item.title)}
-                        </span>
-                      </span>
-                    </article>
-                  </Reveal>
-                ))}
-                <Reveal>
-                  <button
-                    type="button"
-                    onClick={openChat}
-                    className="inline-flex min-h-12 items-center justify-center gap-3 rounded-md bg-navy px-5 text-sm font-extrabold text-white shadow-card transition-colors hover:bg-morocco focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
-                  >
-                    <MessageSquareText className="h-5 w-5" />
-                    {t(copy.askPrecision)}
-                  </button>
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                      {t(item.detail)}
+                    </p>
+                  </article>
                 </Reveal>
-              </div>
+              ))}
             </div>
           </div>
         </section>
