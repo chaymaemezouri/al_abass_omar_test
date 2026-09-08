@@ -113,8 +113,15 @@ export function CandidateVideos() {
   }, []);
 
   useEffect(() => {
-    const chip = carouselRef.current?.querySelector<HTMLElement>("[aria-pressed='true']");
-    chip?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    const carousel = carouselRef.current;
+    const chip = carousel?.querySelector<HTMLElement>("[aria-pressed='true']");
+    if (!carousel || !chip) return;
+    // Horizontal only — scrollIntoView would jump the whole page (esp. on mobile refresh).
+    const left = chip.offsetLeft - (carousel.clientWidth - chip.clientWidth) / 2;
+    carousel.scrollTo({
+      left: Math.max(0, left),
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
   }, [selected, filtered]);
 
   useEffect(() => {
@@ -143,8 +150,9 @@ export function CandidateVideos() {
     if (index >= 0) setPage(Math.floor(index / pageSize));
     const url = new URL(window.location.href);
     url.searchParams.set("video", video.id);
-    url.hash = "videos";
-    window.history.replaceState(window.history.state, "", url);
+    // Keep hash empty so refresh does not jump back to #videos.
+    url.hash = "";
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`);
     if (window.matchMedia("(max-width: 1023px)").matches)
       document.getElementById("video-dialogue-player")?.scrollIntoView({
         block: "start",

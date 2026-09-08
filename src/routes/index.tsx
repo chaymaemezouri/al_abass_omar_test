@@ -690,6 +690,22 @@ function Page() {
     };
   }, []);
 
+  // Refresh must land on the hero, not mid-page (#videos from a prior video pick).
+  useEffect(() => {
+    const nav = performance.getEntriesByType("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+    if (nav?.type !== "reload") return;
+    if (window.location.hash) {
+      const url = new URL(window.location.href);
+      window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`);
+    }
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div dir={dir} className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
