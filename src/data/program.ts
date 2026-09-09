@@ -104,7 +104,7 @@ export type Engagement = {
 
 const source = bi(
   "Source : plateforme electorale actualisee 2026.",
-  "المصدر: الأرضية الانتخابية 2026.",
+  "المصدر: المنصة الانتخابية المحينة 2026.",
 );
 
 export const engagements: Engagement[] = [

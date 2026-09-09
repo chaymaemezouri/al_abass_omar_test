@@ -458,15 +458,10 @@
   outline: 0;
   width: 100%;
   min-width: 0;
-  font-size: 16px; /* >=16px prevents iOS focus zoom */
+  font-size: 13px;
   padding: 11px 0;
   color: var(--vd-ink);
   font-family: inherit;
-}
-@media (min-width: 768px) {
-  .vd-search input {
-    font-size: 13px;
-  }
 }
 .vd-search input::placeholder { color: var(--vd-ink-3); }
 .vd-search .vd-icon { border: 0; width: 28px; height: 28px; background: transparent; color: var(--vd-ink-3); }
@@ -819,13 +814,9 @@
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 8px;
-  width: 100%;
-  /* Lock visual order: meta LEFT, red button RIGHT (ignore page RTL). */
-  direction: ltr;
 }
 
-.vd-mobile-rail-head p,
-.vd-mobile-rail-meta {
+.vd-mobile-rail-head p {
   margin: 0;
   font-size: 11px;
   font-weight: 800;
@@ -850,8 +841,6 @@
   font-size: 11px;
   font-weight: 800;
   font-family: inherit;
-  flex-shrink: 0;
-  direction: ltr;
 }
 
 .vd-mobile-carousel {
