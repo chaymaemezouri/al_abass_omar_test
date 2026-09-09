@@ -288,19 +288,19 @@ export function ChatWidget() {
     <>
       <div
         className={cn(
-          "fixed bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 flex max-w-[calc(100vw-2rem)] flex-col items-center gap-2",
-          dir === "rtl" ? "left-4 sm:left-5" : "right-4 sm:right-5",
+          "fixed bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 flex max-w-[calc(100vw-2rem)] flex-col items-center gap-1 sm:gap-2",
+          dir === "rtl" ? "left-3 sm:left-5" : "right-3 sm:right-5",
           open && "hidden",
         )}
       >
-        <div className="flex flex-col items-center gap-2 px-1">
+        <div className="flex flex-col items-center gap-0.5 px-1 sm:gap-2">
           <img
             src={fabBallotLogo}
             alt="Parti des Néo-Démocrates — رمز البصمة"
-            className="h-auto w-[min(42vw,150px)] object-contain drop-shadow-sm sm:w-36"
+            className="h-auto w-[min(20vw,78px)] object-contain drop-shadow-sm sm:w-36"
           />
           <div
-            className="text-center text-base font-extrabold leading-snug text-navy drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] sm:text-lg"
+            className="text-center text-[0.58rem] font-extrabold leading-[1.15] text-navy drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] sm:text-lg sm:leading-snug"
             dir="rtl"
           >
             <p>صوتوا على الشباب</p>
@@ -312,7 +312,7 @@ export function ChatWidget() {
           type="button"
           onClick={openChat}
           aria-label={t(ui.openChat)}
-          className="inline-flex items-center justify-center gap-3 rounded-sm bg-morocco px-4 py-3 text-sm font-extrabold text-white shadow-elegant transition-colors hover:bg-morocco-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+          className="inline-flex items-center justify-center gap-2 rounded-sm bg-morocco p-2.5 text-sm font-extrabold text-white shadow-elegant transition-colors hover:bg-morocco-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy sm:gap-3 sm:px-4 sm:py-3"
         >
           <MessageCircle className="h-5 w-5" />
           <span className="hidden sm:inline">{t(ui.nav.chat)}</span>

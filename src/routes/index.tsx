@@ -34,6 +34,7 @@ import assistantPortrait from "@/assets/Avatar.png";
 import candidatePortrait from "@/assets/image-original-cutout.png";
 import programmePdf from "@/assets/programme-electoral-2026.pdf";
 import companyLogo from "@/assets/expertise-consulting.png";
+import companyLogoMark from "@/assets/expertise-consulting-mark.png";
 import { ChatWidget, openChat, openChatWithQuestion } from "@/components/ChatWidget";
 import { CandidateVideos } from "@/components/CandidateVideos";
 import { Logo, BasmaMark, basmaLogo } from "@/components/Logo";
@@ -82,30 +83,30 @@ const copy = {
   nav: [
     { label: bi("Accueil", "الرئيسية"), href: "#accueil" },
     { label: bi("Vidéos", "فيديوهات"), href: "#videos" },
-    { label: bi("Plateforme electorale", "الأرضية الانتخابية"), href: "#programme" },
+    { label: bi("Plateforme électorale", "الأرضية الانتخابية"), href: "#programme" },
     { label: bi("Engagements", "الالتزامات"), href: "#engagements" },
     { label: bi("À propos", "حول التطبيق"), href: "#apropos" },
   ],
-  official: bi("Site officiel de la plateforme electorale", "المنصة الرسمية للأرضية الانتخابية"),
+  official: bi("Site officiel de la plateforme électorale", "المنصة الرسمية للأرضية الانتخابية"),
   elections: bi("Élections législatives 2026", "الانتخابات التشريعية 2026"),
   heroLead: bi(
-    "Produire la richesse, repondre aux besoins essentiels et renforcer l unite nationale grace a des politiques publiques fondees sur l efficacite, la justice et la responsabilite.",
+    "Produire la richesse, répondre aux besoins essentiels et renforcer l'unité nationale grâce à des politiques publiques fondées sur l'efficacité, la justice et la responsabilité.",
     "إنتاج الثروة، الاستجابة للحاجيات الأساسية، وتعزيز الوحدة الوطنية عبر سياسات عمومية مبنية على الفعالية والعدالة والمسؤولية.",
   ),
-  consult: bi("Interroger la version numerique", "اسأل النسخة الرقمية"),
+  consult: bi("Interroger la version numérique", "اسأل النسخة الرقمية"),
   ask: bi("Poser la question", "طرح السؤال"),
-  download: bi("Télécharger la plateforme electorale PDF", "تحميل الأرضية الانتخابية PDF"),
-  proofTitle: bi("Objectifs chiffres de la plateforme electorale", "الأهداف الرقمية للأرضية الانتخابية"),
+  download: bi("Télécharger la plateforme électorale PDF", "تحميل الأرضية الانتخابية PDF"),
+  proofTitle: bi("Objectifs chiffrés de la plateforme électorale", "الأهداف الرقمية للأرضية الانتخابية"),
   proofLead: bi(
-    "Neuf objectifs nationaux, formules avec leurs echeances et leur source : plateforme electorale actualisee 2026.",
+    "Neuf objectifs nationaux, formulés avec leurs échéances et leur source : plateforme électorale actualisée 2026.",
     "تسعة أهداف وطنية مع آجالها ومصدرها: الأرضية الانتخابية 2026.",
   ),
   trustLine: bi(
-    "Des réponses fiables, basées uniquement sur la plateforme electorale validée.",
+    "Des réponses fiables, basées uniquement sur la plateforme électorale validée.",
     "إجابات موثوقة مبنية فقط على الأرضية الانتخابية المعتمدة.",
   ),
   heroLocalBadge: bi(
-    "Elections legislatives 2026 — Parti des Democrates Nouveaux",
+    "Élections législatives 2026 — Parti des Démocrates Nouveaux",
     "انتخابات 2026 — حزب الديمقراطيين الجدد",
   ),
   heroCandidateName: bi("Omar Al Abass", "عمر العباس"),
@@ -113,41 +114,41 @@ const copy = {
     "Pour un Maroc souverain, efficace et solidaire",
     "من أجل مغرب سيادي وفعال ومتضامن",
   ),
-  candidateCta: bi("Decouvrir la plateforme electorale", "اكتشاف الأرضية الانتخابية"),
-  mobileBadge: bi("Parti des Neo-Democrates", "حزب الديمقراطيين الجدد"),
-  mobileCta: bi("Telecharger la plateforme electorale PDF", "تحميل الأرضية الانتخابية PDF"),
-  mobileAskHint: bi("Ecrivez votre question...", "اكتب سؤالك..."),
+  candidateCta: bi("Découvrir la plateforme électorale", "اكتشاف الأرضية الانتخابية"),
+  mobileBadge: bi("Parti des Néo-Démocrates", "حزب الديمقراطيين الجدد"),
+  mobileCta: bi("Télécharger la plateforme électorale PDF", "تحميل الأرضية الانتخابية PDF"),
+  mobileAskHint: bi("Écrivez votre question...", "اكتب سؤالك..."),
   mobileAskBtn: bi("Posez votre question", "اطرح سؤالك"),
   mobileTrust: bi(
-    "Reponses basees sur la plateforme electorale",
+    "Réponses basées sur la plateforme électorale",
     "إجابات مبنية على الأرضية الانتخابية",
   ),
-  captionDigitalShort: bi("Je suis sa version numerique", "أنا نسخته الرقمية"),
+  captionDigitalShort: bi("Je suis sa version numérique", "أنا نسخته الرقمية"),
   captionCandidateShort: bi("Je suis Omar Al Abass", "أنا عمر العباس"),
   assistantNote: bi(
-    "La version numerique d'Omar Al Abass",
+    "La version numérique d'Omar Al Abass",
     "النسخة الرقمية لعمر العباس",
   ),
   assistantLead: bi(
-    "Reponses basees uniquement sur la plateforme electorale officielle du Parti des Democrates Nouveaux.",
+    "Réponses basées uniquement sur la plateforme électorale officielle du Parti des Démocrates Nouveaux.",
     "إجابات مبنية فقط على الأرضية الانتخابية الرسمية لحزب الديمقراطيين الجدد.",
   ),
   assistantSublead: bi(
-    "Posez vos questions en francais, en arabe ou en darija sur l emploi, la sante, l education, l eau, le numerique, la justice, la famille ou la souverainete nationale.",
+    "Posez vos questions en français, en arabe ou en darija sur l'emploi, la santé, l'éducation, l'eau, le numérique, la justice, la famille ou la souveraineté nationale.",
     "اطرح أسئلتك بالعربية أو الفرنسية أو الدارجة حول التشغيل والصحة والتعليم والماء والرقمنة والعدالة والأسرة والسيادة الوطنية.",
   ),
   assistantPlaceholder: bi(
-    "Posez votre question sur la plateforme electorale officielle 2026...",
+    "Posez votre question sur la plateforme électorale 2026…",
     "اطرح سؤالك حول الأرضية الانتخابية الرسمية 2026...",
   ),
-  sources: bi("Sources de la plateforme electorale", "مصادر الأرضية الانتخابية"),
-  timeline: bi("Priorites de la prochaine legislature", "أولويات الولاية التشريعية المقبلة"),
+  sources: bi("Sources de la plateforme électorale", "مصادر الأرضية الانتخابية"),
+  timeline: bi("Priorités de la prochaine législature", "أولويات الولاية التشريعية المقبلة"),
   candidateTitle: bi("Vision et valeurs", "الرؤية والقيم"),
   financingTitle: bi(
-    "Une politique fondee sur l efficacite et la responsabilite",
+    "Une politique fondée sur l'efficacité et la responsabilité",
     "سياسة قائمة على الفعالية والمسؤولية",
   ),
-  compareTitle: bi("Explorer la plateforme electorale par theme", "استكشاف الأرضية الانتخابية حسب الموضوع"),
+  compareTitle: bi("Explorer la plateforme électorale par thème", "استكشاف الأرضية الانتخابية حسب الموضوع"),
   currentProblem: bi("Constat", "المعطى"),
   proposal: bi("Proposition", "المقترح"),
   beneficiaries: bi("Bénéficiaires", "المستفيدون"),
@@ -156,12 +157,12 @@ const copy = {
   indicator: bi("Indicateur", "المؤشر"),
   objective: bi("Objectif", "الهدف"),
   axis: bi("Axe", "المحور"),
-  priority: bi("Priorite", "أولوية"),
-  theme: bi("Theme", "الموضوع"),
+  priority: bi("Priorité", "أولوية"),
+  theme: bi("Thème", "الموضوع"),
   mainProposal: bi("Proposition principale", "المقترح الرئيسي"),
-  deadline: bi("Echeance", "الأجل"),
-  sourceShort: bi("Plateforme electorale actualisee 2026", "الأرضية الانتخابية 2026"),
-  askPrecision: bi("Demander une precision a la version numerique", "اطلب توضيحا من النسخة الرقمية"),
+  deadline: bi("Échéance", "الأجل"),
+  sourceShort: bi("Plateforme électorale actualisée 2026", "الأرضية الانتخابية 2026"),
+  askPrecision: bi("Demander une précision à la version numérique", "اطلب توضيحا من النسخة الرقمية"),
 };
 
 const icons = {
@@ -741,9 +742,9 @@ function Page() {
           </nav>
           <div className="flex shrink-0 items-center gap-2">
             <img
-              src={companyLogo}
+              src={companyLogoMark}
               alt={t(ui.footerCompany)}
-              className="h-10 w-auto max-w-[5.5rem] object-contain sm:h-11 sm:max-w-[6.5rem]"
+              className="h-9 w-auto max-w-[5.5rem] object-contain sm:h-10 sm:max-w-[6.5rem]"
             />
             <button
               type="button"
@@ -751,14 +752,6 @@ function Page() {
               className="rounded-sm border border-border px-3 py-2 text-xs font-bold transition-colors hover:bg-secondary"
             >
               {lang === "fr" ? "العربية" : "FR"}
-            </button>
-            <button
-              type="button"
-              onClick={openChat}
-              aria-label={t(ui.openChat)}
-              className="grid h-10 w-10 place-items-center rounded-sm bg-morocco text-white lg:hidden"
-            >
-              <MessageSquareText className="h-5 w-5" />
             </button>
             <button
               type="button"
@@ -839,10 +832,10 @@ function Page() {
 
               <div className="hero-portrait relative mx-auto mt-3 w-full max-w-[420px]">
                 <div className="hero-mobile-captions mb-1.5 flex items-end justify-around gap-2 px-1" dir="ltr">
-                  <p className="hero-caption hero-caption--digital" dir="rtl">
+                  <p className="hero-caption hero-caption--digital" dir={lang === "fr" ? "ltr" : "rtl"}>
                     {t(copy.captionDigitalShort)}
                   </p>
-                  <p className="hero-caption hero-caption--candidate" dir="rtl">
+                  <p className="hero-caption hero-caption--candidate" dir={lang === "fr" ? "ltr" : "rtl"}>
                     {t(copy.captionCandidateShort)}
                   </p>
                 </div>
@@ -967,10 +960,10 @@ function Page() {
                       className="hero-desktop-captions mb-1 flex shrink-0 items-end justify-around gap-3 px-[8%] sm:mb-1.5"
                       dir="ltr"
                     >
-                      <p className="hero-caption hero-caption--digital" dir="rtl">
+                      <p className="hero-caption hero-caption--digital" dir={lang === "fr" ? "ltr" : "rtl"}>
                         {t(copy.captionDigitalShort)}
                       </p>
-                      <p className="hero-caption hero-caption--candidate" dir="rtl">
+                      <p className="hero-caption hero-caption--candidate" dir={lang === "fr" ? "ltr" : "rtl"}>
                         {t(copy.captionCandidateShort)}
                       </p>
                     </div>
@@ -1402,7 +1395,7 @@ function Page() {
               <img
                 src={companyLogo}
                 alt={`${t(ui.footerBuiltBy)} — ${t(ui.footerCompany)}`}
-                className="h-16 w-auto rounded-md bg-white object-contain p-2 sm:h-20"
+                className="h-24 w-auto object-contain sm:h-28"
               />
             </div>
           </div>

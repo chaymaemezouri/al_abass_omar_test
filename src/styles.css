@@ -225,7 +225,7 @@
   position: absolute;
   z-index: 2;
   top: 2.5%;
-  max-width: 12rem;
+  max-width: min(14.5rem, 46vw);
   margin: 0;
   padding: 0.5rem 0.95rem 0.55rem;
   font-family: var(--font-arabic-display);
@@ -235,7 +235,8 @@
   line-height: 1.25;
   color: var(--navy);
   text-align: center;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
   pointer-events: none;
   background: #fffdf8;
   border: 2.5px solid #1a4a7a;
@@ -360,9 +361,9 @@
     left: auto;
     right: auto;
     transform: none;
-    font-size: 0.95rem;
-    max-width: none;
-    white-space: nowrap;
+    font-size: 0.9rem;
+    max-width: min(11.5rem, 44vw);
+    white-space: normal;
     padding: 0.45rem 0.85rem 0.5rem;
     margin: 0;
   }
