@@ -1,0 +1,59 @@
+# Secrets
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Node / Next.js
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Media generated at runtime
+media/audio/*
+media/video/*
+!media/audio/.gitkeep
+!media/video/.gitkeep
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Docker volumes / logs
+*.log
+postgres_data/
+
+# SSL certs (never commit private keys)
+nginx/certs/*.pem
+nginx/certs/*.key
+!nginx/certs/.gitkeep
+
+# Whisper models cache
+.cache/
+backend/.cache/

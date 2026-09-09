@@ -1,0 +1,233 @@
+[
+  {
+    "id": 100004,
+    "chapitre_numero": 1,
+    "chapitre": "الرؤية والحكامة والاقتصاد",
+    "question": "Quel objectif numérique pour l'administration publique à l'horizon 2030 ?",
+    "reponse": "Placer le Maroc parmi les 50 meilleurs pays au monde selon l'indice de développement de l'e-gouvernement.",
+    "langue": "fr",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 4
+  },
+  {
+    "id": 200004,
+    "chapitre_numero": 1,
+    "chapitre": "الرؤية والحكامة والاقتصاد",
+    "question": "chnou l hadaf digital dyal l idara f 2030 ?",
+    "reponse": "Ykoun l Maghrib men a7san 50 blad f l 3alam 3la indice e-gouvernement.",
+    "langue": "ary",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 4
+  },
+  {
+    "id": 100007,
+    "chapitre_numero": 1,
+    "chapitre": "الرؤية والحكامة والاقتصاد",
+    "question": "Combien de jeunes le programme veut former chaque année aux compétences numériques ?",
+    "reponse": "100 000 jeunes par an.",
+    "langue": "fr",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 7
+  },
+  {
+    "id": 200007,
+    "chapitre_numero": 1,
+    "chapitre": "الرؤية والحكامة والاقتصاد",
+    "question": "ch7al men chab bghaw ykowwnou kol 3am f digital ?",
+    "reponse": "100 alf chab f l 3am.",
+    "langue": "ary",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 7
+  },
+  {
+    "id": 100008,
+    "chapitre_numero": 1,
+    "chapitre": "الرؤية والحكامة والاقتصاد",
+    "question": "Quelle est la place des PME dans le tissu entrepreneurial marocain selon le programme ?",
+    "reponse": "La plateforme électorale indique qu'elles représentent plus de 95 % du tissu entrepreneurial marocain.",
+    "langue": "fr",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 8
+  },
+  {
+    "id": 200008,
+    "chapitre_numero": 1,
+    "chapitre": "الرؤية والحكامة والاقتصاد",
+    "question": "chnou hiya makant l PME f l maghrib f l programme ?",
+    "reponse": "L'ardhiya katgol belli l PME kaymettlou akthar men 95% dyal nssij l mokawalati f l Maghrib.",
+    "langue": "ary",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 8
+  },
+  {
+    "id": 100009,
+    "chapitre_numero": 1,
+    "chapitre": "الرؤية والحكامة والاقتصاد",
+    "question": "Quelle part des marchés publics le programme veut-il réserver aux petites entreprises ?",
+    "reponse": "Une part de 20 % des marchés et commandes publics.",
+    "langue": "fr",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 9
+  },
+  {
+    "id": 200009,
+    "chapitre_numero": 1,
+    "chapitre": "الرؤية والحكامة والاقتصاد",
+    "question": "ch7al men 7issa dyal les marchés publics bgha y3tiw l sghira ?",
+    "reponse": "7issa dyal 20% men l aswaq w ttolbiyat l 3omma.",
+    "langue": "ary",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 9
+  },
+  {
+    "id": 100010,
+    "chapitre_numero": 1,
+    "chapitre": "الرؤية والحكامة والاقتصاد",
+    "question": "Quel problème financier des PME la plateforme cite-t-elle pour 2025 ?",
+    "reponse": "Des pertes d'environ 68 milliards de dirhams en 2025, liées notamment à la concentration des investissements au profit des grandes entreprises.",
+    "langue": "fr",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 10
+  },
+  {
+    "id": 200010,
+    "chapitre_numero": 1,
+    "chapitre": "الرؤية والحكامة والاقتصاد",
+    "question": "chnou l mochkil l mali dyal l PME f 2025 ?",
+    "reponse": "Khsayer qriba men 68 milliard dirham f 2025, 3la 9bel concentration dyal investissements l kbar.",
+    "langue": "ary",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 10
+  },
+  {
+    "id": 100011,
+    "chapitre_numero": 1,
+    "chapitre": "المقاولات الصغرى والاستثمار ومكافحة الفساد",
+    "question": "Que propose le programme concernant le seuil d'investissement du nouveau dispositif d'appui ?",
+    "reponse": "Réviser le seuil minimum d'investissement d'un million de dirhams pour ne pas exclure automatiquement les très petites entreprises.",
+    "langue": "fr",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 11
+  },
+  {
+    "id": 200011,
+    "chapitre_numero": 1,
+    "chapitre": "المقاولات الصغرى والاستثمار ومكافحة الفساد",
+    "question": "chnou bghaw ybedlou f seuil dyal investissement ?",
+    "reponse": "Ybdlou l 3ataba dyal million dirham bach l sghira bzzaf ma ttb3adch automatiquement.",
+    "langue": "ary",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 11
+  },
+  {
+    "id": 100012,
+    "chapitre_numero": 1,
+    "chapitre": "المقاولات الصغرى والاستثمار ومكافحة الفساد",
+    "question": "Quel nouveau cadre est proposé pour les très petites entreprises ?",
+    "reponse": "Une « loi des petites entreprises » avec des facilités fiscales et financières adaptées à leur capacité de croissance.",
+    "langue": "fr",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 12
+  },
+  {
+    "id": 200012,
+    "chapitre_numero": 1,
+    "chapitre": "المقاولات الصغرى والاستثمار ومكافحة الفساد",
+    "question": "chnou l qanoun jdid dyal l entreprises sghira bzzaf ?",
+    "reponse": "Qanoun l a3mal sghira m3a tashilat jiba2iya w tamwiliya.",
+    "langue": "ary",
+    "source_page": "4-7",
+    "source_type": "qa",
+    "paraphrase_of": 12
+  },
+  {
+    "id": 100102,
+    "chapitre_numero": 6,
+    "chapitre": "الشباب والتكوين",
+    "question": "Quel pourcentage de jeunes est classé NEET selon le programme ?",
+    "reponse": "Environ 25,6 %, soit près de 4,5 millions de jeunes qui ne sont ni scolarisés, ni employés, ni en formation.",
+    "langue": "fr",
+    "source_page": "28-32",
+    "source_type": "qa",
+    "paraphrase_of": 102
+  },
+  {
+    "id": 200102,
+    "chapitre_numero": 6,
+    "chapitre": "الشباب والتكوين",
+    "question": "ch7al nsbta dyal chabab NEET ?",
+    "reponse": "7awali 25.6%, ya3ni qrib 4.5 malyoun chab ma kayqrawch w ma kaykhdmoch w ma kaytab3ouch takwin.",
+    "langue": "ary",
+    "source_page": "28-32",
+    "source_type": "qa",
+    "paraphrase_of": 102
+  },
+  {
+    "id": 100103,
+    "chapitre_numero": 6,
+    "chapitre": "الشباب والتكوين",
+    "question": "Quel programme est proposé pour les jeunes NEET ? Comment aider les jeunes ?",
+    "reponse": "Une stratégie nationale d'insertion visant environ 4,5 millions de jeunes via des parcours accélérés de formation et d'insertion professionnelle.",
+    "langue": "fr",
+    "source_page": "28-32",
+    "source_type": "qa",
+    "paraphrase_of": 103
+  },
+  {
+    "id": 200103,
+    "chapitre_numero": 6,
+    "chapitre": "الشباب والتكوين",
+    "question": "kifach bghaw y3awnou chabab NEET ? chnou programme ?",
+    "reponse": "Istratijiya wataniya dyal idmaj katstahedf 7awali 4.5 malyoun chab b masarat sari3a dyal takwin w idmaj mihani.",
+    "langue": "ary",
+    "source_page": "28-32",
+    "source_type": "qa",
+    "paraphrase_of": 103
+  },
+  {
+    "id": 100015,
+    "chapitre_numero": 2,
+    "chapitre": "المقاولات الصغرى والاستثمار ومكافحة الفساد",
+    "question": "Quelle est l'évolution fiscale proposée pour les petites entreprises ?",
+    "reponse": "La plateforme propose de revenir sur la hausse prévue du taux d'imposition des petites entreprises de 10 % à 20 %.",
+    "langue": "fr",
+    "source_page": "5-7",
+    "source_type": "qa",
+    "paraphrase_of": 15
+  },
+  {
+    "id": 200015,
+    "chapitre_numero": 2,
+    "chapitre": "المقاولات الصغرى والاستثمار ومكافحة الفساد",
+    "question": "chnou l evolution fiscale / jiba2iya li bghaw ydiru l sghira ?",
+    "reponse": "Katqtar7 l ardhiya traja3 3la ziada dyal taux dyal dara2ib 3la l sghira men 10% l 20%.",
+    "langue": "ary",
+    "source_page": "5-7",
+    "source_type": "qa",
+    "paraphrase_of": 15
+  },
+  {
+    "id": 110012,
+    "chapitre_numero": 2,
+    "chapitre": "المقاولات الصغرى والاستثمار ومكافحة الفساد",
+    "question": "Quelles facilités fiscales pour les très petites entreprises ?",
+    "reponse": "Une « loi des petites entreprises » avec des facilités fiscales et financières adaptées à leur capacité de croissance.",
+    "langue": "fr",
+    "source_page": "5-7",
+    "source_type": "qa",
+    "paraphrase_of": 12
+  }
+]

@@ -19,6 +19,8 @@
 - [x] Endpoint health `GET /api/health`
 - [x] Workflow GitHub Actions TEST (`.github/workflows/deploy-test.yml`)
 - [x] Doc ops `deploy/CI_CD.md` + `deploy/ecosystem.config.cjs` + modèle Nginx
+- [x] Intégration **Avatar Virtuel** : page `/avatar` + CTA « اطرح سؤالك » → IA
+- [x] Dossier source `Avatar_Virtuel/` (backend FastAPI + KB) dans le monorepo
 
 ## À finaliser côté ops
 
@@ -26,6 +28,7 @@
 - [ ] Clé SSH ed25519 dédiée pour `deploy` + test de connexion
 - [ ] Premier run Actions vert + healthcheck HTTPS OK
 - [ ] Durcissement SSH (désactiver root/password une fois la clé validée)
+- [ ] Déployer le **backend** Avatar Virtuel sur le VPS + `VITE_AVATAR_API_URL` (CORS)
 
 ## Hors scope TEST (plus tard)
 

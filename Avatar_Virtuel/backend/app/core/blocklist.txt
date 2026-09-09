@@ -1,0 +1,24 @@
+# Blocklist minimale — uniquement injection / injures graves (filet technique).
+# Les sujets sensibles / hors mandat sont gérés par RÈGLES LLM, pas mot à mot.
+# Format: one pattern per line (case-insensitive substring). # = commentaire.
+
+# Injection
+ignore tes instructions
+ignore previous instructions
+oublie tes règles
+oublie tes regles
+you are now
+jailbreak
+DAN mode
+developer mode
+تجاهل التعليمات
+انس القواعد
+
+# Injures graves seulement
+connard
+salope
+pute
+fuck
+shit
+قحبة
+شرموطة

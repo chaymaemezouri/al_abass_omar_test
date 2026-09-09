@@ -40,9 +40,20 @@ type SpeechRecognitionLike = {
 type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
 
 export const OPEN_CHAT_EVENT = "open-campaign-chat";
-export const openChat = () => window.dispatchEvent(new Event(OPEN_CHAT_EVENT));
-export const openChatWithQuestion = (question: string) =>
-  window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT, { detail: question }));
+
+/** Ouvre la page Avatar Virtuel IA (intégration Avatar_Virtuel). */
+export const openChat = () => {
+  if (typeof window !== "undefined") {
+    window.location.assign("/avatar");
+  }
+};
+
+export const openChatWithQuestion = (question: string) => {
+  if (typeof window !== "undefined") {
+    const q = question.trim();
+    window.location.assign(q ? `/avatar?q=${encodeURIComponent(q)}` : "/avatar");
+  }
+};
 
 const bi = (fr: string, ar: string): Bi => ({ fr, ar });
 
@@ -303,7 +314,7 @@ export function ChatWidget() {
         </div>
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={openChat}
           aria-label={t(ui.openChat)}
           className="inline-flex items-center justify-center gap-3 rounded-sm bg-morocco px-4 py-3 text-sm font-extrabold text-white shadow-elegant transition-colors hover:bg-morocco-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
         >

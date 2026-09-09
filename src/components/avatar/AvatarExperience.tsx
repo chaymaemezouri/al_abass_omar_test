@@ -1,0 +1,677 @@
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import {
+  ArrowLeft,
+  Copy,
+  Mic,
+  RotateCcw,
+  Send,
+  ShieldCheck,
+  Square,
+  Volume2,
+  VolumeX,
+  Wand2,
+} from "lucide-react";
+
+import candidatePortrait from "@/assets/avatar-cutout.png";
+import { useLang, suggestions } from "@/lib/i18n";
+import {
+  askAvatarAudio,
+  askAvatarTextStream,
+  simplifyAvatarAnswer,
+  speakAvatar,
+  type AvatarChatResponse,
+} from "@/lib/avatar-api";
+import { AvatarStage } from "@/components/avatar/AvatarStage";
+import "@/components/avatar/avatar-experience.css";
+
+type Bi = { fr: string; ar: string };
+const bi = (fr: string, ar: string): Bi => ({ fr, ar });
+
+type Turn = {
+  role: "user" | "assistant";
+  text: string;
+  meta?: string;
+  streaming?: boolean;
+};
+
+type VoiceMode = "text" | "voice";
+const VOICE_MODE_KEY = "avx-voice-mode";
+
+type Props = {
+  initialQuestion?: string;
+};
+
+function loadVoiceMode(): VoiceMode {
+  if (typeof window === "undefined") return "voice";
+  const v = window.localStorage.getItem(VOICE_MODE_KEY);
+  return v === "text" ? "text" : "voice";
+}
+
+export function AvatarExperience({ initialQuestion = "" }: Props) {
+  const { lang, t, setLang, dir } = useLang();
+  const ar = lang === "ar" || lang === "darija";
+  const languageHint = lang === "fr" ? "fr" : lang === "darija" ? "ary" : null;
+  const [question, setQuestion] = useState("");
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [turns, setTurns] = useState<Turn[]>([]);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [speaking, setSpeaking] = useState(false);
+  const [followups, setFollowups] = useState<string[]>([]);
+  const [bootstrapped, setBootstrapped] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [voiceMode, setVoiceMode] = useState<VoiceMode>(loadVoiceMode);
+  const [simplifying, setSimplifying] = useState(false);
+  const historyRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const mediaRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const lastQuestionRef = useRef<string>("");
+  const lastLanguageRef = useRef<string>("fr");
+  const speakReqRef = useRef(0);
+
+  const copy = {
+    brand: "Al Abass Omar",
+    kicker: bi("Version numérique Al Abass Omar", "النسخة الرقمية Al Abass Omar"),
+    badge: bi("Version numérique officielle", "النسخة الرقمية الرسمية"),
+    title: bi("Parlez à l'avatar", "تحدث مع الأفاتار"),
+    emptyTitle: bi("Posez votre première question", "اطرح سؤالك الأول"),
+    empty: bi(
+      "Choisissez une suggestion ou écrivez librement. L'avatar répond à partir de la base officielle.",
+      "اختر اقتراحا أو اكتب بحرية. يجيب الأفاتار انطلاقا من القاعدة الرسمية.",
+    ),
+    related: bi("Pour aller plus loin", "لمعرفة المزيد"),
+    suggestions: bi("Suggestions", "اقتراحات"),
+    placeholder: bi("Écrivez votre question…", "اكتب سؤالك…"),
+    send: bi("Envoyer", "إرسال"),
+    back: bi("Retour", "رجوع"),
+    online: bi("En ligne", "متصل"),
+    listening: bi("En écoute…", "يستمع…"),
+    speak: bi("Micro", "ميكروفون"),
+    stop: bi("Stop", "إيقاف"),
+    foot: bi(
+      "Réponses limitées à la plateforme electorale officielle 2026.",
+      "الإجابات مقيدة بالأرضية الانتخابية الرسمية 2026.",
+    ),
+    offline: bi(
+      "Service Avatar indisponible. Vérifiez que le backend tourne.",
+      "خدمة الأفاتار غير متاحة. تأكد أن الـ backend يعمل.",
+    ),
+    statusSpeaking: bi("L'avatar répond…", "الأفاتار يجيب…"),
+    statusIdle: bi("Prêt à vous écouter", "جاهز للاستماع"),
+    newChat: bi("Nouvelle conversation", "محادثة جديدة"),
+    stopAudio: bi("Couper le son", "إيقاف الصوت"),
+    copyAnswer: bi("Copier la réponse", "نسخ الجواب"),
+    copied: bi("Copié", "تم النسخ"),
+    retry: bi("Réessayer", "إعادة المحاولة"),
+    hideSuggestions: bi("Masquer", "إخفاء"),
+    showSuggestions: bi("Suggestions", "اقتراحات"),
+    simplify: bi("Plus simple", "بصيغة أبسط"),
+    simplifying: bi("Reformulation…", "جاري التبسيط…"),
+    modeText: bi("Texte seul", "نص فقط"),
+    modeVoice: bi("Avec voix", "مع الصوت"),
+  };
+
+  function resizeInput() {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+  }
+
+  function stopVoice() {
+    speakReqRef.current += 1;
+    setAudioUrl(null);
+    setVideoUrl(null);
+    setSpeaking(false);
+  }
+
+  function toggleVoiceMode() {
+    setVoiceMode((prev) => {
+      const next: VoiceMode = prev === "voice" ? "text" : "voice";
+      window.localStorage.setItem(VOICE_MODE_KEY, next);
+      if (next === "text") stopVoice();
+      return next;
+    });
+  }
+
+  function resetConversation() {
+    stopVoice();
+    setSessionId(null);
+    setTurns([]);
+    setError(null);
+    setQuestion("");
+    setFollowups([]);
+    setShowSuggestions(true);
+    lastQuestionRef.current = "";
+    inputRef.current?.focus();
+  }
+
+  useEffect(() => {
+    historyRef.current?.scrollTo({
+      top: historyRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [turns, loading]);
+
+  useEffect(() => {
+    resizeInput();
+  }, [question]);
+
+  function assistantMeta(data: AvatarChatResponse): string | undefined {
+    if (data.used_fallback) {
+      return ar ? "رد احتياطي / خارج القاعدة" : "Réponse de repli / hors base";
+    }
+    if (data.sources?.length) {
+      return `${ar ? "المصادر" : "Sources"}: ${data.sources.join(", ")}`;
+    }
+    return undefined;
+  }
+
+  async function maybeSpeak(answer: string, language: string, blocked: boolean) {
+    if (voiceMode !== "voice" || !answer || blocked) return;
+    const reqId = ++speakReqRef.current;
+    const url = await speakAvatar(answer, language);
+    if (url && speakReqRef.current === reqId) {
+      setAudioUrl(url);
+      setSpeaking(true);
+    }
+  }
+
+  async function applyAssistant(data: AvatarChatResponse, replaceStreaming = false) {
+    setSessionId(data.session_id);
+    lastLanguageRef.current = data.language || "fr";
+    const meta = assistantMeta(data);
+    setTurns((prev) => {
+      if (replaceStreaming && prev.length > 0 && prev[prev.length - 1]?.role === "assistant") {
+        const next = [...prev];
+        next[next.length - 1] = {
+          role: "assistant",
+          text: data.answer,
+          ...(meta ? { meta } : {}),
+        };
+        return next;
+      }
+      return [
+        ...prev,
+        {
+          role: "assistant",
+          text: data.answer,
+          ...(meta ? { meta } : {}),
+        },
+      ];
+    });
+
+    setVideoUrl(data.video_url);
+    setAudioUrl(data.audio_url);
+    setSpeaking(Boolean(data.audio_url || data.video_url));
+    setFollowups(data.followups?.filter(Boolean).slice(0, 3) ?? []);
+    setShowSuggestions(true);
+
+    if (!data.audio_url) {
+      void maybeSpeak(data.answer, data.language, data.blocked);
+    } else if (voiceMode === "voice") {
+      setSpeaking(true);
+    }
+  }
+
+  async function submitQuestion(text: string) {
+    const cleaned = text.trim();
+    if (!cleaned || loading) return;
+
+    lastQuestionRef.current = cleaned;
+    setQuestion("");
+    setLoading(true);
+    setError(null);
+    setShowSuggestions(false);
+    stopVoice();
+    setTurns((prev) => [
+      ...prev,
+      { role: "user", text: cleaned },
+      { role: "assistant", text: "", streaming: true },
+    ]);
+    requestAnimationFrame(() => {
+      if (inputRef.current) {
+        inputRef.current.style.height = "auto";
+        inputRef.current.focus();
+      }
+    });
+
+    let streamed = "";
+    try {
+      const data = await askAvatarTextStream(cleaned, sessionId, languageHint, {
+        onToken: (chunk) => {
+          streamed += chunk;
+          const snapshot = streamed;
+          setTurns((prev) => {
+            const next = [...prev];
+            const last = next[next.length - 1];
+            if (last?.role === "assistant") {
+              next[next.length - 1] = { ...last, text: snapshot, streaming: true };
+            }
+            return next;
+          });
+        },
+      });
+      await applyAssistant(data, true);
+    } catch (err) {
+      setTurns((prev) => {
+        if (prev.length && prev[prev.length - 1]?.role === "assistant" && prev[prev.length - 1]?.streaming) {
+          return prev.slice(0, -1);
+        }
+        return prev;
+      });
+      setError(err instanceof Error ? err.message : t(copy.offline));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    await submitQuestion(question);
+  }
+
+  async function onAudio(blob: Blob, filename: string) {
+    setLoading(true);
+    setError(null);
+    setShowSuggestions(false);
+    stopVoice();
+    try {
+      const data = await askAvatarAudio(blob, filename, sessionId, languageHint);
+      lastQuestionRef.current = data.question;
+      setTurns((prev) => [...prev, { role: "user", text: data.question }]);
+      await applyAssistant(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t(copy.offline));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function startRecording() {
+    if (loading || recording) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : "audio/mp4";
+      const recorder = new MediaRecorder(stream, { mimeType: mime });
+      chunksRef.current = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        const blob = new Blob(chunksRef.current, { type: mime });
+        const ext = mime.includes("webm") ? "webm" : "m4a";
+        void onAudio(blob, `question.${ext}`);
+      };
+      mediaRef.current = recorder;
+      recorder.start();
+      setRecording(true);
+    } catch {
+      setError(t(copy.offline));
+    }
+  }
+
+  function stopRecording() {
+    mediaRef.current?.stop();
+    setRecording(false);
+  }
+
+  async function copyLastAnswer() {
+    const last = [...turns].reverse().find((t) => t.role === "assistant");
+    if (!last?.text) return;
+    try {
+      await navigator.clipboard.writeText(last.text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function simplifyLastAnswer() {
+    const last = [...turns].reverse().find((t) => t.role === "assistant" && t.text);
+    if (!last?.text || simplifying || loading) return;
+    setSimplifying(true);
+    setError(null);
+    stopVoice();
+    try {
+      const simpler = await simplifyAvatarAnswer(
+        last.text,
+        lastLanguageRef.current,
+        sessionId,
+      );
+      setTurns((prev) => {
+        const next = [...prev];
+        for (let i = next.length - 1; i >= 0; i -= 1) {
+          if (next[i]?.role === "assistant") {
+            next[i] = {
+              ...next[i],
+              text: simpler,
+              meta: ar ? "صيغة أبسط" : "Version plus simple",
+            };
+            break;
+          }
+        }
+        return next;
+      });
+      void maybeSpeak(simpler, lastLanguageRef.current, false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t(copy.offline));
+    } finally {
+      setSimplifying(false);
+    }
+  }
+
+  useEffect(() => {
+    if (bootstrapped || !initialQuestion.trim()) return;
+    setBootstrapped(true);
+    void submitQuestion(initialQuestion);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- bootstrap once
+  }, [initialQuestion, bootstrapped]);
+
+  useEffect(() => {
+    document.documentElement.classList.add("avx-lock");
+    document.body.classList.add("avx-lock");
+    return () => {
+      document.documentElement.classList.remove("avx-lock");
+      document.body.classList.remove("avx-lock");
+    };
+  }, []);
+
+  const starterSuggestions = suggestions.slice(0, 3);
+  const activeSuggestions = followups.length > 0 ? followups : starterSuggestions.map((s) => t(s));
+  const suggestionsTitle = followups.length > 0 ? t(copy.related) : t(copy.suggestions);
+  const lastAssistant = [...turns].reverse().find((t) => t.role === "assistant" && t.text);
+  const charsLeft = 2000 - question.length;
+
+  return (
+    <div className="avx" dir={dir}>
+      <header className="avx-bar">
+        <Link to="/" className="avx-back">
+          <ArrowLeft className={`avx-back-icon ${ar ? "is-rtl" : ""}`} />
+          <span>{t(copy.back)}</span>
+        </Link>
+        <div className="avx-bar-brand">
+          <span className="avx-dot" />
+          <span>{t(copy.badge)}</span>
+        </div>
+        <div className="avx-lang" role="group" aria-label="Language">
+          <button
+            type="button"
+            className={lang === "ar" ? "is-active" : undefined}
+            onClick={() => setLang("ar")}
+          >
+            عربي
+          </button>
+          <button
+            type="button"
+            className={lang === "darija" ? "is-active" : undefined}
+            onClick={() => setLang("darija")}
+          >
+            دارجة
+          </button>
+          <button
+            type="button"
+            className={lang === "fr" ? "is-active" : undefined}
+            onClick={() => setLang("fr")}
+          >
+            FR
+          </button>
+        </div>
+      </header>
+
+      <main className="avx-shell">
+        <section className="avx-stage" aria-label={copy.brand}>
+          <div className="avx-stage-glow" aria-hidden />
+          <AvatarStage
+            videoUrl={videoUrl}
+            audioUrl={audioUrl}
+            idle={!loading && !speaking}
+            speaking={speaking}
+            name={copy.brand}
+            portraitSrc={candidatePortrait}
+            statusLabel={
+              loading || speaking ? t(copy.statusSpeaking) : t(copy.statusIdle)
+            }
+            onAudioEnded={() => setSpeaking(false)}
+          />
+        </section>
+
+        <section className="avx-panel">
+          <div className="avx-panel-head">
+            <div className="avx-panel-head-copy">
+              <p className="avx-kicker">{t(copy.kicker)}</p>
+              <h1>{t(copy.title)}</h1>
+            </div>
+            <div className="avx-panel-actions">
+              <span className="avx-online">
+                <span className="avx-online-dot" />
+                {t(copy.online)}
+              </span>
+              <button
+                type="button"
+                className={`avx-tool-btn ${voiceMode === "voice" ? "is-accent" : ""}`}
+                onClick={toggleVoiceMode}
+                title={voiceMode === "voice" ? t(copy.modeVoice) : t(copy.modeText)}
+              >
+                {voiceMode === "voice" ? (
+                  <Volume2 className="h-3.5 w-3.5" />
+                ) : (
+                  <VolumeX className="h-3.5 w-3.5" />
+                )}
+                <span>{voiceMode === "voice" ? t(copy.modeVoice) : t(copy.modeText)}</span>
+              </button>
+              <button
+                type="button"
+                className="avx-tool-btn"
+                onClick={resetConversation}
+                disabled={loading || (turns.length === 0 && !sessionId)}
+                title={t(copy.newChat)}
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span>{t(copy.newChat)}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="avx-suggestions" aria-label={suggestionsTitle}>
+            <div className="avx-suggestions-row">
+              <p className="avx-suggestions-label">{suggestionsTitle}</p>
+              {turns.length > 0 && showSuggestions && (
+                <button
+                  type="button"
+                  className="avx-linkish"
+                  onClick={() => setShowSuggestions(false)}
+                >
+                  {t(copy.hideSuggestions)}
+                </button>
+              )}
+              {turns.length > 0 && !showSuggestions && (
+                <button
+                  type="button"
+                  className="avx-linkish"
+                  onClick={() => setShowSuggestions(true)}
+                >
+                  {t(copy.showSuggestions)}
+                </button>
+              )}
+            </div>
+            {showSuggestions && (
+              <div className="avx-chips">
+                {activeSuggestions.map((item, index) => (
+                  <button
+                    key={`${item}-${index}`}
+                    type="button"
+                    className="avx-chip"
+                    disabled={loading}
+                    onClick={() => void submitQuestion(item)}
+                  >
+                    <span className="avx-chip-index">{index + 1}</span>
+                    <span className="avx-chip-text">{item}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div ref={historyRef} className="avx-history" aria-live="polite">
+            {turns.length === 0 && !loading ? (
+              <div className="avx-empty">
+                <div className="avx-empty-badge">
+                  <ShieldCheck className="avx-empty-icon" />
+                </div>
+                <h2>{t(copy.emptyTitle)}</h2>
+                <p>{t(copy.empty)}</p>
+              </div>
+            ) : (
+              turns.map((turn, i) => (
+                <article
+                  key={`${turn.role}-${i}`}
+                  className={`avx-bubble ${turn.role}${turn.streaming ? " is-streaming" : ""}`}
+                >
+                  <span className="avx-bubble-role">
+                    {turn.role === "user"
+                      ? ar
+                        ? "أنت"
+                        : "Vous"
+                      : ar
+                        ? "الأفاتار"
+                        : "Avatar"}
+                  </span>
+                  <p>
+                    {turn.text}
+                    {turn.streaming && !turn.text ? "…" : null}
+                    {turn.streaming && turn.text ? (
+                      <span className="avx-cursor" aria-hidden>
+                        |
+                      </span>
+                    ) : null}
+                  </p>
+                  {turn.meta && <small>{turn.meta}</small>}
+                </article>
+              ))
+            )}
+            {loading && !turns.some((t) => t.streaming) && (
+              <div className="avx-typing" aria-hidden>
+                <span />
+                <span />
+                <span />
+              </div>
+            )}
+          </div>
+
+          <div className="avx-toolbar">
+            <button
+              type="button"
+              className="avx-tool-btn"
+              disabled={!lastAssistant || loading || simplifying}
+              onClick={() => void copyLastAnswer()}
+            >
+              <Copy className="h-3.5 w-3.5" />
+              {copied ? t(copy.copied) : t(copy.copyAnswer)}
+            </button>
+            <button
+              type="button"
+              className="avx-tool-btn is-accent"
+              disabled={!lastAssistant || loading || simplifying}
+              onClick={() => void simplifyLastAnswer()}
+            >
+              <Wand2 className="h-3.5 w-3.5" />
+              {simplifying ? t(copy.simplifying) : t(copy.simplify)}
+            </button>
+            <button
+              type="button"
+              className="avx-tool-btn"
+              disabled={!speaking && !audioUrl}
+              onClick={stopVoice}
+            >
+              <VolumeX className="h-3.5 w-3.5" />
+              {t(copy.stopAudio)}
+            </button>
+            {error && lastQuestionRef.current && (
+              <button
+                type="button"
+                className="avx-tool-btn is-accent"
+                disabled={loading}
+                onClick={() => void submitQuestion(lastQuestionRef.current)}
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                {t(copy.retry)}
+              </button>
+            )}
+          </div>
+
+          <form onSubmit={onSubmit} className="avx-composer">
+            <div className="avx-composer-shell">
+              <div className="avx-composer-box">
+                <button
+                  type="button"
+                  className={`avx-mic ${recording ? "is-rec" : ""}`}
+                  disabled={loading}
+                  onClick={() => (recording ? stopRecording() : void startRecording())}
+                  aria-label={recording ? t(copy.stop) : t(copy.speak)}
+                >
+                  {recording ? (
+                    <Square strokeWidth={1.75} className="h-[1rem] w-[1rem]" />
+                  ) : (
+                    <Mic strokeWidth={1.75} className="h-[1.15rem] w-[1.15rem]" />
+                  )}
+                </button>
+                <textarea
+                  ref={inputRef}
+                  id="avatar-q"
+                  rows={1}
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      void submitQuestion(question);
+                    }
+                  }}
+                  placeholder={recording ? t(copy.listening) : t(copy.placeholder)}
+                  disabled={loading || recording}
+                  maxLength={2000}
+                />
+                <button
+                  type="submit"
+                  className="avx-send"
+                  disabled={loading || !question.trim()}
+                  aria-label={t(copy.send)}
+                >
+                  <Send
+                    strokeWidth={1.75}
+                    className={`h-[1.1rem] w-[1.1rem] ${ar ? "is-rtl" : ""}`}
+                  />
+                </button>
+              </div>
+            </div>
+            <div className="avx-composer-meta">
+              <span className={charsLeft < 80 ? "is-warn" : undefined}>
+                {question.length}/2000
+              </span>
+            </div>
+            {error && (
+              <p className="avx-error" role="alert">
+                {error}
+              </p>
+            )}
+            <p className="avx-foot">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              {t(copy.foot)}
+            </p>
+          </form>
+        </section>
+      </main>
+    </div>
+  );
+}
