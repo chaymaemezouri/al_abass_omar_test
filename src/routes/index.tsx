@@ -35,6 +35,15 @@ import candidatePortrait from "@/assets/image-original-cutout.png";
 import programmePdf from "@/assets/programme-electoral-2026.pdf";
 import companyLogo from "@/assets/expertise-consulting.png";
 import companyLogoMark from "@/assets/expertise-consulting-mark.png";
+import carte1 from "@/assets/cartes/carte1 (1).png";
+import carte2 from "@/assets/cartes/carte1 (2).png";
+import carte3 from "@/assets/cartes/carte1 (3).png";
+import carte4 from "@/assets/cartes/carte1 (4).png";
+import carte5 from "@/assets/cartes/carte1 (5).png";
+import carte6 from "@/assets/cartes/carte1 (6).png";
+import carte7 from "@/assets/cartes/carte1 (7).png";
+import carte8 from "@/assets/cartes/carte1 (8).png";
+import carte9 from "@/assets/cartes/carte1 (9).png";
 import { ChatWidget, openChat, openChatWithQuestion } from "@/components/ChatWidget";
 import { CandidateVideos } from "@/components/CandidateVideos";
 import { Logo, BasmaMark, basmaLogo } from "@/components/Logo";
@@ -50,6 +59,18 @@ import {
 } from "@/data/program";
 import { LangProvider, useLang, ui } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+
+const engagementCardBackgrounds = [
+  carte1,
+  carte2,
+  carte3,
+  carte4,
+  carte5,
+  carte6,
+  carte7,
+  carte8,
+  carte9,
+] as const;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -448,7 +469,14 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
   const { t, lang } = useLang();
   const ar = lang !== "fr";
   const axis = axisById(engagement.axis);
-  const cardSrc = `/src/assets/cartes/carte1 (${engagement.cardBg}).png`;
+  const [flipped, setFlipped] = useState(false);
+  const cardSrc =
+    engagementCardBackgrounds[Math.max(0, Math.min(8, engagement.cardBg - 1))] ??
+    engagementCardBackgrounds[0];
+
+  function toggleFlip() {
+    setFlipped((value) => !value);
+  }
 
   return (
     <Reveal>
@@ -456,8 +484,29 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
         id={`engagement-${engagement.n}`}
         className="group h-[250px] scroll-mt-28 [perspective:1000px]"
       >
-        <div className="relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-
+        <div
+          role="button"
+          tabIndex={0}
+          aria-expanded={flipped}
+          aria-label={
+            flipped
+              ? ar
+                ? "إغلاق التفاصيل"
+                : "Fermer les détails"
+              : ar
+                ? "عرض التفاصيل"
+                : "Voir les détails"
+          }
+          onClick={toggleFlip}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              toggleFlip();
+            }
+          }}
+          className="relative h-full w-full cursor-pointer text-start transition-transform duration-700 [transform-style:preserve-3d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy"
+          style={{ transform: flipped ? "rotateY(180deg)" : undefined }}
+        >
           {/* ══════ FRONT ══════ */}
           <div
             className="absolute inset-0 overflow-hidden rounded-2xl shadow-card [backface-visibility:hidden] bg-cover bg-center"
@@ -514,11 +563,9 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
           </div>
 
           {/* ══════ BACK ══════ */}
-          <div
-            className="absolute inset-0 overflow-hidden rounded-2xl border border-border bg-white shadow-card [backface-visibility:hidden] [transform:rotateY(180deg)]"
-          >
+          <div className="absolute inset-0 overflow-hidden rounded-2xl border border-border bg-white shadow-card [backface-visibility:hidden] [transform:rotateY(180deg)]">
             {/* Watermark number */}
-            <span className="absolute -bottom-4 -right-2 text-[80px] font-black leading-none text-navy/[0.04] select-none pointer-events-none">
+            <span className="pointer-events-none absolute -bottom-4 -right-2 select-none text-[80px] font-black leading-none text-navy/[0.04]">
               {engagement.bigNumber}
             </span>
 
@@ -539,7 +586,9 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
 
               {/* Problem */}
               <div className="mt-2.5 flex gap-2">
-                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md bg-red-50 text-[10px]">⚠️</span>
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md bg-red-50 text-[10px]">
+                  ⚠️
+                </span>
                 <div className="min-w-0">
                   <p className="text-[9px] font-bold uppercase tracking-wider text-morocco/70">
                     {t(bi("Constat", "التشخيص"))}
@@ -552,7 +601,9 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
 
               {/* Proposal */}
               <div className="mt-2 flex gap-2">
-                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md bg-emerald-50 text-[10px]">💡</span>
+                <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md bg-emerald-50 text-[10px]">
+                  💡
+                </span>
                 <div className="min-w-0">
                   <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-700/70">
                     {t(copy.proposal)}
@@ -585,15 +636,16 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
               <div className="mt-2 flex items-center justify-between gap-3">
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); openChatWithQuestion(t(engagement.title)); }}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-navy/15 px-3 py-1.5 text-[10px] font-bold text-navy hover:bg-navy hover:text-white transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openChatWithQuestion(t(engagement.title));
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-navy/15 px-3 py-1.5 text-[10px] font-bold text-navy transition-colors hover:bg-navy hover:text-white"
                 >
                   <MessageSquareText size={11} />
                   {t(copy.askPrecision)}
                 </button>
-                <span className="text-[9px] font-medium text-navy/20">
-                  {ar ? "↩" : "↩"}
-                </span>
+                <span className="text-[9px] font-medium text-navy/20">↩</span>
               </div>
             </div>
           </div>
