@@ -623,3 +623,12 @@
     padding-bottom: calc(13rem + env(safe-area-inset-bottom));
   }
 }
+
+/* iOS/Android: inputs < 16px trigger automatic page zoom on focus */
+@media (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}

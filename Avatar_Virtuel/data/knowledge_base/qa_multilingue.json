@@ -1,0 +1,158 @@
+{
+  "items": [
+    {
+      "chapitre": "Vision et gouvernance",
+      "question": "Quelle est votre vision pour le Maroc ?",
+      "reponse": "Un Maroc fort, juste et productif, fondé sur une gouvernance transparente et des institutions au service du citoyen.",
+      "langue": "fr",
+      "source_page": "vision:fr:1"
+    },
+    {
+      "chapitre": "Vision et gouvernance",
+      "question": "Comment luttez-vous contre la corruption ?",
+      "reponse": "Par la transparence, la digitalisation des procédures, la protection des lanceurs d alerte et le renforcement des contrôles.",
+      "langue": "fr",
+      "source_page": "vision:fr:2"
+    },
+    {
+      "chapitre": "Économie",
+      "question": "Quelle est votre politique économique ?",
+      "reponse": "Une croissance durable créatrice d emplois décents, soutenant l industrie et le pouvoir d achat des familles.",
+      "langue": "fr",
+      "source_page": "eco:fr:1"
+    },
+    {
+      "chapitre": "Économie",
+      "question": "Comment réduire le chômage ?",
+      "reponse": "Par une formation liée aux besoins, le soutien aux entreprises créatrices d emplois et l attraction d investissements.",
+      "langue": "fr",
+      "source_page": "eco:fr:2"
+    },
+    {
+      "chapitre": "Eau et agriculture",
+      "question": "Comment faites-vous face à la crise de l eau ?",
+      "reponse": "Gestion intégrée : économie d eau, dessalement durable, réutilisation des eaux usées et gouvernance transparente des bassins.",
+      "langue": "fr",
+      "source_page": "eau:fr:1"
+    },
+    {
+      "chapitre": "Santé",
+      "question": "Quelles sont vos priorités en santé ?",
+      "reponse": "Proximité des soins, ressources humaines suffisantes, médicaments accessibles et prévention communautaire.",
+      "langue": "fr",
+      "source_page": "sante:fr:1"
+    },
+    {
+      "chapitre": "Éducation",
+      "question": "Quelle est votre vision de l école ?",
+      "reponse": "Une école publique de qualité, des enseignants formés et une réelle égalité des chances entre les régions.",
+      "langue": "fr",
+      "source_page": "edu:fr:1"
+    },
+    {
+      "chapitre": "IA et startups",
+      "question": "Quelle est votre politique pour l intelligence artificielle ?",
+      "reponse": "Un développement responsable : innovation, éthique, protection des droits et usages publics utiles.",
+      "langue": "fr",
+      "source_page": "ia:fr:1"
+    },
+    {
+      "chapitre": "الرؤية والحكامة",
+      "question": "واش هي الرؤية ديالكم للمغرب؟",
+      "reponse": "كنخدمو على مغرب قوي وعادل ومنتج، بحكامة شفافة ومؤسسات ك تخدم المواطن وتضمن تكافؤ الفرص.",
+      "langue": "ary",
+      "source_page": "vision:ary:1"
+    },
+    {
+      "chapitre": "الاقتصاد والتنمية",
+      "question": "كيفاش غادي تنقصو البطالة؟",
+      "reponse": "بتكوين مهني مربوط بالطلب، دعم المقاولات اللي ك تخلق الشغل، وتشجيع الاستثمار فالقطاعات الواعدة.",
+      "langue": "ary",
+      "source_page": "eco:ary:1"
+    },
+    {
+      "chapitre": "الماء والفلاحة",
+      "question": "كيفاش غادي تواجهو أزمة الماء؟",
+      "reponse": "بتدبير مندمج: اقتصاد الماء، تحلية مستدامة، إعادة استعمال المياه، وحكامة شفافة لأحواض المياه.",
+      "langue": "ary",
+      "source_page": "eau:ary:1"
+    },
+    {
+      "chapitre": "الصحة والتقاعد",
+      "question": "شنو أولويات الصحة عندكم؟",
+      "reponse": "قرب الخدمات، موارد بشرية كافية، دواء متاح، ووقاية مجتمعية للمواطنين.",
+      "langue": "ary",
+      "source_page": "sante:ary:1"
+    },
+    {
+      "chapitre": "التعليم والحماية الاجتماعية والشباب والنساء",
+      "question": "كيفاش غادي تحسنو التعليم؟",
+      "reponse": "مدرسة عمومية بجودة، أساتذة مكونين، وتكافؤ فرص حقيقي بين الجهات.",
+      "langue": "ary",
+      "source_page": "edu:ary:1"
+    },
+    {
+      "chapitre": "الذكاء الاصطناعي والشركات الناشئة",
+      "question": "واش سياستكم فالذكاء الاصطناعي؟",
+      "reponse": "تطوير مسؤول: ابتكار، أخلاقيات، حماية الحقوق، واستعمال عمومي نافع للمواطن.",
+      "langue": "ary",
+      "source_page": "ia:ary:1"
+    },
+    {
+      "chapitre": "المقاولات الصغرى والمتوسطة",
+      "question": "كيفاش ك تدعمو المقاولات الصغرى؟",
+      "reponse": "بتمويل ميسر، ضمانات، تبسيط الضرائب، وتكوين فالتسيير الرقمي.",
+      "langue": "ary",
+      "source_page": "pme:ary:1"
+    },
+    {
+      "chapitre": "PME",
+      "question": "Comment soutenez-vous les PME ?",
+      "reponse": "Financement accessible, garanties publiques, simplification fiscale et formation au digital.",
+      "langue": "fr",
+      "source_page": "pme:fr:1"
+    },
+    {
+      "chapitre": "Energie",
+      "question": "Quel est votre position sur l'hydrogène vert ?",
+      "reponse": "Investir dans les renouvelables, infrastructures d'export et partenariats industriels locaux.",
+      "langue": "fr",
+      "source_page": "h2:fr:1"
+    },
+    {
+      "chapitre": "Cybersecurite",
+      "question": "Comment protégez-vous les citoyens en cybersécurité ?",
+      "reponse": "Sensibilisation large, protection des infrastructures critiques et réponse rapide aux incidents.",
+      "langue": "fr",
+      "source_page": "cyber:fr:1"
+    },
+    {
+      "chapitre": "Justice",
+      "question": "Quelle réforme de la justice proposez-vous ?",
+      "reponse": "Proximité, rapidité, digitalisation des procédures et indépendance effective pour restaurer la confiance.",
+      "langue": "fr",
+      "source_page": "justice:fr:1"
+    },
+    {
+      "chapitre": "Education",
+      "question": "Comment soutenez-vous les jeunes ?",
+      "reponse": "Formation, entreprenariat, culture et sport, et participation aux décisions publiques.",
+      "langue": "fr",
+      "source_page": "jeunes:fr:1"
+    },
+    {
+      "chapitre": "Gaz",
+      "question": "Comment valorisez-vous le gaz atlantique ?",
+      "reponse": "Valorisation souveraine des ressources, transparence des contrats et priorité à la demande nationale.",
+      "langue": "fr",
+      "source_page": "gaz:fr:1"
+    },
+    {
+      "chapitre": "Afrique numerique",
+      "question": "Quelle est votre vision du numérique en Afrique ?",
+      "reponse": "Partenariats gagnant-gagnant, hébergement local des données sensibles et industrie numérique nationale.",
+      "langue": "fr",
+      "source_page": "afrique:fr:1"
+    }
+  ]
+}

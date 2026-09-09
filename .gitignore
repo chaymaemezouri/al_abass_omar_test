@@ -1,3 +1,19 @@
+# Env (secrets stay on the VPS only)
+.env
+.env.*
+!.env.example
+
+# Avatar Virtuel nested secrets / runtime (keep source, never commit secrets)
+Avatar_Virtuel/.env
+Avatar_Virtuel/.env.*
+!Avatar_Virtuel/.env.example
+!Avatar_Virtuel/.env.production.example
+Avatar_Virtuel/.git/
+Avatar_Virtuel/nginx/certs/*.pem
+Avatar_Virtuel/backend/.pytest_cache/
+Avatar_Virtuel/**/__pycache__/
+Avatar_Virtuel/**/node_modules/
+
 # Logs
 logs
 *.log
@@ -30,3 +46,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Windows reserved junk
+NUL
+Avatar_Virtuel/NUL
