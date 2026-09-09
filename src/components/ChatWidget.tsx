@@ -20,7 +20,8 @@ import {
 } from "lucide-react";
 
 import assistantAvatar from "@/assets/assistant-avatar.png";
-import { Logo, BasmaMark, basmaLogo } from "@/components/Logo";
+import fabBallotLogo from "@/assets/image.png";
+import { Logo, BasmaMark } from "@/components/Logo";
 import { identity } from "@/data/program";
 import { suggestions, ui, useLang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -145,13 +146,13 @@ const sourceByContent = (content: string): Bi => {
   if (lower.includes("pme") || lower.includes("entrepreneur") || lower.includes("marche")) {
     return bi(
       "Plateforme electorale actualisee 2026, objectif PME et marches publics",
-      "الأرضية الانتخابية 2026، هدف المقاولات والصفقات العمومية",
+      "المنصة الانتخابية المحينة 2026، هدف المقاولات والصفقات العمومية",
     );
   }
   if (lower.includes("eau") || lower.includes("hydrique") || lower.includes("dessalement")) {
     return bi(
       "Plateforme electorale actualisee 2026, securite hydrique et reutilisation des eaux",
-      "الأرضية الانتخابية 2026، الأمن المائي وإعادة استعمال المياه",
+      "المنصة الانتخابية المحينة 2026، الأمن المائي وإعادة استعمال المياه",
     );
   }
   if (
@@ -162,16 +163,16 @@ const sourceByContent = (content: string): Bi => {
   ) {
     return bi(
       "Plateforme electorale actualisee 2026, axe transformation numerique",
-      "الأرضية الانتخابية 2026، محور التحول الرقمي",
+      "المنصة الانتخابية المحينة 2026، محور التحول الرقمي",
     );
   }
   if (lower.includes("culture") || lower.includes("identite") || lower.includes("famille")) {
     return bi(
       "Plateforme electorale actualisee 2026, axe identite et unite nationale",
-      "الأرضية الانتخابية 2026، محور الهوية والوحدة الوطنية",
+      "المنصة الانتخابية المحينة 2026، محور الهوية والوحدة الوطنية",
     );
   }
-  return bi("Plateforme electorale actualisee 2026", "الأرضية الانتخابية 2026");
+  return bi("Plateforme electorale actualisee 2026", "المنصة الانتخابية المحينة 2026");
 };
 
 export function ChatWidget() {
@@ -294,14 +295,9 @@ export function ChatWidget() {
       >
         <div className="flex flex-col items-center gap-2 px-1">
           <img
-            src={basmaLogo}
-            alt=""
-            aria-hidden
-            className="h-14 w-14 object-contain drop-shadow-sm sm:hidden"
-          />
-          <Logo
-            decorative
-            className="hidden h-20 w-20 rounded-sm shadow-card sm:block sm:h-24 sm:w-24"
+            src={fabBallotLogo}
+            alt="Parti des Néo-Démocrates — رمز البصمة"
+            className="h-auto w-[min(42vw,150px)] object-contain drop-shadow-sm sm:w-36"
           />
           <div
             className="text-center text-base font-extrabold leading-snug text-navy drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] sm:text-lg"
