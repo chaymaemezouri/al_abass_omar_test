@@ -146,13 +146,13 @@ const sourceByContent = (content: string): Bi => {
   if (lower.includes("pme") || lower.includes("entrepreneur") || lower.includes("marche")) {
     return bi(
       "Plateforme electorale actualisee 2026, objectif PME et marches publics",
-      "المنصة الانتخابية المحينة 2026، هدف المقاولات والصفقات العمومية",
+      "الأرضية الانتخابية 2026، هدف المقاولات والصفقات العمومية",
     );
   }
   if (lower.includes("eau") || lower.includes("hydrique") || lower.includes("dessalement")) {
     return bi(
       "Plateforme electorale actualisee 2026, securite hydrique et reutilisation des eaux",
-      "المنصة الانتخابية المحينة 2026، الأمن المائي وإعادة استعمال المياه",
+      "الأرضية الانتخابية 2026، الأمن المائي وإعادة استعمال المياه",
     );
   }
   if (
@@ -163,16 +163,16 @@ const sourceByContent = (content: string): Bi => {
   ) {
     return bi(
       "Plateforme electorale actualisee 2026, axe transformation numerique",
-      "المنصة الانتخابية المحينة 2026، محور التحول الرقمي",
+      "الأرضية الانتخابية 2026، محور التحول الرقمي",
     );
   }
   if (lower.includes("culture") || lower.includes("identite") || lower.includes("famille")) {
     return bi(
       "Plateforme electorale actualisee 2026, axe identite et unite nationale",
-      "المنصة الانتخابية المحينة 2026، محور الهوية والوحدة الوطنية",
+      "الأرضية الانتخابية 2026، محور الهوية والوحدة الوطنية",
     );
   }
-  return bi("Plateforme electorale actualisee 2026", "المنصة الانتخابية المحينة 2026");
+  return bi("Plateforme electorale actualisee 2026", "الأرضية الانتخابية 2026");
 };
 
 export function ChatWidget() {
