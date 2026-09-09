@@ -20,7 +20,8 @@ import {
 } from "lucide-react";
 
 import assistantAvatar from "@/assets/assistant-avatar.png";
-import { Logo, BasmaMark, basmaLogo } from "@/components/Logo";
+import fabBallotLogo from "@/assets/image.png";
+import { Logo, BasmaMark } from "@/components/Logo";
 import { identity } from "@/data/program";
 import { suggestions, ui, useLang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -279,14 +280,9 @@ export function ChatWidget() {
       >
         <div className="flex flex-col items-center gap-2 px-1">
           <img
-            src={basmaLogo}
-            alt=""
-            aria-hidden
-            className="h-14 w-14 object-contain drop-shadow-sm sm:hidden"
-          />
-          <Logo
-            decorative
-            className="hidden h-20 w-20 rounded-sm shadow-card sm:block sm:h-24 sm:w-24"
+            src={fabBallotLogo}
+            alt="Parti des Néo-Démocrates — رمز البصمة"
+            className="h-auto w-[min(42vw,150px)] object-contain drop-shadow-sm sm:w-36"
           />
           <div
             className="text-center text-base font-extrabold leading-snug text-navy drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] sm:text-lg"
