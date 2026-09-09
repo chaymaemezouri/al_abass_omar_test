@@ -1,33 +1,33 @@
-import { axes, engagements, financing, type Bi } from "./program";
-import capsule1 from "@/assets/capsules/1.mp4";
-import capsule2 from "@/assets/capsules/2.mp4";
-import capsule3 from "@/assets/capsules/3.mp4";
-import capsule4 from "@/assets/capsules/4.mp4";
-import capsule5 from "@/assets/capsules/5.mp4";
-import capsule6 from "@/assets/capsules/6.mp4";
-import capsule7 from "@/assets/capsules/7.mp4";
-import capsule8 from "@/assets/capsules/8.mp4";
-import capsule9 from "@/assets/capsules/9.mp4";
-import capsule10 from "@/assets/capsules/10.mp4";
-import capsule11 from "@/assets/capsules/11.mp4";
-import capsule12 from "@/assets/capsules/12.mp4";
-import capsule13 from "@/assets/capsules/13.mp4";
-import capsule14 from "@/assets/capsules/14.mp4";
-import capsule15 from "@/assets/capsules/15.mp4";
-import capsule16 from "@/assets/capsules/16.mp4";
-import capsule17 from "@/assets/capsules/17.mp4";
-import capsule18 from "@/assets/capsules/18.mp4";
-import capsule19 from "@/assets/capsules/19.mp4";
-import capsule20 from "@/assets/capsules/20.mp4";
-import capsule21 from "@/assets/capsules/21.mp4";
-import capsule22 from "@/assets/capsules/22.mp4";
-import capsule23 from "@/assets/capsules/23.mp4";
-import capsule24 from "@/assets/capsules/24.mp4";
-import capsule25 from "@/assets/capsules/25.mp4";
-import capsule26 from "@/assets/capsules/26.mp4";
-import capsule27 from "@/assets/capsules/27.mp4";
-import capsule28 from "@/assets/capsules/28.mp4";
-import capsule29 from "@/assets/capsules/29.mp4";
+import { axes, engagements, type Bi } from "./program";
+import capsule1 from "@/assets/capsulesv2/1.mp4";
+import capsule2 from "@/assets/capsulesv2/2.mp4";
+import capsule3 from "@/assets/capsulesv2/3.mp4";
+import capsule4 from "@/assets/capsulesv2/4.mp4";
+import capsule5 from "@/assets/capsulesv2/5.mp4";
+import capsule6 from "@/assets/capsulesv2/6.mp4";
+import capsule7 from "@/assets/capsulesv2/7.mp4";
+import capsule8 from "@/assets/capsulesv2/8.mp4";
+import capsule9 from "@/assets/capsulesv2/9.mp4";
+import capsule10 from "@/assets/capsulesv2/10.mp4";
+import capsule11 from "@/assets/capsulesv2/11.mp4";
+import capsule12 from "@/assets/capsulesv2/12.mp4";
+import capsule13 from "@/assets/capsulesv2/13.mp4";
+import capsule14 from "@/assets/capsulesv2/14.mp4";
+import capsule15 from "@/assets/capsulesv2/15.mp4";
+import capsule16 from "@/assets/capsulesv2/16.mp4";
+import capsule17 from "@/assets/capsulesv2/17.mp4";
+import capsule18 from "@/assets/capsulesv2/18.mp4";
+import capsule19 from "@/assets/capsulesv2/19.mp4";
+import capsule20 from "@/assets/capsulesv2/20.mp4";
+import capsule21 from "@/assets/capsulesv2/21.mp4";
+import capsule22 from "@/assets/capsulesv2/22.mp4";
+import capsule23 from "@/assets/capsulesv2/23.mp4";
+import capsule24 from "@/assets/capsulesv2/24.mp4";
+import capsule25 from "@/assets/capsulesv2/25 v2.mp4";
+import capsule26 from "@/assets/capsulesv2/26.mp4";
+import capsule27 from "@/assets/capsulesv2/27.mp4";
+import capsule28 from "@/assets/capsulesv2/28.mp4";
+import capsule29 from "@/assets/capsulesv2/29.mp4";
 
 export const videoThemes = [
   { id: "all", fr: "Tout", ar: "الكل" },
@@ -69,7 +69,7 @@ export type VideoRecording = Pick<
 
 // Map each video index to the engagement number it relates to (0 = general / no specific engagement)
 const questionEngagements = [
-  0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 5, 8, 8, 8, 8, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 5, 8, 8, 8, 8, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
 export function programmeForVideo(video: CandidateVideo) {
   const index = Number(video.id.replace("question-", "")) - 1;
@@ -80,16 +80,17 @@ export function programmeForVideo(video: CandidateVideo) {
       points: [engagement.promise, engagement.proposal, engagement.beneficiaries],
       href: `#engagement-${engagement.n}`,
     };
-  // Fallback for general / unmapped questions
   const axis = index >= 14 && index <= 17 ? axes[1] : index >= 22 ? axes[2] : undefined;
   return {
-    title: axis?.title ?? { fr: "Les trois axes de la plateforme electorale", ar: "المحاور الثلاثة للأرضية الانتخابية" },
+    title: axis?.title ?? {
+      fr: "Les trois axes de la plateforme electorale",
+      ar: "المحاور الثلاثة للأرضية الانتخابية",
+    },
     points: axis ? [axis.summary] : axes.map((item) => item.title),
     href: "#programme",
   };
 }
 
-// Video sources mapped by index
 const videoSources: (string | undefined)[] = [
   capsule1,
   capsule2,
@@ -122,22 +123,22 @@ const videoSources: (string | undefined)[] = [
   capsule29,
 ];
 
-// The 29 questions provided by the user — FR translations + original AR
+// 29 questions — FR translations + original AR (capsulesv2)
 const questions: [CandidateVideo["theme"], string, string][] = [
   [
     "programme",
-    "Qui est le Parti des Démocrates Nouveaux ? Le parti a-t-il une plateforme électorale ?",
-    "من هو حزب الديمقراطيين الجدد ؟ هل لدي الحزب أرضية انتخابية ؟",
+    "Qui est le Parti des Démocrates Nouveaux ?",
+    "من هو حزب الديمقراطيين الجدد ؟",
   ],
   [
     "programme",
-    "Le Parti des Démocrates Nouveaux a-t-il une plateforme électorale ?",
-    "هل لحزب الديمقراطيين الجدد أرضية انتخابية ؟",
+    "Le Parti des Démocrates Nouveaux a-t-il un programme électoral ?",
+    "هل لحزب الديمقراطيين الجدد برنامج إنتخابي ؟",
   ],
   [
     "programme",
-    "Capsule vidéo n°3",
-    "كبسولة فيديو رقم 3",
+    "Sur quoi repose la plateforme électorale du Parti des Démocrates Nouveaux ?",
+    "على ماذا ترتكز الأرضية الانتخابية لحزب الديمقراطيين الجدد ؟",
   ],
   [
     "programme",
@@ -170,9 +171,9 @@ const questions: [CandidateVideo["theme"], string, string][] = [
     "كيف يمكن القضاء على البيروقراطية أو ما يعرف بـ(سير حتى تجي) ؟",
   ],
   [
-    "programme",
-    "Capsule vidéo n°10",
-    "كبسولة فيديو رقم 10",
+    "economie",
+    "Comment le parti envisage-t-il de faire émerger les startups ?",
+    "في نظر الحزب كيف يمكن النهوض بالشركات الناشئة",
   ],
   [
     "economie",
@@ -216,8 +217,8 @@ const questions: [CandidateVideo["theme"], string, string][] = [
   ],
   [
     "services",
-    "Quelles réformes le parti considère-t-il comme une urgence ?",
-    "ما هي الإصلاحات التي يراها حزب الديمقراطيين الجدد حاجة ملحة ؟",
+    "Quelles réformes le parti considère-t-il urgentes dans l'éducation et la formation ?",
+    "ما هي الإصلاحات التي يراها حزب الديمقراطيين الجدد حاجة ملحة في مجال التعليم و التربية ؟",
   ],
   [
     "services",
@@ -231,8 +232,8 @@ const questions: [CandidateVideo["theme"], string, string][] = [
   ],
   [
     "programme",
-    "Capsule vidéo n°22",
-    "كبسولة فيديو رقم 22",
+    "Ne trouvez-vous pas que candidater avec un parti émergent est une aventure ?",
+    "واش ما كتشوفشي أن ترشحك في حزب ناشئ يعتبر مغامرة ؟",
   ],
   [
     "emploi",
@@ -245,14 +246,9 @@ const questions: [CandidateVideo["theme"], string, string][] = [
     "شنو رأيك في عدم الثقة في الشباب التي يراها البعض ؟",
   ],
   [
-    "programme",
-    "Capsule vidéo n°25",
-    "كبسولة فيديو رقم 25",
-  ],
-  [
-    "programme",
-    "Capsule vidéo n°26",
-    "كبسولة فيديو رقم 26",
+    "services",
+    "Avez-vous des idées dans le domaine du logement ?",
+    "واش عندكم شي أفكار في مجال الإسكان؟",
   ],
   [
     "culture",
@@ -261,13 +257,18 @@ const questions: [CandidateVideo["theme"], string, string][] = [
   ],
   [
     "programme",
-    "Capsule vidéo n°28",
-    "كبسولة فيديو رقم 28",
+    "Comment faire pour voter pour le Parti des Démocrates Nouveaux ?",
+    "كفاش نعمل باش نصوت على حزب الديمقراطيين الجدد",
   ],
   [
     "programme",
-    "Capsule vidéo n°29",
-    "كبسولة فيديو رقم 29",
+    "Et si je vis à l'étranger ?",
+    "و اذا كنت عايش في الخارج ؟",
+  ],
+  [
+    "programme",
+    "Quel est le symbole du Parti des Démocrates Nouveaux ?",
+    "شنو هو رمز جزب الديموقراطيين الجدد ؟",
   ],
 ];
 

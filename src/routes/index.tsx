@@ -84,6 +84,7 @@ const copy = {
     { label: bi("Vidéos", "فيديوهات"), href: "#videos" },
     { label: bi("Plateforme electorale", "الأرضية الانتخابية"), href: "#programme" },
     { label: bi("Engagements", "الالتزامات"), href: "#engagements" },
+    { label: bi("À propos", "حول التطبيق"), href: "#apropos" },
   ],
   official: bi("Site officiel de la plateforme electorale", "المنصة الرسمية للأرضية الانتخابية"),
   elections: bi("Élections législatives 2026", "الانتخابات التشريعية 2026"),
@@ -739,6 +740,11 @@ function Page() {
             </button>
           </nav>
           <div className="flex shrink-0 items-center gap-2">
+            <img
+              src={companyLogo}
+              alt={t(ui.footerCompany)}
+              className="h-10 w-auto max-w-[5.5rem] object-contain sm:h-11 sm:max-w-[6.5rem]"
+            />
             <button
               type="button"
               onClick={() => setLang(lang === "fr" ? "ar" : "fr")}
@@ -1306,6 +1312,19 @@ function Page() {
           </div>
         </section>
 
+        <section id="apropos" className="relative scroll-mt-28 overflow-hidden bg-white py-10 sm:py-16">
+          <BasmaMark tone="navy" size="lg" className="-end-8 top-10 opacity-[0.06]" />
+          <div className="relative mx-auto max-w-3xl px-4">
+            <SectionHeading kicker={t(ui.nav.about)} title={t(ui.aboutTitle)} />
+            <div className="mt-8 space-y-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <p>{t(ui.aboutP1)}</p>
+              <p>{t(ui.aboutP2)}</p>
+              <p>{t(ui.aboutP3)}</p>
+              <p>{t(ui.aboutP4)}</p>
+            </div>
+          </div>
+        </section>
+
       </main>
 
       <footer className="relative overflow-hidden border-t border-white/10 bg-navy text-white">
@@ -1380,13 +1399,10 @@ function Page() {
               <p className="mt-1">{t(ui.footerRights)}</p>
             </div>
             <div className="flex flex-col items-center gap-2 sm:items-end">
-              <p className="text-[0.65rem] font-bold uppercase tracking-wide text-white/45">
-                {t(ui.footerBuiltBy)}
-              </p>
               <img
                 src={companyLogo}
-                alt={t(ui.footerCompany)}
-                className="h-14 w-auto object-contain sm:h-16"
+                alt={`${t(ui.footerBuiltBy)} — ${t(ui.footerCompany)}`}
+                className="h-16 w-auto rounded-md bg-white object-contain p-2 sm:h-20"
               />
             </div>
           </div>

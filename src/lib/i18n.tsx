@@ -32,10 +32,30 @@ export const useLang = () => useContext(LangContext);
 export const ui = {
   nav: {
     program: { fr: "La plateforme electorale", ar: "الأرضية الانتخابية" },
-    about: { fr: "Qui sommes-nous", ar: "من نحن" },
+    about: { fr: "À propos", ar: "حول التطبيق" },
     axes: { fr: "Axes prioritaires", ar: "المحاور الأساسية" },
     contact: { fr: "Contact", ar: "تواصل معنا" },
     chat: { fr: "Version numerique", ar: "النسخة الرقمية" },
+  },
+  aboutTitle: {
+    fr: "Application numérique de la campagne électorale 2026",
+    ar: "التطبيق الرقمي للحملة الانتخابية 2026",
+  },
+  aboutP1: {
+    fr: "Cette application a été développée comme une version numérique intelligente du candidat Omar Al Abass, pour sa campagne électorale de 2026, afin de présenter le programme électoral et son contenu aux citoyens de manière numérique, interactive et innovante.",
+    ar: "تم تطوير هذا التطبيق باعتباره نسخة رقمية ذكية للمرشح عمر العباس، لحملته الانتخابية لسنة 2026، بهدف تقديم البرنامج الانتخابي ومضامينه للمواطنين بطريقة رقمية تفاعلية ومبتكرة.",
+  },
+  aboutP2: {
+    fr: "L'application a été développée par Expertise and Consulting Company, sous la supervision scientifique et technique du professeur fondateur Mostafa Ezziyyani, expert en intelligence artificielle et en développement de solutions et d'applications intelligentes.",
+    ar: "وقد تم تطوير التطبيق من طرف شركة Expertise and Consulting Company، تحت الإشراف العلمي والتقني للأستاذ المؤسس البروفيسور مصطفى الزياني (Mostafa Ezziyyani)، الخبير في الذكاء الاصطناعي وتطوير الحلول والتطبيقات الذكية.",
+  },
+  aboutP3: {
+    fr: "Elle s'appuie sur les techniques d'intelligence artificielle, la science des données et l'interaction numérique pour présenter le programme électoral, expliquer ses axes, répondre aux questions des citoyens sur son contenu, et faciliter l'accès à l'information de manière simplifiée et interactive.",
+    ar: "ويعتمد التطبيق على تقنيات الذكاء الاصطناعي وعلوم البيانات والتفاعل الرقمي لتقديم البرنامج الانتخابي، شرح محاوره، الإجابة عن استفسارات المواطنين حول مضامينه، وتسهيل الوصول إلى المعلومات بطريقة مبسطة وتفاعلية.",
+  },
+  aboutP4: {
+    fr: "Cette solution vise à passer de la présentation traditionnelle du programme électoral à un modèle moderne fondé sur la communication numérique, l'interaction, la transparence, et la facilitation de l'accès du citoyen à l'information électorale.",
+    ar: "ويهدف هذا الحل إلى الانتقال من العرض التقليدي للبرنامج الانتخابي إلى نموذج حديث يقوم على التواصل الرقمي، التفاعل، الشفافية، وتيسير وصول المواطن إلى المعلومة الانتخابية.",
   },
   ctaProgram: { fr: "Découvrir la plateforme electorale", ar: "اكتشف الأرضية الانتخابية" },
   ctaChat: { fr: "Parler a la version numerique", ar: "تحدث مع النسخة الرقمية" },
