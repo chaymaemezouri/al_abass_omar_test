@@ -8,7 +8,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import portrait from "@/assets/image-original-cutout.png";
+import portrait from "@/assets/condidat.png";
 import { Logo, BasmaMark } from "@/components/Logo";
 import {
   candidateVideos,
@@ -333,13 +333,6 @@ export function CandidateVideos() {
           </div>
           <div className="vd-counter">
             <Logo decorative className="hidden h-12 w-auto sm:block" />
-            <span className="vd-counter-pill">
-              <span className="vd-dot" />
-              {candidateVideos.filter((v) => v.src).length} {ar ? "فيديو" : "vidéos"}
-            </span>
-            <span className="vd-counter-pill">
-              {candidateVideos.length} {ar ? "سؤال" : "questions"}
-            </span>
           </div>
         </div>
       </div>

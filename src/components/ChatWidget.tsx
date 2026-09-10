@@ -297,10 +297,10 @@ export function ChatWidget() {
           <img
             src={fabBallotLogo}
             alt="Parti des Néo-Démocrates — رمز البصمة"
-            className="h-auto w-[min(20vw,78px)] object-contain drop-shadow-sm sm:w-36"
+            className="h-auto w-[min(28vw,104px)] object-contain drop-shadow-sm sm:w-36"
           />
           <div
-            className="text-center text-[0.58rem] font-extrabold leading-[1.15] text-navy drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] sm:text-lg sm:leading-snug"
+            className="text-center text-[0.72rem] font-extrabold leading-[1.2] text-navy drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] sm:text-lg sm:leading-snug"
             dir="rtl"
           >
             <p>صوتوا على الشباب</p>
