@@ -540,6 +540,29 @@ export const contact = {
 export const axisById = (id: AxisId) => axes.find((a) => a.id === id)!;
 export const engagementsOfAxis = (id: AxisId) => engagements.filter((e) => e.axis === id);
 
+/** Question prête pour l'avatar IA — courte, bonne pour le RAG. */
+export function avatarQuestionForEngagement(
+  engagement: Engagement,
+  lang: Lang = "ar",
+): string {
+  const title = lang === "fr" ? engagement.title.fr : engagement.title.ar;
+  const promise = lang === "fr" ? engagement.promise.fr : engagement.promise.ar;
+
+  if (lang === "fr") {
+    return (
+      `Que prévoit la plateforme électorale pour « ${title} » ? ` +
+      `${promise} ` +
+      `Donne les chiffres, le calendrier et les mesures concrètes.`
+    );
+  }
+
+  return (
+    `شنو كتقول الأرضية الانتخابية على «${title}»؟ ` +
+    `${promise} ` +
+    `عطيني الأرقام والآجال والتدابير بوضوح.`
+  );
+}
+
 /** Programme complet injecte dans le prompt systeme de l'assistant. */
 export const programContext = `
 CANDIDAT : ${identity.candidate.fr} / ${identity.candidate.ar}

@@ -211,7 +211,11 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     setAudioUrl(data.audio_url);
     setSpeaking(Boolean(data.audio_url || data.video_url));
     setFollowups(data.followups?.filter(Boolean).slice(0, 3) ?? []);
-    setShowSuggestions(true);
+    // Desktop: show follow-ups. Mobile: keep collapsed so chat stays visible.
+    const wide =
+      typeof window !== "undefined" &&
+      window.matchMedia("(min-width: 981px)").matches;
+    setShowSuggestions(wide);
 
     if (!data.audio_url) {
       void maybeSpeak(data.answer, data.language, data.blocked);
@@ -391,7 +395,6 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const activeSuggestions = followups.length > 0 ? followups : starterSuggestions.map((s) => t(s));
   const suggestionsTitle = followups.length > 0 ? t(copy.related) : t(copy.suggestions);
   const lastAssistant = [...turns].reverse().find((t) => t.role === "assistant" && t.text);
-  const charsLeft = 2000 - question.length;
 
   return (
     <div className="avx" dir={dir}>
@@ -446,65 +449,55 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
           />
         </section>
 
-        <section className="avx-panel">
+        <section className={`avx-panel${turns.length > 0 ? " has-chat" : ""}`}>
           <div className="avx-panel-head">
             <div className="avx-panel-head-copy">
-              <p className="avx-kicker">{t(copy.kicker)}</p>
+              <p className="avx-kicker">
+                <span className="avx-online-dot" aria-hidden />
+                {t(copy.kicker)}
+              </p>
               <h1>{t(copy.title)}</h1>
             </div>
-            <div className="avx-panel-actions">
-              <span className="avx-online">
-                <span className="avx-online-dot" />
-                {t(copy.online)}
-              </span>
+            <div className="avx-panel-actions" role="group" aria-label="Actions">
               <button
                 type="button"
-                className={`avx-tool-btn ${voiceMode === "voice" ? "is-accent" : ""}`}
+                className={`avx-icon-btn ${voiceMode === "voice" ? "is-on" : ""}`}
                 onClick={toggleVoiceMode}
+                aria-label={voiceMode === "voice" ? t(copy.modeVoice) : t(copy.modeText)}
                 title={voiceMode === "voice" ? t(copy.modeVoice) : t(copy.modeText)}
               >
                 {voiceMode === "voice" ? (
-                  <Volume2 className="h-3.5 w-3.5" />
+                  <Volume2 className="h-4 w-4" strokeWidth={1.75} />
                 ) : (
-                  <VolumeX className="h-3.5 w-3.5" />
+                  <VolumeX className="h-4 w-4" strokeWidth={1.75} />
                 )}
-                <span>{voiceMode === "voice" ? t(copy.modeVoice) : t(copy.modeText)}</span>
               </button>
               <button
                 type="button"
-                className="avx-tool-btn"
+                className="avx-icon-btn"
                 onClick={resetConversation}
                 disabled={loading || (turns.length === 0 && !sessionId)}
+                aria-label={t(copy.newChat)}
                 title={t(copy.newChat)}
               >
-                <RotateCcw className="h-3.5 w-3.5" />
-                <span>{t(copy.newChat)}</span>
+                <RotateCcw className="h-4 w-4" strokeWidth={1.75} />
               </button>
             </div>
           </div>
 
           <div className="avx-suggestions" aria-label={suggestionsTitle}>
-            <div className="avx-suggestions-row">
+            {(turns.length === 0 || showSuggestions) && (
               <p className="avx-suggestions-label">{suggestionsTitle}</p>
-              {turns.length > 0 && showSuggestions && (
-                <button
-                  type="button"
-                  className="avx-linkish"
-                  onClick={() => setShowSuggestions(false)}
-                >
-                  {t(copy.hideSuggestions)}
-                </button>
-              )}
-              {turns.length > 0 && !showSuggestions && (
-                <button
-                  type="button"
-                  className="avx-linkish"
-                  onClick={() => setShowSuggestions(true)}
-                >
-                  {t(copy.showSuggestions)}
-                </button>
-              )}
-            </div>
+            )}
+            {turns.length > 0 && (
+              <button
+                type="button"
+                className="avx-linkish"
+                onClick={() => setShowSuggestions((v) => !v)}
+              >
+                {showSuggestions ? t(copy.hideSuggestions) : t(copy.showSuggestions)}
+              </button>
+            )}
             {showSuggestions && (
               <div className="avx-chips">
                 {activeSuggestions.map((item, index) => (
@@ -515,7 +508,6 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
                     disabled={loading}
                     onClick={() => void submitQuestion(item)}
                   >
-                    <span className="avx-chip-index">{index + 1}</span>
                     <span className="avx-chip-text">{item}</span>
                   </button>
                 ))}
@@ -538,15 +530,6 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
                   key={`${turn.role}-${i}`}
                   className={`avx-bubble ${turn.role}${turn.streaming ? " is-streaming" : ""}`}
                 >
-                  <span className="avx-bubble-role">
-                    {turn.role === "user"
-                      ? ar
-                        ? "أنت"
-                        : "Vous"
-                      : ar
-                        ? "الأفاتار"
-                        : "Avatar"}
-                  </span>
                   <p>
                     {turn.text}
                     {turn.streaming && !turn.text ? "…" : null}
@@ -569,46 +552,45 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
             )}
           </div>
 
-          <div className="avx-toolbar">
-            <button
-              type="button"
-              className="avx-tool-btn"
-              disabled={!lastAssistant || loading || simplifying}
-              onClick={() => void copyLastAnswer()}
-            >
-              <Copy className="h-3.5 w-3.5" />
-              {copied ? t(copy.copied) : t(copy.copyAnswer)}
-            </button>
-            <button
-              type="button"
-              className="avx-tool-btn is-accent"
-              disabled={!lastAssistant || loading || simplifying}
-              onClick={() => void simplifyLastAnswer()}
-            >
-              <Wand2 className="h-3.5 w-3.5" />
-              {simplifying ? t(copy.simplifying) : t(copy.simplify)}
-            </button>
-            <button
-              type="button"
-              className="avx-tool-btn"
-              disabled={!speaking && !audioUrl}
-              onClick={stopVoice}
-            >
-              <VolumeX className="h-3.5 w-3.5" />
-              {t(copy.stopAudio)}
-            </button>
-            {error && lastQuestionRef.current && (
+          {lastAssistant && (
+            <div className="avx-toolbar">
               <button
                 type="button"
-                className="avx-tool-btn is-accent"
-                disabled={loading}
-                onClick={() => void submitQuestion(lastQuestionRef.current)}
+                className="avx-tool-btn"
+                disabled={loading || simplifying}
+                onClick={() => void copyLastAnswer()}
               >
-                <RotateCcw className="h-3.5 w-3.5" />
-                {t(copy.retry)}
+                <Copy className="h-3.5 w-3.5" />
+                <span>{copied ? t(copy.copied) : t(copy.copyAnswer)}</span>
               </button>
-            )}
-          </div>
+              <button
+                type="button"
+                className="avx-tool-btn"
+                disabled={loading || simplifying}
+                onClick={() => void simplifyLastAnswer()}
+              >
+                <Wand2 className="h-3.5 w-3.5" />
+                <span>{simplifying ? t(copy.simplifying) : t(copy.simplify)}</span>
+              </button>
+              {(speaking || audioUrl) && (
+                <button type="button" className="avx-tool-btn" onClick={stopVoice}>
+                  <VolumeX className="h-3.5 w-3.5" />
+                  <span>{t(copy.stopAudio)}</span>
+                </button>
+              )}
+              {error && lastQuestionRef.current && (
+                <button
+                  type="button"
+                  className="avx-tool-btn"
+                  disabled={loading}
+                  onClick={() => void submitQuestion(lastQuestionRef.current)}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span>{t(copy.retry)}</span>
+                </button>
+              )}
+            </div>
+          )}
 
           <form onSubmit={onSubmit} className="avx-composer">
             <div className="avx-composer-shell">
@@ -655,20 +637,11 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
                 </button>
               </div>
             </div>
-            <div className="avx-composer-meta">
-              <span className={charsLeft < 80 ? "is-warn" : undefined}>
-                {question.length}/2000
-              </span>
-            </div>
             {error && (
               <p className="avx-error" role="alert">
                 {error}
               </p>
             )}
-            <p className="avx-foot">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              {t(copy.foot)}
-            </p>
           </form>
         </section>
       </main>

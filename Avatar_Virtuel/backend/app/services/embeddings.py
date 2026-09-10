@@ -103,8 +103,9 @@ class GeminiEmbeddingService(EmbeddingService):
                     raise
             if last_exc is not None:
                 raise last_exc
+            # Free-tier: stay under ~60–100 embed RPM
             if i + 1 < len(texts):
-                await asyncio.sleep(0.35)
+                await asyncio.sleep(1.2)
         return out
 
 

@@ -26,6 +26,7 @@ from app.services.intent import (
     generate_clarification_reply,
     generate_conversational_reply,
     is_clarification,
+    is_off_topic,
 )
 from app.services.language import get_language_service
 from app.services.latency import finish_latency_profile, start_latency_profile, time_step
@@ -34,6 +35,7 @@ from app.services.rag import PgVectorRAGService
 from app.services.rerank import rerank_hits
 from app.services.translate import translate_answer_to_language, translate_query_to_arabic
 from app.services.tts import get_tts_service
+from app.services.rag import hit_is_relevant
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +133,8 @@ async def _run_programme_rag(
             return best_res
         ranked = sorted(by_id.values(), key=lambda h: h.score or 0.0, reverse=True)
         threshold = get_settings().rag_similarity_threshold
-        soft = max(0.45, threshold - 0.10)
+        # Soft floor only for near-misses that still pass relevance later
+        soft = max(0.48, threshold - 0.05)
         best_score = ranked[0].score if ranked else 0.0
         above = (best_score or 0) >= soft
         hits = ranked[: max(3, get_settings().rag_top_k)]
@@ -189,6 +192,39 @@ async def _run_programme_rag(
 
     with time_step("rerank"):
         best = await rerank_hits(search_question or question, rag_result.hits)
+
+    if not hit_is_relevant(
+        search_question or question, best, get_settings().rag_similarity_threshold
+    ):
+        logger.info(
+            "rag_chunk_retained outcome=fallback_irrelevant score=%s kw_gate lang=%s",
+            None if best.score is None else round(best.score, 4),
+            language,
+        )
+        answer = FALLBACK_MESSAGES.get(language, FALLBACK_MESSAGES["fr"])
+        followups = await build_followups(
+            db,
+            language=language,
+            best=None,
+            hits=[],
+            answered_question=question,
+            limit=3,
+        )
+        return await _finalize(
+            db,
+            session,
+            question,
+            answer,
+            language,
+            similarity=best.score,
+            used_fallback=True,
+            blocked=False,
+            sources=[],
+            generate_media=generate_media,
+            source_type=None,
+            followups=followups,
+        )
+
     reponse_source = best.reponse.strip()
     sources = [best.chapitre]
     logger.info(
@@ -400,6 +436,23 @@ async def run_text_pipeline(
                     source_type=None,
                 )
 
+        # Hors-sujet clair → fallback (pas de RAG inventif)
+        if is_off_topic(question):
+            logger.info("rag_chunk_retained outcome=off_topic lang=%s", language)
+            return await _finalize(
+                db,
+                session,
+                question,
+                FALLBACK_MESSAGES.get(language, FALLBACK_MESSAGES["fr"]),
+                language,
+                similarity=None,
+                used_fallback=True,
+                blocked=False,
+                sources=[],
+                generate_media=generate_media,
+                source_type=None,
+            )
+
         with time_step("conversational_llm"):
             conv = await generate_conversational_reply(language, question)
         if conv and not conversational_reply_looks_unsafe(conv):
@@ -447,9 +500,9 @@ async def run_text_pipeline(
                 source_type=None,
             )
         soft_fallback = {
-            "fr": "Je suis l'assistant virtuel d'Al Abass Omar. Posez-moi une question sur le programme électoral.",
-            "ar": "أنا المساعد الافتراضي للعباس عمر. يمكنك سؤالي عن البرنامج الانتخابي.",
-            "ary": "أنا المساعد الافتراضي ديال العباس عمر. سولني على البرنامج الانتخابي.",
+            "fr": FALLBACK_MESSAGES["fr"],
+            "ar": FALLBACK_MESSAGES["ar"],
+            "ary": FALLBACK_MESSAGES["ary"],
         }
         return await _finalize(
             db,
@@ -458,7 +511,7 @@ async def run_text_pipeline(
             soft_fallback.get(language, soft_fallback["fr"]),
             language,
             similarity=None,
-            used_fallback=False,
+            used_fallback=True,
             blocked=False,
             sources=[],
             generate_media=generate_media,

@@ -306,6 +306,35 @@ class PgVectorRAGService(RAGService):
         return chunk, True
 
 
+def hit_is_relevant(query: str, hit: RagHit, threshold: float) -> bool:
+    """Reject weak semantic matches that don't share topical terms with the query.
+
+    Prevents out-of-scope questions (capitale, foot, bitcoin…) from riding a
+    0.50–0.65 cosine similarity into a false programme answer.
+    """
+    score = float(hit.score or 0.0)
+    if score <= 0:
+        return False
+    # Strong hybrid score — trust (card/long questions often dilute keyword overlap)
+    if score >= max(0.68, threshold + 0.12):
+        return True
+    kw_q = keyword_overlap(query, hit.question or "")
+    kw_r = keyword_overlap(query, (hit.reponse or "")[:500])
+    kw = max(kw_q, 0.7 * kw_r)
+    lex = lexical_similarity(query, hit.question or "")
+    # Also compare against a shortened query (first sentence / before long dump)
+    short = (query or "").strip().split("؟")[0].split("?")[0][:120]
+    if short and short != query:
+        kw = max(kw, keyword_overlap(short, hit.question or ""))
+        lex = max(lex, lexical_similarity(short, hit.question or ""))
+    soft = max(0.48, threshold - 0.05)
+    if score >= threshold and (kw >= 0.12 or lex >= 0.28):
+        return True
+    if score >= soft and (kw >= 0.28 or lex >= 0.45):
+        return True
+    return False
+
+
 def format_rag_context(hits: list[RagHit]) -> str:
     if not hits:
         return ""

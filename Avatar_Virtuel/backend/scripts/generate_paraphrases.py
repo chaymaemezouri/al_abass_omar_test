@@ -137,9 +137,10 @@ async def run(limit: int | None, ids: set[int] | None) -> Path:
                 json.dumps(list(by_id.values()), ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
-            await asyncio.sleep(0.35)
+            await asyncio.sleep(0.8)
         except Exception:
             logger.exception("paraphrase_failed id=%s", rid)
+            await asyncio.sleep(2.0)
 
     final = sorted(by_id.values(), key=lambda r: int(r["id"]))
     out_path.write_text(json.dumps(final, ensure_ascii=False, indent=2), encoding="utf-8")
