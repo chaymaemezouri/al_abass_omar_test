@@ -40,6 +40,7 @@ import { Logo, BasmaMark, basmaLogo } from "@/components/Logo";
 import {
   axes,
   axisById,
+  avatarQuestionForEngagement,
   engagements,
   financing,
   firstHundredDays,
@@ -160,7 +161,8 @@ const copy = {
   mainProposal: bi("Proposition principale", "المقترح الرئيسي"),
   deadline: bi("Echeance", "الأجل"),
   sourceShort: bi("Plateforme electorale actualisee 2026", "الأرضية الانتخابية 2026"),
-  askPrecision: bi("Demander une precision a la version numerique", "اطلب توضيحا من النسخة الرقمية"),
+  askPrecision: bi("Plus de details avec l'IA", "المزيد من التفاصيل مع الذكاء الاصطناعي"),
+  askCardDetails: bi("Details avec l'IA", "التفاصيل مع الذكاء الاصطناعي"),
 };
 
 const icons = {
@@ -448,6 +450,12 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
   const axis = axisById(engagement.axis);
   const cardSrc = `/src/assets/cartes/carte1 (${engagement.cardBg}).png`;
 
+  function askAiDetails(e?: { stopPropagation: () => void; preventDefault: () => void }) {
+    e?.stopPropagation();
+    e?.preventDefault();
+    openChatWithQuestion(avatarQuestionForEngagement(engagement, lang));
+  }
+
   return (
     <Reveal>
       <article
@@ -499,14 +507,19 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
               </p>
 
               {/* Footer */}
-              <div className="mt-1.5 flex items-center justify-between">
+              <div className="mt-1.5 flex items-center justify-between gap-2">
                 <div className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-bold text-white">
                   <CalendarDays className="h-2.5 w-2.5" />
                   {engagement.calendar}
                 </div>
-                <span className="text-[10px] font-semibold text-white/60">
-                  {ar ? "اضغط للتفاصيل ↩" : "Cliquer pour détails ↩"}
-                </span>
+                <button
+                  type="button"
+                  onClick={askAiDetails}
+                  className="inline-flex items-center gap-1 rounded-full bg-white/25 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm transition hover:bg-white/40"
+                >
+                  <MessageSquareText className="h-2.5 w-2.5" />
+                  {ar ? "اضغط للتفاصيل مع الذكاء الاصطناعي" : "Details avec l'IA"}
+                </button>
               </div>
             </div>
           </div>
@@ -583,8 +596,8 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
               <div className="mt-2 flex items-center justify-between gap-3">
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); openChatWithQuestion(t(engagement.title)); }}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-navy/15 px-3 py-1.5 text-[10px] font-bold text-navy hover:bg-navy hover:text-white transition-colors"
+                  onClick={askAiDetails}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-navy/15 bg-navy px-3 py-1.5 text-[10px] font-bold text-white hover:bg-morocco transition-colors"
                 >
                   <MessageSquareText size={11} />
                   {t(copy.askPrecision)}
@@ -1188,7 +1201,9 @@ function Page() {
                     <button
                       key={engagement.n}
                       type="button"
-                      onClick={openChat}
+                      onClick={() =>
+                        openChatWithQuestion(avatarQuestionForEngagement(engagement, lang))
+                      }
                       className="group rounded-md border border-border bg-white p-4 text-start transition-all hover:-translate-y-0.5 hover:border-morocco/50 hover:shadow-card"
                     >
                       <span className="text-xs font-extrabold uppercase text-morocco">
@@ -1199,6 +1214,10 @@ function Page() {
                       </span>
                       <span className="mt-2 block text-xs leading-relaxed text-muted-foreground">
                         {t(engagement.indicator)}
+                      </span>
+                      <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold text-morocco">
+                        <MessageSquareText className="h-3 w-3" />
+                        {t(copy.askCardDetails)}
                       </span>
                     </button>
                   ))}

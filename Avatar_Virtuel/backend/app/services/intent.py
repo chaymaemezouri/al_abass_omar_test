@@ -37,16 +37,33 @@ _MIXED_GREETING = re.compile(
 )
 
 _PROGRAMME_CUES = re.compile(
-    r"(programme|economie|économie|emploi|santé|sante|eau|éducation|education|"
-    r"اقتصاد|تشغيل|صحة|ماء|تعليم|كيفاش|شنو|واش|pourquoi|comment|combien|"
-    r"quel|quelle|mesure|proposition|فلاحة|طاقة|مقاول|bghit|نعرف)",
+    r"(programme|plateforme|électoral|electoral|economie|économie|emploi|jeunes|"
+    r"santé|sante|eau|éducation|education|pme|neet|fiscal|digital|"
+    r"اقتصاد|تشغيل|صحة|ماء|تعليم|أرضية|انتخاب|رقمن|مقاول|"
+    r"فلاحة|طاقة|شباب|بطالة|تحلية|هيدروجين|سيبر|"
+    r"pourquoi|combien|mesure|proposition|réforme|reforme|"
+    r"bghit|نعرف|كيفاش|شنو\s+(هو|هي|كاين)|واش\s+(هي|هو))",
     re.IGNORECASE,
 )
 
-# Routing-only risk cues — if present, force LLM safety classify (not a blocklist answer)
+# Clear off-topic → never send to RAG (fallback / conversational redirect)
+_OFF_TOPIC_CUES = re.compile(
+    r"(capitale|australia|australie|recette|tajine|cuisine|match\s+de\s+foot|"
+    r"gagner\s+le\s+match|bitcoin|crypto|relativit[eé]|einstein|po[eè]me|"
+    r"voisin|128\s*\*\s*64|combien\s+font|calcule|math[eé]mat|"
+    r"couleur\s+de\s+(ton|votre)|لون\s*قميص|سعر\s*البيتكوين|بيتكوين|"
+    r"الزنقة|avis\s+personnel|meilleur\s+candidat\s+adverse|"
+    r"secret\s+not\s+in|invente\s+un\s+programme|write\s+a\s+poem|"
+    r"recipe|football\s+tonight|weather|m[eé]t[eé]o)",
+    re.IGNORECASE,
+)
+
+# Routing-only risk cues — force sensible (not a word-list answer content)
 _RISK_CUES = re.compile(
     r"(kill|tuer|bombe|attentat|suicide|drogue|porn|jailbreak|"
-    r"اغتيال|تفجير|قتل|مخدر|إباحي|رقم\s*هاتف|adresse\s*perso|cin\b)",
+    r"arme\b|armes\b|weapon|fabriquer\s+une\s+arme|"
+    r"adresse\s+personnelle|adresse\s+perso|num[eé]ro\s+de\s+t[eé]l|"
+    r"اغتيال|تفجير|قتل|مخدر|إباحي|رقم\s*هاتف|cin\b)",
     re.IGNORECASE,
 )
 
@@ -122,11 +139,17 @@ async def expand_followup_question(question: str, historique: str) -> str:
     return question
 
 
+def is_off_topic(question: str) -> bool:
+    return bool(_OFF_TOPIC_CUES.search((question or "").strip()))
+
+
 def heuristic_intent(question: str) -> Intent | None:
     """
     Fast path:
     - obvious greetings / clarifications → conversationnel
-    - clear programme cue without risk cue → programme
+    - clear off-topic → conversationnel (RAG must not invent)
+    - clear risk → sensible
+    - clear programme cue → programme
     - otherwise → None (LLM rules)
     """
     q = (question or "").strip()
@@ -137,8 +160,10 @@ def heuristic_intent(question: str) -> Intent | None:
     if is_clarification(q):
         return "conversationnel"
     if _RISK_CUES.search(q):
-        return None
-    if _PROGRAMME_CUES.search(q) or "?" in q or "؟" in q:
+        return "sensible"
+    if _OFF_TOPIC_CUES.search(q):
+        return "conversationnel"
+    if _PROGRAMME_CUES.search(q):
         return "programme"
     return None
 

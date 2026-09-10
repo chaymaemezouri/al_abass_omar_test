@@ -138,32 +138,29 @@ body.avx-lock {
   min-height: 0;
   overflow: hidden;
   background:
-    radial-gradient(ellipse 65% 50% at 50% 28%, rgba(32, 82, 149, 0.5), transparent 62%),
-    radial-gradient(ellipse 80% 55% at 50% 100%, rgba(176, 16, 32, 0.2), transparent 58%),
-    linear-gradient(168deg, #030b14 0%, #071a33 46%, #0d2f57 100%);
+    radial-gradient(ellipse 70% 55% at 50% 32%, rgba(255, 255, 255, 0.08), transparent 58%),
+    radial-gradient(ellipse 90% 60% at 50% 100%, rgba(176, 16, 32, 0.14), transparent 55%),
+    linear-gradient(165deg, #0c2a4f 0%, #143a66 45%, #1b4f8a 100%);
 }
 
 .avx-stage::before {
   content: "";
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: radial-gradient(ellipse at 50% 40%, black 15%, transparent 72%);
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255, 255, 255, 0.1), transparent 42%);
   pointer-events: none;
-  opacity: 0.55;
+  opacity: 1;
 }
 
 .avx-stage-glow {
   position: absolute;
-  inset: 12% 8% auto;
-  height: 48%;
-  background: radial-gradient(ellipse at center, rgba(214, 69, 80, 0.22), transparent 70%);
-  filter: blur(10px);
+  inset: 18% 12% auto;
+  height: 42%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.18), transparent 70%);
+  filter: blur(18px);
   pointer-events: none;
-  animation: avx-breathe 6s ease-in-out infinite;
+  animation: avx-breathe 7s ease-in-out infinite;
 }
 
 .avx-stage-inner {
@@ -178,7 +175,7 @@ body.avx-lock {
 
 .avx-avatar-scene {
   position: relative;
-  width: min(72%, 360px);
+  width: min(68%, 340px);
   aspect-ratio: 1;
   display: grid;
   place-items: center;
@@ -187,27 +184,23 @@ body.avx-lock {
 
 .avx-avatar-ring {
   position: absolute;
-  inset: -3%;
+  inset: -2.5%;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow:
-    0 0 0 1px rgba(176, 16, 32, 0.1),
-    inset 0 0 40px rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: none;
   pointer-events: none;
 }
 
 .avx-avatar-ring--soft {
-  inset: -9%;
-  border-color: rgba(255, 255, 255, 0.08);
-  opacity: 0.75;
+  inset: -8%;
+  border-color: rgba(255, 255, 255, 0.12);
+  opacity: 0.9;
 }
 
 .avx-stage-inner.is-speaking .avx-avatar-ring {
-  border-color: rgba(214, 69, 80, 0.55);
-  box-shadow:
-    0 0 0 6px rgba(176, 16, 32, 0.12),
-    0 0 40px rgba(176, 16, 32, 0.25);
-  animation: avx-pulse 1.6s ease-in-out infinite;
+  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.08);
+  animation: avx-pulse 1.8s ease-in-out infinite;
 }
 
 .avx-avatar-card {
@@ -216,8 +209,8 @@ body.avx-lock {
   height: 100%;
   border-radius: 50%;
   overflow: hidden;
-  background: transparent;
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 20px 50px rgba(7, 26, 51, 0.22);
 }
 
 .avx-portrait-img,
@@ -227,11 +220,11 @@ body.avx-lock {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  object-position: center 20%;
-  transform: scale(1.08);
+  object-position: center 18%;
+  transform: scale(1.06);
   user-select: none;
   pointer-events: none;
-  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 12px 24px rgba(7, 26, 51, 0.25));
 }
 
 .avx-video {
@@ -247,26 +240,26 @@ body.avx-lock {
   place-items: center;
   color: #fff;
   font-size: 2.4rem;
-  font-weight: 800;
+  font-weight: 750;
   letter-spacing: 0.04em;
 }
 
 .avx-eq {
   position: absolute;
-  bottom: -1.35rem;
+  bottom: -1.2rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: flex-end;
-  gap: 0.28rem;
-  height: 1.1rem;
+  gap: 0.22rem;
+  height: 0.95rem;
   z-index: 4;
 }
 
 .avx-eq span {
-  width: 0.28rem;
+  width: 0.22rem;
   border-radius: 999px;
-  background: linear-gradient(to top, #b01020, #e04552);
+  background: rgba(255, 255, 255, 0.9);
   animation: avx-eq 0.9s ease-in-out infinite;
 }
 
@@ -307,37 +300,38 @@ body.avx-lock {
 
 .avx-stage-name {
   margin: 0;
-  font-size: clamp(1.25rem, 2vw, 1.65rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-shadow: 0 1px 12px rgba(7, 26, 51, 0.2);
 }
 
 .avx-stage-status {
-  margin: 0.45rem auto 0;
+  margin: 0.5rem auto 0;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.35rem 0.7rem;
+  padding: 0.32rem 0.75rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  font-size: 0.78rem;
-  color: rgba(247, 245, 241, 0.82);
-  font-weight: 700;
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 600;
+  backdrop-filter: blur(10px);
 }
 
 .avx-stage-status.is-live {
-  border-color: rgba(214, 69, 80, 0.35);
-  background: rgba(176, 16, 32, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .avx-stage-live-dot {
-  width: 0.4rem;
-  height: 0.4rem;
+  width: 0.38rem;
+  height: 0.38rem;
   border-radius: 50%;
   background: #34d399;
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.2);
 }
 
 .avx-stage-status.is-live .avx-stage-live-dot {
@@ -370,11 +364,8 @@ body.avx-lock {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse 80% 40% at 100% 0%, rgba(176, 16, 32, 0.05), transparent 50%),
-    radial-gradient(ellipse 70% 35% at 0% 0%, rgba(27, 79, 138, 0.06), transparent 45%),
-    linear-gradient(180deg, #ffffff 0%, #f7f5f1 100%);
-  border-inline-start: 1px solid rgba(7, 26, 51, 0.08);
+  background: #fbfaf8;
+  border-inline-start: 1px solid rgba(7, 26, 51, 0.06);
 }
 
 .avx[dir="rtl"] .avx-panel {
@@ -384,10 +375,10 @@ body.avx-lock {
 .avx-panel-head {
   flex: 0 0 auto;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 1.1rem clamp(1rem, 2vw, 1.6rem) 0.7rem;
+  padding: 1rem clamp(1rem, 2vw, 1.75rem) 0.65rem;
 }
 
 .avx-panel-head-copy {
@@ -398,15 +389,21 @@ body.avx-lock {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin: 0 0 0.35rem;
-  padding: 0.28rem 0.6rem;
-  border-radius: 999px;
-  background: rgba(176, 16, 32, 0.08);
-  color: var(--avx-red);
+  margin: 0 0 0.25rem;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--avx-muted);
   font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.avx-kicker .avx-online-dot {
+  width: 0.38rem;
+  height: 0.38rem;
+  flex-shrink: 0;
 }
 
 .avx-kicker-icon {
@@ -416,11 +413,11 @@ body.avx-lock {
 
 .avx-panel-head h1 {
   margin: 0;
-  font-size: clamp(1.25rem, 1.9vw, 1.65rem);
-  font-weight: 800;
+  font-size: clamp(1.15rem, 1.7vw, 1.45rem);
+  font-weight: 750;
   color: var(--avx-navy);
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
 }
 
 .avx-lead {
@@ -428,27 +425,50 @@ body.avx-lock {
 }
 
 .avx-online {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-shrink: 0;
-  margin-top: 0.1rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 999px;
-  background: rgba(5, 150, 105, 0.1);
-  border: 1px solid rgba(5, 150, 105, 0.14);
-  color: #047857;
-  font-size: 0.68rem;
-  font-weight: 800;
-  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.08);
+  display: none;
 }
 
 .avx-panel-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.45rem;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.3rem;
   flex-shrink: 0;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: rgba(7, 26, 51, 0.04);
+}
+
+.avx-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--avx-navy);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.avx-icon-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--avx-red);
+}
+
+.avx-icon-btn.is-on {
+  background: #fff;
+  color: var(--avx-red);
+  box-shadow: 0 1px 3px rgba(7, 26, 51, 0.08);
+}
+
+.avx-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .avx-suggestions-row {
@@ -471,16 +491,23 @@ body.avx-lock {
 .avx-linkish {
   border: 0;
   background: transparent;
-  color: var(--avx-red);
+  color: var(--avx-muted);
   font: inherit;
-  font-size: 0.72rem;
-  font-weight: 800;
+  font-size: 0.7rem;
+  font-weight: 650;
   cursor: pointer;
   padding: 0;
 }
 
 .avx-linkish:hover {
-  text-decoration: underline;
+  color: var(--avx-red);
+  text-decoration: none;
+}
+
+.avx-suggestions > .avx-linkish {
+  position: absolute;
+  inset-inline-end: clamp(1rem, 2vw, 1.75rem);
+  top: 0;
 }
 
 .avx-bubble.is-streaming p {
@@ -506,45 +533,39 @@ body.avx-lock {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border: 1px solid rgba(7, 26, 51, 0.1);
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--avx-navy);
+  border: 0;
+  background: transparent;
+  color: var(--avx-muted);
   border-radius: 999px;
-  padding: 0.35rem 0.7rem;
+  padding: 0.35rem 0.55rem;
   font: inherit;
-  font-size: 0.68rem;
-  font-weight: 750;
+  font-size: 0.7rem;
+  font-weight: 650;
   cursor: pointer;
   transition:
+    color 0.2s ease,
     background 0.2s ease,
-    border-color 0.2s ease,
     opacity 0.2s ease;
 }
 
 .avx-tool-btn:hover:not(:disabled) {
-  border-color: rgba(176, 16, 32, 0.28);
-  background: #fff;
+  color: var(--avx-navy);
+  background: rgba(7, 26, 51, 0.05);
 }
 
 .avx-tool-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .avx-tool-btn.is-accent {
-  border-color: rgba(176, 16, 32, 0.35);
-  color: var(--avx-red);
-  background: rgba(176, 16, 32, 0.06);
+  color: var(--avx-muted);
+  background: transparent;
+  border-color: transparent;
 }
 
 .avx-composer-meta {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 0.35rem;
-  padding: 0 0.25rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--avx-muted);
+  display: none;
 }
 
 .avx-composer-meta .is-warn {
@@ -561,64 +582,51 @@ body.avx-lock {
 }
 
 .avx-suggestions {
+  position: relative;
   flex: 0 0 auto;
-  padding: 0 clamp(1rem, 2vw, 1.6rem) 0.75rem;
+  padding: 0 clamp(1rem, 2vw, 1.75rem) 0.7rem;
 }
 
 .avx-suggestions-label {
-  margin: 0 0 0.5rem;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
+  margin: 0 0 0.45rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--avx-muted);
 }
 
 .avx-chips {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.45rem;
-  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .avx-chip {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.45rem;
-  min-height: 0;
-  max-height: 3.4rem;
-  max-width: none;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
   border: 1px solid rgba(7, 26, 51, 0.08);
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  background: #fff;
   color: var(--avx-navy);
-  padding: 0.55rem 0.6rem;
-  border-radius: 0.9rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
   font: inherit;
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-size: 0.74rem;
+  font-weight: 600;
   cursor: pointer;
   text-align: start;
-  line-height: 1.3;
-  box-shadow: 0 8px 20px rgba(7, 26, 51, 0.04);
+  line-height: 1.35;
+  box-shadow: none;
   overflow: hidden;
   transition:
     border-color 0.2s ease,
-    background 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    color 0.2s ease,
+    background 0.2s ease;
 }
 
 .avx-chip-index {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: 999px;
-  background: rgba(7, 26, 51, 0.06);
-  color: var(--avx-navy);
-  font-size: 0.65rem;
-  font-weight: 800;
+  display: none;
 }
 
 .avx-chip-text {
@@ -629,15 +637,16 @@ body.avx-lock {
 }
 
 .avx-chip:hover:not(:disabled) {
-  border-color: rgba(176, 16, 32, 0.28);
+  border-color: rgba(7, 26, 51, 0.18);
   background: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(176, 16, 32, 0.1);
+  color: var(--avx-red);
+  transform: none;
+  box-shadow: none;
 }
 
 .avx-chip:hover:not(:disabled) .avx-chip-index {
-  background: rgba(176, 16, 32, 0.1);
-  color: var(--avx-red);
+  background: transparent;
+  color: inherit;
 }
 
 .avx-chip:disabled {
@@ -651,10 +660,10 @@ body.avx-lock {
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0.25rem clamp(1rem, 2vw, 1.6rem) 0.85rem;
+  padding: 0.35rem clamp(1rem, 2vw, 1.75rem) 0.85rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.65rem;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -667,94 +676,94 @@ body.avx-lock {
 
 .avx-empty {
   margin: auto;
-  max-width: 18rem;
+  max-width: 17rem;
   text-align: center;
-  padding: 1rem 0.75rem;
-  border-radius: 1.25rem;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(7, 26, 51, 0.06);
-  box-shadow: 0 16px 40px rgba(7, 26, 51, 0.05);
+  padding: 0.5rem;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .avx-empty-badge {
   display: grid;
   place-items: center;
-  width: 2.6rem;
-  height: 2.6rem;
-  margin: 0 auto 0.7rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin: 0 auto 0.65rem;
   border-radius: 999px;
-  background: linear-gradient(145deg, rgba(27, 79, 138, 0.12), rgba(176, 16, 32, 0.1));
+  background: rgba(7, 26, 51, 0.05);
 }
 
 .avx-empty-icon {
-  width: 1.2rem;
-  height: 1.2rem;
-  color: var(--avx-royal);
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--avx-navy);
   margin-bottom: 0;
+  opacity: 0.7;
 }
 
 .avx-empty h2 {
   margin: 0;
-  font-size: 0.98rem;
+  font-size: 0.95rem;
   color: var(--avx-navy);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .avx-empty p {
-  margin: 0.4rem 0 0;
+  margin: 0.35rem 0 0;
   color: var(--avx-muted);
-  font-size: 0.8rem;
-  line-height: 1.5;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  font-weight: 500;
 }
 
 .avx-bubble {
-  max-width: min(92%, 34rem);
-  padding: 0.8rem 0.95rem;
-  border-radius: 1.15rem;
-  animation: avx-rise 0.3s ease both;
+  max-width: min(88%, 32rem);
+  padding: 0.75rem 0.95rem;
+  border-radius: 1.1rem;
+  animation: avx-rise 0.28s ease both;
 }
 
 .avx-bubble-role {
-  display: block;
-  margin-bottom: 0.35rem;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.72;
+  display: none;
 }
 
 .avx-bubble.user {
   align-self: flex-end;
-  background: linear-gradient(145deg, #0a2647, #123a66 55%, #0d2f57);
+  background: #1b4f8a;
   color: #fff;
   border-end-end-radius: 0.35rem;
-  box-shadow: 0 14px 30px rgba(7, 26, 51, 0.18);
+  box-shadow: none;
 }
 
 .avx-bubble.assistant {
   align-self: flex-start;
-  background: linear-gradient(180deg, #ffffff, #fbfcfa);
-  border: 1px solid rgba(7, 26, 51, 0.08);
+  background: #fff;
+  border: 1px solid rgba(7, 26, 51, 0.06);
   color: var(--avx-ink);
   border-end-start-radius: 0.35rem;
-  box-shadow: 0 12px 28px rgba(7, 26, 51, 0.06);
+  box-shadow: 0 1px 2px rgba(7, 26, 51, 0.04);
 }
 
 .avx-bubble p {
   margin: 0;
   white-space: pre-wrap;
-  line-height: 1.55;
-  font-size: 0.9rem;
+  line-height: 1.6;
+  font-size: 0.88rem;
+  font-weight: 550;
+}
+
+.avx-bubble.user p {
   font-weight: 600;
 }
 
 .avx-bubble small {
   display: block;
-  margin-top: 0.4rem;
-  opacity: 0.7;
-  font-size: 0.68rem;
-  font-weight: 600;
+  margin-top: 0.45rem;
+  opacity: 0.55;
+  font-size: 0.65rem;
+  font-weight: 550;
 }
 
 .avx-typing {
@@ -785,19 +794,56 @@ body.avx-lock {
 }
 
 @media (max-width: 980px) {
+  /* Once chatting: conversation first, suggestions under the thread */
+  .avx-panel.has-chat .avx-panel-head {
+    order: 1;
+  }
+
+  .avx-panel.has-chat .avx-history {
+    order: 2;
+  }
+
+  .avx-panel.has-chat .avx-suggestions {
+    order: 3;
+    padding-bottom: 0.45rem;
+    border-top: 1px solid rgba(7, 26, 51, 0.06);
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  .avx-panel.has-chat .avx-toolbar {
+    order: 4;
+  }
+
+  .avx-panel.has-chat .avx-composer {
+    order: 5;
+  }
+
   .avx-chips {
     display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
-    overflow: hidden;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0.15rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .avx-chips::-webkit-scrollbar {
+    display: none;
   }
 
   .avx-chip {
-    flex: none;
-    width: 100%;
+    flex: 0 0 auto;
+    width: auto;
+    max-width: min(78vw, 16.5rem);
     max-height: none;
-    min-height: 2.75rem;
+    min-height: 0;
     align-items: center;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.7rem;
+    border-radius: 999px;
   }
 
   .avx-chip-text {
@@ -806,54 +852,57 @@ body.avx-lock {
   }
 }
 
+.avx-toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem;
+  padding: 0 clamp(0.75rem, 2vw, 1.5rem) 0.25rem;
+}
+
 .avx-composer {
   flex: 0 0 auto;
-  padding: 0.75rem clamp(1rem, 2vw, 1.5rem) 0.95rem;
-  border-top: 1px solid transparent;
-  background:
-    linear-gradient(to top, rgba(247, 245, 241, 0.98), rgba(247, 245, 241, 0.55) 70%, transparent);
+  padding: 0.55rem clamp(1rem, 2vw, 1.75rem) 1rem;
+  border-top: 0;
+  background: linear-gradient(to top, #fbfaf8 60%, transparent);
 }
 
 .avx-composer-shell {
-  padding: 1px;
-  border-radius: 1.35rem;
-  background: linear-gradient(
-    135deg,
-    rgba(176, 16, 32, 0.35),
-    rgba(7, 26, 51, 0.12) 40%,
-    rgba(27, 79, 138, 0.22)
-  );
-  box-shadow:
-    0 18px 40px rgba(7, 26, 51, 0.1),
-    0 2px 0 rgba(255, 255, 255, 0.65) inset;
-  transition:
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
+  padding: 0;
+  border-radius: 1.25rem;
+  background: transparent;
+  box-shadow: none;
+  transition: none;
 }
 
 .avx-composer-shell:focus-within {
-  box-shadow:
-    0 22px 48px rgba(176, 16, 32, 0.14),
-    0 0 0 4px rgba(176, 16, 32, 0.08),
-    0 2px 0 rgba(255, 255, 255, 0.75) inset;
-  transform: translateY(-1px);
+  box-shadow: none;
+  transform: none;
 }
 
 .avx-composer-box {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  min-height: 3.35rem;
-  padding: 0.4rem 0.45rem 0.4rem 0.5rem;
-  border-radius: calc(1.35rem - 1px);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.9));
-  backdrop-filter: blur(18px);
+  gap: 0.35rem;
+  min-height: 3.15rem;
+  padding: 0.35rem 0.4rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(7, 26, 51, 0.1);
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(7, 26, 51, 0.05);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.avx-composer-shell:focus-within .avx-composer-box {
+  border-color: rgba(7, 26, 51, 0.22);
+  box-shadow: 0 10px 32px rgba(7, 26, 51, 0.08);
 }
 
 .avx-composer textarea {
   flex: 1;
-  min-height: 2.4rem;
+  min-height: 2.2rem;
   max-height: 5.5rem;
   resize: none;
   border: 0;
@@ -861,73 +910,66 @@ body.avx-lock {
   background: transparent;
   font: inherit;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 550;
   line-height: 1.4;
-  padding: 0.55rem 0.35rem;
+  padding: 0.5rem 0.3rem;
   color: var(--avx-ink);
   letter-spacing: 0.01em;
 }
 
 .avx-composer textarea::placeholder {
-  color: rgba(106, 115, 128, 0.72);
-  font-weight: 600;
+  color: rgba(106, 115, 128, 0.75);
+  font-weight: 500;
 }
 
 .avx-mic,
 .avx-send {
   display: grid;
   place-items: center;
-  width: 2.65rem;
-  height: 2.65rem;
+  width: 2.45rem;
+  height: 2.45rem;
   border: 0;
-  border-radius: 1rem;
+  border-radius: 999px;
   cursor: pointer;
   flex-shrink: 0;
   transition:
     transform 0.18s ease,
     background 0.18s ease,
-    box-shadow 0.18s ease;
+    opacity 0.18s ease;
 }
 
 .avx-mic {
-  background: linear-gradient(180deg, #f4f6f8, #e8ecf1);
+  background: rgba(7, 26, 51, 0.05);
   color: var(--avx-navy);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.9) inset,
-    0 4px 12px rgba(7, 26, 51, 0.06);
+  box-shadow: none;
 }
 
 .avx-mic:hover:not(:disabled) {
-  background: linear-gradient(180deg, #fff, #edf1f5);
-  transform: translateY(-1px);
+  background: rgba(7, 26, 51, 0.09);
+  transform: none;
 }
 
 .avx-mic.is-rec {
-  background: linear-gradient(180deg, #ffe8ea, #ffd2d6);
+  background: rgba(176, 16, 32, 0.12);
   color: var(--avx-red);
-  box-shadow:
-    0 0 0 3px rgba(176, 16, 32, 0.12),
-    0 6px 16px rgba(176, 16, 32, 0.16);
+  box-shadow: none;
   animation: avx-pulse 1.2s ease-in-out infinite;
 }
 
 .avx-send {
-  background: linear-gradient(145deg, #e04552 0%, var(--avx-red) 55%, #8f0d1a 100%);
+  background: var(--avx-navy);
   color: #fff;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.28) inset,
-    0 8px 18px rgba(176, 16, 32, 0.28);
+  box-shadow: none;
 }
 
 .avx-send:hover:not(:disabled) {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.35) inset,
-    0 12px 24px rgba(176, 16, 32, 0.34);
+  transform: none;
+  background: var(--avx-navy-mid);
+  box-shadow: none;
 }
 
 .avx-send:active:not(:disabled) {
-  transform: translateY(0) scale(0.98);
+  transform: scale(0.97);
 }
 
 .avx-mic:disabled,
@@ -1013,6 +1055,10 @@ body.avx-lock {
   }
 
   .avx-bar-brand span:last-child {
+    display: none;
+  }
+
+  .avx-composer-meta {
     display: none;
   }
 }

@@ -9,18 +9,21 @@ from app.services.base import LanguageService
 DetectorFactory.seed = 0
 
 # Common Darija markers (Latin transliteration + Arabic script)
+# Avoid FR false positives: fin, men, pme, neet, hiya, howa, etc.
 _DARIJA_MARKERS = re.compile(
     r"\b("
-    r"wach|wash|ach|ash|chno|chnou|shno|shnou|kifash|kifach|kifesh|"
-    r"bghit|bghiti|bghina|fin|fayn|bzzaf|bezzaf|bzf|"
-    r"daba|db|3ndi|andi|ma3ndi|kayn|kayen|makayn|makayen|"
-    r"safi|wakha|waxa|b7al|bhal|hna|hnta|nti|nta|ntoma|"
-    r"ghir|gir|ghadi|radi|mzyan|mezian|meziane|"
-    r"3la|3lach|3lah|3lach|shhal|chhal|chnou|chnouwa|"
-    r"khdma|khedma|flous|drahem|magana|lmaghrib|maghrib|"
-    r"bghitk|smeh|smah|afak|3afak|lahihdik|bikhir|labas|"
-    r"katgol|katgoul|kaygol|wesh|wachmen|men|dyal|dial"
+    r"wach|wash|ashnu|chno|chnou|shno|shnou|kifash|kifach|kifesh|"
+    r"bghit|bghiti|bghina|fayn|bzzaf|bezzaf|bzf|"
+    r"daba|3ndi|andi|ma3ndi|kayn|kayen|makayn|makayen|"
+    r"safi|wakha|waxa|b7al|bhal|hnta|ntoma|"
+    r"ghir|ghadi|mzyan|mezian|meziane|"
+    r"3lach|3lah|shhal|chhal|ch7al|chnouwa|"
+    r"khdma|khedma|flous|drahem|lmaghrib|"
+    r"smeh|smah|afak|3afak|lahihdik|bikhir|labas|"
+    r"katgol|katgoul|kaygol|wesh|wachmen|dyal|dial|"
+    r"bghaw|y3awn|y3awnou|nsbta|sghira|chabab"
     r")\b|"
+
     r"(واش|آش|اش|كيفاش|كيفاه|بغيت|بغيتي|بغينا|فين|فيناه|"
     r"أشنو|اشنو|شنو|شنوه|شحال|بزاف|دابا|كاين|كاينش|ماكاين|"
     r"صافي|واخا|مزيان|مزيا|علاش|علاش|غادي|غادين|"
@@ -58,13 +61,10 @@ class HeuristicLanguageService(LanguageService):
 
         if has_ar and not has_lat:
             # Arabic script + informal Darija patterns → Darija
-            if _DARIJA_INFORMAL_AR.search(cleaned):
+            if _DARIJA_INFORMAL_AR.search(cleaned) or _DARIJA_MARKERS.search(cleaned):
                 return "ary"
-            # Short Arabic questions without formal MSA particles → prefer Darija
-            # for citizen chat (Morocco). Formal MSA particles → ar.
-            msa_cues = re.search(r"(هل|ما\s+هي|ما\s+هو|كيف\s+يمكن|بالنسبة|فيما\s+يتعلق)", cleaned)
-            if not msa_cues and len(cleaned) < 120:
-                return "ary"
+            # Default MSA for formal Arabic (programme / fusha). Only Darija
+            # when markers are present — avoid mislabeling MSA as ary.
             return "ar"
 
         try:

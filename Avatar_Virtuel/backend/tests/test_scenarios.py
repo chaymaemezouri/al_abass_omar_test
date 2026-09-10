@@ -68,6 +68,12 @@ IN_SCOPE_ARY = [
     "شنو هي المساهمة فالناتج الداخلي الخام المرتبطة بالتحول الرقمي؟",
     "كيفاش يمكن دعم الفلاحين الصغار والمتوسطين؟",
     "شنو هي الرؤية اللغوية العامة المدافع عليها؟",
+    # Latin Darija (citizen chat)
+    "chnou hiya makant l PME f l maghrib ?",
+    "kifach bghaw y3awnou chabab NEET ?",
+    "ch7al nsbta dyal chabab NEET ?",
+    "chnou l evolution fiscale dyal l sghira ?",
+    "chnou l hadaf digital dyal l idara f 2030 ?",
 ]
 
 OUT_OF_SCOPE = [
