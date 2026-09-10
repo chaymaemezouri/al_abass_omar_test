@@ -553,7 +553,7 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
               <div className="flex-1" />
 
               {/* Big KPI */}
-              <p className="text-3xl font-black leading-none text-white drop-shadow-lg">
+              <p className="text-3xl font-black leading-none text-white drop-shadow-lg" dir="ltr">
                 {engagement.bigNumber}
               </p>
               <p className="mt-0.5 text-xs font-semibold text-white/75">
@@ -581,7 +581,10 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
           {/* ══════ BACK ══════ */}
           <div className="absolute inset-0 overflow-hidden rounded-2xl border border-border bg-white shadow-card [backface-visibility:hidden] [transform:rotateY(180deg)]">
             {/* Watermark number */}
-            <span className="pointer-events-none absolute -bottom-4 -right-2 select-none text-[80px] font-black leading-none text-navy/[0.04]">
+            <span
+              className="pointer-events-none absolute -bottom-4 -right-2 select-none text-[80px] font-black leading-none text-navy/[0.04]"
+              dir="ltr"
+            >
               {engagement.bigNumber}
             </span>
 
@@ -700,7 +703,9 @@ function AxisPanel({ axisId }: { axisId: (typeof axes)[number]["id"] }) {
           </div>
         )}
         <div className="mt-5 flex items-baseline gap-3 rounded-md bg-ivory p-4">
-          <span className="text-2xl font-extrabold text-morocco">{axis.stat.value}</span>
+          <span className="text-2xl font-extrabold text-morocco" dir="ltr">
+            {axis.stat.value}
+          </span>
           <span className="text-xs text-muted-foreground">{t(axis.stat.label)}</span>
         </div>
       </article>
@@ -1122,7 +1127,9 @@ function Page() {
                           {t(metric.detail)}
                         </span>
                       </div>
-                      <p className="mt-4 text-3xl font-extrabold text-navy">{metric.value}</p>
+                      <p className="mt-4 text-3xl font-extrabold text-navy" dir="ltr">
+                        {metric.value}
+                      </p>
                       <p className="mt-1 text-sm font-semibold text-muted-foreground">
                         {t(metric.label)}
                       </p>
