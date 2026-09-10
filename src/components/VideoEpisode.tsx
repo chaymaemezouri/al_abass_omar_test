@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, Check, Copy, Film, RotateCcw, Subtitles } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, Copy, Film, Play, RotateCcw, Subtitles } from "lucide-react";
 import type { CandidateVideo, VideoLanguage, VideoRecording } from "@/data/videos";
 import { useLang } from "@/lib/i18n";
+import partyLogo from "@/assets/logo.png";
 
 export const mediaTime = (seconds: number) => {
   if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
@@ -50,8 +51,10 @@ export function VideoEpisode({
   const [captionsEnabled, setCaptionsEnabled] = useState(false);
   const [copied, setCopied] = useState("");
   const [transcriptOpen, setTranscriptOpen] = useState(false);
+  const [started, setStarted] = useState(false);
   const cues = recording.cues?.[captionLang] ?? [];
   const currentCue = cues.find((cue) => time >= cue.start && time < cue.end);
+  const showIdleCover = Boolean(recording.src) && !failed && !started && time < 0.2;
   const hasLanguage = (id: string) =>
     Boolean(
       recording.cues?.[id as VideoLanguage]?.length ||
@@ -63,6 +66,12 @@ export function VideoEpisode({
   useEffect(() => {
     setCaptionLang(lang === "fr" ? "fr" : "ar");
   }, [lang]);
+
+  useEffect(() => {
+    setStarted(false);
+    setTime(0);
+    setFailed(false);
+  }, [recording.src, retry]);
 
   useEffect(
     () => () => {
@@ -247,6 +256,15 @@ export function VideoEpisode({
                 </button>
               </div>
             ) : (
+              <>
+              {showIdleCover && (
+                <div className="episode-idle" aria-hidden>
+                  <img src={partyLogo} alt="" className="episode-idle-logo" />
+                  <span className="episode-idle-play">
+                    <Play size={20} fill="currentColor" />
+                  </span>
+                </div>
+              )}
               <video
                 ref={player}
                 key={retry}
@@ -269,7 +287,10 @@ export function VideoEpisode({
                   if (shouldPlay && player.current)
                     void player.current.play().catch(() => onPlaying(false));
                 }}
-                onPlay={playing}
+                onPlay={() => {
+                  setStarted(true);
+                  playing();
+                }}
                 onPause={() => onPlaying(false)}
                 onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)}
                 onEnded={() => {
@@ -291,6 +312,7 @@ export function VideoEpisode({
                   />
                 ))}
               </video>
+              </>
             )}
             {intro && (
               <div className="episode-question" role="status">

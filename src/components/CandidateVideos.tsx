@@ -181,7 +181,7 @@ export function CandidateVideos() {
   }
 
   const themeColor: Record<string, string> = {
-    programme: "#c41425",
+    programme: "#143a66",
     numerique: "#6db8ff",
     emploi: "#4dd991",
     economie: "#5dd0a4",
@@ -450,7 +450,7 @@ export function CandidateVideos() {
               <div className="vd-now-playing-theme">
                 <span
                   className="vd-dot"
-                  style={{ background: themeColor[active.theme] ?? "#c41425" }}
+                  style={{ background: themeColor[active.theme] ?? "#143a66" }}
                 />
                 {themeLabel(active.theme)}
               </div>

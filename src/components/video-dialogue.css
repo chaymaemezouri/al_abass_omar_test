@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════
    Video Dialogue — 2026 Light Premium Theme
-   Clean institutional design · White & warm grays · Red accent
+   Clean institutional design · White & warm grays · Navy accent
    Font: Inter · Scale: 11 / 12 / 13 / 14 / 16 / 20 / 28px
    ════════════════════════════════════════════════════════════════ */
 
@@ -13,13 +13,13 @@
   --vd-bg-raised: #ffffff;
   --vd-bg-card: #ffffff;
   --vd-bg-card-hover: #f0f3f7;
-  --vd-bg-card-active: #fef2f3;
+  --vd-bg-card-active: #eef3f9;
   --vd-bg-input: #f0f2f5;
   --vd-bg-player: #0c1017;
-  --vd-red: #c41425;
-  --vd-red-hover: #a8101f;
-  --vd-red-soft: #fef2f3;
-  --vd-red-glow: rgba(196, 20, 37, 0.06);
+  --vd-red: #143a66;
+  --vd-red-hover: #0f2d50;
+  --vd-red-soft: #eef3f9;
+  --vd-red-glow: rgba(20, 58, 102, 0.08);
   --vd-ink: #1a1f2e;
   --vd-ink-2: #4a5568;
   --vd-ink-3: #8a95a8;
@@ -296,10 +296,10 @@
   aspect-ratio: 9/16;
   max-height: min(520px, 58svh);
   margin: 0 auto;
-  background: #000;
+  background: #f4f0e8;
   overflow: hidden;
   border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(9, 28, 57, 0.14);
   touch-action: pan-x;
 }
 .episode-frame video {
@@ -308,6 +308,40 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  background: #f4f0e8;
+}
+.episode-idle {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px 20px;
+  overflow: hidden;
+  background: #ffffff;
+  pointer-events: none;
+}
+.episode-idle-logo {
+  width: min(72%, 210px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(20, 58, 102, 0.12));
+}
+.episode-idle-play {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  color: #fff;
+  background: #143a66;
+  box-shadow: 0 10px 24px rgba(9, 28, 57, 0.28);
+}
+.episode-idle-play svg {
+  margin-inline-start: 2px;
 }
 .episode-navigation {
   display: flex;
@@ -1073,7 +1107,7 @@
     border: 2px solid var(--vd-ink);
     border-radius: 14px 14px 0 0;
     box-shadow: none;
-    background: #000;
+    background: #f4f0e8;
   }
   .vd-mobile-rail {
     margin: 0;
