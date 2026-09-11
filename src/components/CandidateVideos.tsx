@@ -376,28 +376,7 @@ export function CandidateVideos() {
               </div>
             </div>
 
-            <VideoEpisode
-              key={`${active.id}-${format}-${episodeKey}`}
-              video={active}
-              recording={recording}
-              shouldPlay={playOnSelection}
-              onPlaying={setPlaying}
-              onDuration={(value) => {
-                if (format === "detailed")
-                  setDurations((state) =>
-                    state[active.id] === value ? state : { ...state, [active.id]: value },
-                  );
-              }}
-              position={`${String(activeIndex + 1).padStart(2, "0")} / ${candidateVideos.length}`}
-              onPrevious={previous ? () => choose(previous) : undefined}
-              onNext={next ? () => choose(next) : undefined}
-              onEnded={() => {
-                setEnded(true);
-                if (autoNext && nextAvailable) choose(nextAvailable);
-              }}
-            />
-
-            {/* Mobile: carousel glued under the video */}
+            {/* Mobile: question chips above the video */}
             <div className="vd-mobile-rail">
               <div className="vd-mobile-rail-head">
                 <p className="vd-mobile-rail-meta">
@@ -434,6 +413,27 @@ export function CandidateVideos() {
                 })}
               </div>
             </div>
+
+            <VideoEpisode
+              key={`${active.id}-${format}-${episodeKey}`}
+              video={active}
+              recording={recording}
+              shouldPlay={playOnSelection}
+              onPlaying={setPlaying}
+              onDuration={(value) => {
+                if (format === "detailed")
+                  setDurations((state) =>
+                    state[active.id] === value ? state : { ...state, [active.id]: value },
+                  );
+              }}
+              position={`${String(activeIndex + 1).padStart(2, "0")} / ${candidateVideos.length}`}
+              onPrevious={previous ? () => choose(previous) : undefined}
+              onNext={next ? () => choose(next) : undefined}
+              onEnded={() => {
+                setEnded(true);
+                if (autoNext && nextAvailable) choose(nextAvailable);
+              }}
+            />
 
             <div className="vd-now-playing">
               <p className="vd-now-playing-label">

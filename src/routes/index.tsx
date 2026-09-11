@@ -996,7 +996,7 @@ function Page() {
                 <div className="hero-features mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5">
                   {heroFeatures.map((item) => (
                     <div key={item.label.fr} className="text-center sm:text-start">
-                      <item.icon className="mx-auto h-5 w-5 text-[#b57905] sm:mx-0 sm:h-6 sm:w-6" />
+                      <item.icon className="mx-auto h-5 w-5 text-morocco sm:mx-0 sm:h-6 sm:w-6" />
                       <p className="mt-1.5 text-[0.68rem] font-semibold leading-snug text-navy sm:text-[0.72rem]">
                         {t(item.label)}
                       </p>
@@ -1449,8 +1449,8 @@ function Page() {
               <p className="text-xs font-bold text-morocco-light" dir="rtl">
                 صوتوا على الشباب · صوتوا على رمز البصمة
               </p>
-              <p className="text-sm font-extrabold text-morocco-light" dir="ltr">
-                #عمل_جيم_للشباب
+              <p className="text-sm font-extrabold text-morocco-light" dir="rtl">
+                {"\u200F"}#عمل_جيم_للشباب
               </p>
             </div>
 

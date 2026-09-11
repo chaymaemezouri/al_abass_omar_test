@@ -293,7 +293,7 @@ export function ChatWidget() {
           open && "hidden",
         )}
       >
-        <div className="flex flex-col items-center gap-0.5 px-1 sm:gap-2">
+        <div className="flex origin-bottom scale-[1.15] flex-col items-center gap-0.5 px-1 sm:gap-2">
           <img
             src={fabBallotLogo}
             alt="Parti des Néo-Démocrates — رمز البصمة"
@@ -305,7 +305,7 @@ export function ChatWidget() {
           >
             <p>صوتوا على الشباب</p>
             <p>صوتوا على رمز البصمة</p>
-            <p className="text-morocco">#عمل_جيم_للشباب</p>
+            <p className="text-morocco">{"\u200F"}#عمل_جيم_للشباب</p>
           </div>
         </div>
         <button
@@ -355,7 +355,7 @@ export function ChatWidget() {
             <section className="flex min-h-0 flex-col border-border lg:border-r">
               <div
                 ref={scrollRef}
-                className="relative min-h-0 flex-1 overflow-y-auto bg-[radial-gradient(circle_at_20%_0%,rgba(194,15,26,0.08),transparent_28%),linear-gradient(180deg,#fbfaf5_0%,#f5f1e7_100%)] p-4 sm:p-6"
+                className="relative min-h-0 flex-1 overflow-y-auto bg-[radial-gradient(circle_at_20%_0%,rgba(197,90,39,0.08),transparent_28%),linear-gradient(180deg,#fbfaf5_0%,#f5f1e7_100%)] p-4 sm:p-6"
               >
                 <BasmaMark
                   tone="navy"

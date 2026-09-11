@@ -95,7 +95,7 @@
   font-size: 30px;
   font-weight: 800;
   line-height: 1.15;
-  color: #c41425;
+  color: #c55a27;
   margin: 0 0 8px;
   letter-spacing: -0.02em;
 }
@@ -182,7 +182,7 @@
 .vd-format-switch button[aria-pressed="true"] {
   background: var(--vd-red);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(196, 20, 37, 0.25);
+  box-shadow: 0 2px 8px rgba(197, 90, 39, 0.25);
 }
 .vd-format-switch button:not([aria-pressed="true"]):hover:not(:disabled) {
   color: var(--vd-ink);
@@ -434,7 +434,7 @@
 .episode-transcript-tools { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .episode-transcript-line { display: grid; grid-template-columns: 44px minmax(0,1fr); gap: 10px; text-align: start; width: 100%; padding: 10px; border-radius: 6px; font-size: 13px; line-height: 1.7; }
 .episode-transcript-line > span:first-child { color: #6b7a8d; font-size: 11px; font-variant-numeric: tabular-nums; }
-.episode-transcript-line.is-current { background: rgba(196,20,37,0.1); border-inline-start: 2px solid var(--vd-red); }
+.episode-transcript-line.is-current { background: rgba(197,90,39,0.1); border-inline-start: 2px solid var(--vd-red); }
 .episode-chapters { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 10px; }
 .episode-chapters button { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #a8b5c4; }
 .episode-chapters span { color: #6b7a8d; font-variant-numeric: tabular-nums; }
@@ -535,7 +535,7 @@
   background: var(--vd-red);
   border-color: var(--vd-red);
   color: white;
-  box-shadow: 0 2px 6px rgba(196,20,37,0.2);
+  box-shadow: 0 2px 6px rgba(197,90,39,0.2);
 }
 
 /* ── Sort ── */
@@ -603,7 +603,7 @@
 .vd-question-card.is-active {
   border-color: var(--vd-red);
   background: var(--vd-bg-card-active);
-  box-shadow: 0 0 0 1px var(--vd-red), 0 4px 16px rgba(196,20,37,0.08);
+  box-shadow: 0 0 0 1px var(--vd-red), 0 4px 16px rgba(197,90,39,0.08);
 }
 .vd-question-card.is-active::before {
   content: "";
@@ -1077,7 +1077,14 @@
   .vd-sheet { display: block; }
   .vd-player { position: relative; }
   .vd-player-meta { margin-bottom: 8px; }
-  .vd-now-playing { display: none; }
+  .vd-now-playing {
+    display: block;
+    margin-top: 12px;
+    padding: 14px 16px;
+  }
+  .vd-now-playing h3 {
+    font-size: 16px;
+  }
 
   /* Mobile: video only, 2px frame, no dark stage/blur */
   .episode-stage {
@@ -1107,7 +1114,8 @@
     max-height: min(72svh, 620px);
     margin: 0;
     border: 2px solid var(--vd-ink);
-    border-radius: 14px 14px 0 0;
+    border-top: 0;
+    border-radius: 0 0 14px 14px;
     box-shadow: none;
     background: #f4f0e8;
   }
@@ -1115,8 +1123,8 @@
     margin: 0;
     padding: 10px 10px 8px;
     border: 2px solid var(--vd-ink);
-    border-top: 0;
-    border-radius: 0 0 14px 14px;
+    border-bottom: 0;
+    border-radius: 14px 14px 0 0;
     background: var(--vd-bg-white);
     box-shadow: none;
   }
@@ -1130,11 +1138,12 @@
   .vd-sidebar-header { padding: 16px 16px 0; }
   .vd-sidebar-scroll { padding: 0 16px 12px; }
   .vd-mobile-chip-text { max-width: 9.5rem; }
-  .episode-frame {
+  .vd-mobile-rail {
     border-width: 2px;
+    border-bottom: 0;
     border-radius: 12px 12px 0 0;
   }
-  .vd-mobile-rail {
+  .episode-frame {
     border-width: 2px;
     border-top: 0;
     border-radius: 0 0 12px 12px;
