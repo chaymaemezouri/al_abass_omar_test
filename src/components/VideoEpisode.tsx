@@ -39,6 +39,7 @@ export function VideoEpisode({
   const { lang, t } = useLang();
   const ar = lang !== "fr";
   const player = useRef<HTMLVideoElement>(null);
+  const bgPlayer = useRef<HTMLVideoElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const introShown = useRef(false);
   const touch = useRef<{ x: number; y: number; at: number } | null>(null);
@@ -54,7 +55,8 @@ export function VideoEpisode({
   const [started, setStarted] = useState(false);
   const cues = recording.cues?.[captionLang] ?? [];
   const currentCue = cues.find((cue) => time >= cue.start && time < cue.end);
-  const showIdleCover = Boolean(recording.src) && !failed && !started && time < 0.2;
+  const showIdleCover =
+    Boolean(recording.src) && !failed && !started && !shouldPlay && time < 0.2;
   const hasLanguage = (id: string) =>
     Boolean(
       recording.cues?.[id as VideoLanguage]?.length ||
@@ -129,10 +131,52 @@ export function VideoEpisode({
     };
   }, [recording.src, shouldPlay]);
 
+  // Autoplay as soon as the user picks a question (retry until the element can play).
+  useEffect(() => {
+    if (!recording.src || !shouldPlay) return;
+    const el = player.current;
+    if (!el) return;
 
+    let cancelled = false;
+    const tryPlay = () => {
+      if (cancelled || !player.current) return;
+      void player.current
+        .play()
+        .then(() => {
+          if (!cancelled) {
+            setStarted(true);
+            onPlaying(true);
+          }
+        })
+        .catch(() => {
+          if (cancelled || !player.current) return;
+          // Some mobile browsers need a muted kickstart within gesture/policy limits.
+          const video = player.current;
+          const wasMuted = video.muted;
+          video.muted = true;
+          void video
+            .play()
+            .then(() => {
+              if (cancelled) return;
+              video.muted = wasMuted;
+              setStarted(true);
+              onPlaying(true);
+            })
+            .catch(() => {
+              if (!cancelled) onPlaying(false);
+            });
+        });
+    };
 
-  // Ref for the blurred background video
-  const bgPlayer = useRef<HTMLVideoElement>(null);
+    tryPlay();
+    el.addEventListener("loadeddata", tryPlay);
+    el.addEventListener("canplay", tryPlay);
+    return () => {
+      cancelled = true;
+      el.removeEventListener("loadeddata", tryPlay);
+      el.removeEventListener("canplay", tryPlay);
+    };
+  }, [recording.src, shouldPlay, retry, onPlaying]);
 
   // Sync blur video with main video time
   useEffect(() => {
@@ -272,7 +316,7 @@ export function VideoEpisode({
                 poster={recording.poster}
                 controls
                 playsInline
-                preload="metadata"
+                preload={shouldPlay ? "auto" : "metadata"}
                 aria-label={
                   video.test ? (ar ? "فيديو تجريبي" : "Vidéo de démonstration") : t(video.question)
                 }
@@ -282,10 +326,6 @@ export function VideoEpisode({
                     setDuration(d);
                     onDuration(d);
                   }
-                }}
-                onCanPlay={() => {
-                  if (shouldPlay && player.current)
-                    void player.current.play().catch(() => onPlaying(false));
                 }}
                 onPlay={() => {
                   setStarted(true);

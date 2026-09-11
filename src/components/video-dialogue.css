@@ -189,9 +189,9 @@
   background: var(--vd-bg-card-hover);
 }
 
-/* ── Now-playing info below video ── */
+/* ── Now-playing info above video ── */
 .vd-now-playing {
-  margin-top: 18px;
+  margin: 12px 0 14px;
   padding: 20px 24px;
   background: var(--vd-bg-white);
   border: 1px solid var(--vd-border);
@@ -1079,7 +1079,7 @@
   .vd-player-meta { margin-bottom: 8px; }
   .vd-now-playing {
     display: block;
-    margin-top: 12px;
+    margin: 10px 0 12px;
     padding: 14px 16px;
   }
   .vd-now-playing h3 {
@@ -1114,8 +1114,7 @@
     max-height: min(72svh, 620px);
     margin: 0;
     border: 2px solid var(--vd-ink);
-    border-top: 0;
-    border-radius: 0 0 14px 14px;
+    border-radius: 14px;
     box-shadow: none;
     background: #f4f0e8;
   }
@@ -1123,8 +1122,7 @@
     margin: 0;
     padding: 10px 10px 8px;
     border: 2px solid var(--vd-ink);
-    border-bottom: 0;
-    border-radius: 14px 14px 0 0;
+    border-radius: 14px;
     background: var(--vd-bg-white);
     box-shadow: none;
   }
@@ -1140,13 +1138,11 @@
   .vd-mobile-chip-text { max-width: 9.5rem; }
   .vd-mobile-rail {
     border-width: 2px;
-    border-bottom: 0;
-    border-radius: 12px 12px 0 0;
+    border-radius: 12px;
   }
   .episode-frame {
     border-width: 2px;
-    border-top: 0;
-    border-radius: 0 0 12px 12px;
+    border-radius: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -154,7 +154,7 @@ export function CandidateVideos() {
     url.hash = "";
     window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`);
     if (window.matchMedia("(max-width: 1023px)").matches)
-      document.getElementById("video-dialogue-player")?.scrollIntoView({
+      document.getElementById("vd-question-rail")?.scrollIntoView({
         block: "start",
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
       });
@@ -376,8 +376,8 @@ export function CandidateVideos() {
               </div>
             </div>
 
-            {/* Mobile: question chips above the video */}
-            <div className="vd-mobile-rail">
+            {/* Question chips above the video */}
+            <div className="vd-mobile-rail" id="vd-question-rail">
               <div className="vd-mobile-rail-head">
                 <p className="vd-mobile-rail-meta">
                   {String(activeIndex + 1).padStart(2, "0")} / {candidateVideos.length}
@@ -402,7 +402,7 @@ export function CandidateVideos() {
                       type="button"
                       className={`vd-mobile-chip ${isActive ? "is-active" : ""}`}
                       aria-pressed={isActive}
-                      onClick={() => choose(video)}
+                      onClick={() => choose(video, true)}
                     >
                       <span className="vd-mobile-chip-num">
                         {String(index).padStart(2, "0")}
@@ -411,6 +411,20 @@ export function CandidateVideos() {
                     </button>
                   );
                 })}
+              </div>
+            </div>
+
+            <div className="vd-now-playing">
+              <p className="vd-now-playing-label">
+                {ar ? "السؤال الحالي" : "Question en cours"}
+              </p>
+              <h3>{t(active.question)}</h3>
+              <div className="vd-now-playing-theme">
+                <span
+                  className="vd-dot"
+                  style={{ background: themeColor[active.theme] ?? "#143a66" }}
+                />
+                {themeLabel(active.theme)}
               </div>
             </div>
 
@@ -434,20 +448,6 @@ export function CandidateVideos() {
                 if (autoNext && nextAvailable) choose(nextAvailable);
               }}
             />
-
-            <div className="vd-now-playing">
-              <p className="vd-now-playing-label">
-                {ar ? "السؤال الحالي" : "Question en cours"}
-              </p>
-              <h3>{t(active.question)}</h3>
-              <div className="vd-now-playing-theme">
-                <span
-                  className="vd-dot"
-                  style={{ background: themeColor[active.theme] ?? "#143a66" }}
-                />
-                {themeLabel(active.theme)}
-              </div>
-            </div>
           </div>
 
           <aside
