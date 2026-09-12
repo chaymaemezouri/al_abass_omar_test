@@ -40,7 +40,12 @@ class MediaResult:
 
 class STTService(ABC):
     @abstractmethod
-    async def transcribe(self, audio_bytes: bytes, filename: str) -> str:
+    async def transcribe(
+        self,
+        audio_bytes: bytes,
+        filename: str,
+        language_hint: Optional[str] = None,
+    ) -> str:
         ...
 
 
@@ -126,5 +131,7 @@ class TTSService(ABC):
 
 class AvatarService(ABC):
     @abstractmethod
-    async def generate(self, audio_url: str, text: str) -> MediaResult:
+    async def generate(
+        self, audio_url: str, text: str, language: str = "fr"
+    ) -> MediaResult:
         ...

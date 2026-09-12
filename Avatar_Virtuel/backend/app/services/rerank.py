@@ -42,6 +42,18 @@ async def rerank_hits(question: str, hits: list[RagHit]) -> RagHit:
     if len(hits) == 1:
         return hits[0]
 
+    top, second = hits[0], hits[1]
+    top_score = top.score or 0.0
+    gap = top_score - (second.score or 0.0)
+    # Skip LLM when the vector ranking is already decisive (saves ~0.8–1s).
+    if top_score >= 0.84 and gap >= 0.04:
+        logger.info(
+            "rerank_skip_confident score=%.4f gap=%.4f",
+            top_score,
+            gap,
+        )
+        return top
+
     settings = get_settings()
     if not settings.gemini_api_key or settings.gemini_api_key.startswith("your-"):
         return hits[0]
@@ -55,7 +67,10 @@ async def rerank_hits(question: str, hits: list[RagHit]) -> RagHit:
             settings.translation_model,
             generation_config={"temperature": 0.0, "max_output_tokens": 8},
         )
-        raw = await asyncio.to_thread(model.generate_content, prompt)
+        raw = await asyncio.wait_for(
+            asyncio.to_thread(model.generate_content, prompt),
+            timeout=10.0,
+        )
         text = (raw.text or "").strip()
         m = re.search(r"[123]", text)
         if not m:

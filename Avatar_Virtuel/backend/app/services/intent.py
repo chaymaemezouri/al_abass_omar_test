@@ -209,7 +209,10 @@ async def _gemini_short(
             "max_output_tokens": max_output_tokens,
         },
     )
-    response = await asyncio.to_thread(model.generate_content, prompt)
+    response = await asyncio.wait_for(
+        asyncio.to_thread(model.generate_content, prompt),
+        timeout=12.0,
+    )
     return (response.text or "").strip()
 
 

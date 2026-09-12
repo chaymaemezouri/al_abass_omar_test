@@ -23,21 +23,30 @@ export function AvatarStage({
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const showPortrait = Boolean(portraitSrc) && !videoUrl;
 
   useEffect(() => {
     const el = videoRef.current;
     if (!el || !videoUrl) return;
+    // Stop any Edge TTS so only HeyGen voice plays with lip-sync.
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+    }
     el.style.display = "";
+    el.muted = false;
     el.load();
     el.play().catch(() => undefined);
   }, [videoUrl]);
 
   useEffect(() => {
     const el = audioRef.current;
-    if (!el || !audioUrl) return;
+    if (!el || !audioUrl || videoUrl) return;
     el.load();
     el.play().catch(() => undefined);
-  }, [audioUrl]);
+  }, [audioUrl, videoUrl]);
 
   const live = speaking || !idle;
 
@@ -49,22 +58,23 @@ export function AvatarStage({
         <div className="avx-avatar-ring" aria-hidden />
         <div className="avx-avatar-ring avx-avatar-ring--soft" aria-hidden />
 
-        <div className="avx-avatar-card">
-          {portraitSrc ? (
+        <div className={`avx-avatar-card${videoUrl ? " has-video" : ""}`}>
+          {showPortrait ? (
             <img src={portraitSrc} alt={name} className="avx-portrait-img" />
-          ) : (
+          ) : !videoUrl ? (
             <div className="avx-portrait-fallback">
               <span>AO</span>
             </div>
-          )}
+          ) : null}
 
           {videoUrl && (
             <video
               ref={videoRef}
               src={videoUrl}
               playsInline
-              muted={Boolean(audioUrl)}
+              muted={false}
               className="avx-video"
+              onEnded={onAudioEnded}
               onError={() => {
                 if (videoRef.current) videoRef.current.style.display = "none";
               }}
@@ -93,7 +103,7 @@ export function AvatarStage({
         )}
       </div>
 
-      {audioUrl && (
+      {audioUrl && !videoUrl && (
         <audio
           ref={audioRef}
           src={audioUrl}

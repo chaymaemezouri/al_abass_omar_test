@@ -13,11 +13,12 @@ import {
   Wand2,
 } from "lucide-react";
 
-import candidatePortrait from "@/assets/avatar-cutout.png";
+import candidatePortrait from "@/assets/heygen-avatar.png";
 import { useLang, suggestions } from "@/lib/i18n";
 import {
   askAvatarAudio,
   askAvatarTextStream,
+  generateAvatarVideo,
   simplifyAvatarAnswer,
   speakAvatar,
   type AvatarChatResponse,
@@ -51,7 +52,7 @@ function loadVoiceMode(): VoiceMode {
 export function AvatarExperience({ initialQuestion = "" }: Props) {
   const { lang, t, setLang, dir } = useLang();
   const ar = lang === "ar" || lang === "darija";
-  const languageHint = lang === "fr" ? "fr" : lang === "darija" ? "ary" : null;
+  const languageHint = lang === "fr" ? "fr" : lang === "darija" ? "ary" : "ar";
   const [question, setQuestion] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -67,6 +68,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [voiceMode, setVoiceMode] = useState<VoiceMode>(loadVoiceMode);
   const [simplifying, setSimplifying] = useState(false);
+  const [avatarGenerating, setAvatarGenerating] = useState(false);
   const historyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const mediaRef = useRef<MediaRecorder | null>(null);
@@ -74,6 +76,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const lastQuestionRef = useRef<string>("");
   const lastLanguageRef = useRef<string>("fr");
   const speakReqRef = useRef(0);
+  const avatarStartedRef = useRef(false);
 
   const copy = {
     brand: "Al Abass Omar",
@@ -104,6 +107,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     ),
     statusSpeaking: bi("L'avatar répond…", "الأفاتار يجيب…"),
     statusIdle: bi("Prêt à vous écouter", "جاهز للاستماع"),
+    statusGenerating: bi("Génération de l'avatar…", "جاري إنشاء الأفاتار…"),
     newChat: bi("Nouvelle conversation", "محادثة جديدة"),
     stopAudio: bi("Couper le son", "إيقاف الصوت"),
     copyAnswer: bi("Copier la réponse", "نسخ الجواب"),
@@ -126,9 +130,11 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
 
   function stopVoice() {
     speakReqRef.current += 1;
+    avatarStartedRef.current = false;
     setAudioUrl(null);
     setVideoUrl(null);
     setSpeaking(false);
+    setAvatarGenerating(false);
   }
 
   function toggleVoiceMode() {
@@ -173,13 +179,58 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     return undefined;
   }
 
-  async function maybeSpeak(answer: string, language: string, blocked: boolean) {
+  function firstSpeakableClip(text: string): string | null {
+    const cleaned = text.replace(/\s+/g, " ").trim();
+    if (cleaned.length < 28) return null;
+    for (const sep of [". ", "! ", "? ", "۔", "؟"]) {
+      const idx = cleaned.indexOf(sep);
+      if (idx >= 24) {
+        const end = idx + (sep.length === 1 ? 1 : 1);
+        const clip = cleaned.slice(0, end).trim();
+        if (clip.length >= 24) return clip.slice(0, 100);
+      }
+    }
+    if (cleaned.length >= 55) return cleaned.slice(0, 100);
+    return null;
+  }
+
+  async function maybeSpeak(
+    answer: string,
+    language: string,
+    blocked: boolean,
+    gen: number,
+  ) {
     if (voiceMode !== "voice" || !answer || blocked) return;
-    const reqId = ++speakReqRef.current;
     const url = await speakAvatar(answer, language);
-    if (url && speakReqRef.current === reqId) {
+    if (url && speakReqRef.current === gen) {
+      setVideoUrl(null);
       setAudioUrl(url);
       setSpeaking(true);
+    }
+  }
+
+  async function maybeAvatarVideo(
+    answer: string,
+    language: string,
+    blocked: boolean,
+    gen: number,
+  ) {
+    if (!answer || blocked) return false;
+    setAvatarGenerating(true);
+    try {
+      const url = await generateAvatarVideo(answer, language);
+      if (url && speakReqRef.current === gen) {
+        // One voice only: HeyGen video audio — never overlap Edge TTS.
+        setAudioUrl(null);
+        setVideoUrl(url);
+        setSpeaking(true);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    } finally {
+      if (speakReqRef.current === gen) setAvatarGenerating(false);
     }
   }
 
@@ -207,21 +258,34 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
       ];
     });
 
-    setVideoUrl(data.video_url);
-    setAudioUrl(data.audio_url);
-    setSpeaking(Boolean(data.audio_url || data.video_url));
+    if (data.video_url) {
+      setAudioUrl(null);
+      setVideoUrl(data.video_url);
+      setSpeaking(true);
+    }
     setFollowups(data.followups?.filter(Boolean).slice(0, 3) ?? []);
-    // Desktop: show follow-ups. Mobile: keep collapsed so chat stays visible.
     const wide =
       typeof window !== "undefined" &&
       window.matchMedia("(min-width: 981px)").matches;
     setShowSuggestions(wide);
 
-    if (!data.audio_url) {
-      void maybeSpeak(data.answer, data.language, data.blocked);
-    } else if (voiceMode === "voice") {
-      setSpeaking(true);
-    }
+    const gen = speakReqRef.current;
+    if (data.video_url || data.blocked) return;
+
+    // Don't block the chat UI on HeyGen — run in background.
+    if (avatarStartedRef.current) return;
+    avatarStartedRef.current = true;
+    void (async () => {
+      const gotVideo = await maybeAvatarVideo(
+        data.answer,
+        data.language,
+        data.blocked,
+        gen,
+      );
+      if (!gotVideo && speakReqRef.current === gen) {
+        await maybeSpeak(data.answer, data.language, data.blocked, gen);
+      }
+    })();
   }
 
   async function submitQuestion(text: string) {
@@ -234,6 +298,8 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     setError(null);
     setShowSuggestions(false);
     stopVoice();
+    avatarStartedRef.current = false;
+    const gen = speakReqRef.current;
     setTurns((prev) => [
       ...prev,
       { role: "user", text: cleaned },
@@ -260,6 +326,15 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
             }
             return next;
           });
+          // Start HeyGen ASAP on first sentence — hides ~half the wait.
+          if (!avatarStartedRef.current) {
+            const clip = firstSpeakableClip(snapshot);
+            if (clip) {
+              avatarStartedRef.current = true;
+              lastLanguageRef.current = languageHint || "fr";
+              void maybeAvatarVideo(clip, languageHint || "fr", false, gen);
+            }
+          }
         },
       });
       await applyAssistant(data, true);
@@ -443,7 +518,11 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
             name={copy.brand}
             portraitSrc={candidatePortrait}
             statusLabel={
-              loading || speaking ? t(copy.statusSpeaking) : t(copy.statusIdle)
+              avatarGenerating
+                ? t(copy.statusGenerating)
+                : loading || speaking
+                  ? t(copy.statusSpeaking)
+                  : t(copy.statusIdle)
             }
             onAudioEnded={() => setSpeaking(false)}
           />

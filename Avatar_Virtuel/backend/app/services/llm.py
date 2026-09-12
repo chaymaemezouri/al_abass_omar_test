@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class GeminiLLMService(LLMService):
     def __init__(self) -> None:
         settings = get_settings()
-        self.model_name = settings.translation_model or settings.llm_model
+        self.model_name = settings.llm_model or settings.translation_model
         self.api_key = settings.gemini_api_key
 
     async def reformulate(
@@ -43,7 +43,10 @@ class GeminiLLMService(LLMService):
             prompt = build_reformulation_prompt(
                 language, reponse_source, question, historique=historique
             )
-            response = await asyncio.to_thread(model.generate_content, prompt)
+            response = await asyncio.wait_for(
+                asyncio.to_thread(model.generate_content, prompt),
+                timeout=15.0,
+            )
             text = (response.text or "").strip()
             return LlmResult(text=text, provider="gemini", model=self.model_name)
         except Exception:

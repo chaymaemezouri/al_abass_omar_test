@@ -182,6 +182,25 @@ export async function speakAvatar(
   return mediaUrl(data.audio_url ?? null);
 }
 
+export async function generateAvatarVideo(
+  text: string,
+  language: string,
+): Promise<string | null> {
+  const lang = language === "ary" || language === "ar" || language === "fr" ? language : "fr";
+  const res = await fetch(`${getAvatarApiUrl()}/api/v1/chat/avatar`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, language: lang }),
+  });
+  if (!res.ok) return null;
+  const data = (await res.json()) as {
+    video_url?: string | null;
+    success?: boolean;
+  };
+  if (!data.success) return null;
+  return mediaUrl(data.video_url ?? null);
+}
+
 export async function askAvatarAudio(
   blob: Blob,
   filename: string,

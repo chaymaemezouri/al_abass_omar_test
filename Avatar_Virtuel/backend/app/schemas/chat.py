@@ -54,6 +54,26 @@ class SpeakResponse(BaseModel):
     success: bool = False
 
 
+class AvatarMediaRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=4000)
+    language: Literal["fr", "ar", "ary"] = "fr"
+
+    @field_validator("text")
+    @classmethod
+    def strip_text(cls, v: str) -> str:
+        cleaned = v.strip()
+        if not cleaned:
+            raise ValueError("Le texte ne peut pas être vide")
+        return cleaned
+
+
+class AvatarMediaResponse(BaseModel):
+    video_url: Optional[str] = None
+    success: bool = False
+    provider: Optional[str] = None
+    error: Optional[str] = None
+
+
 class SimplifyRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=4000)
     language: Literal["fr", "ar", "ary"] = "fr"

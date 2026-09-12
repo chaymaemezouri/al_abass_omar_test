@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
 
     stt_provider: str = "faster_whisper"
-    stt_model_size: str = "base"
+    stt_model_size: str = "small"
     whisper_api_key: str = ""
 
     tts_provider: str = "edge"
@@ -65,6 +65,10 @@ class Settings(BaseSettings):
     avatar_provider: str = "mock"
     heygen_api_key: str = ""
     heygen_avatar_id: str = ""
+    # Optional overrides; if empty, HeyGen look default / sensible FR-AR voices are used.
+    heygen_voice_id: str = ""
+    heygen_voice_id_fr: str = "f2e07fa46261456b9eea3b35ae8f24ce"  # Antoine
+    heygen_voice_id_ar: str = "ee8d15f1254b4f8691cba4c663e0c005"  # Arabic male
     did_api_key: str = ""
     did_source_url: str = ""
 

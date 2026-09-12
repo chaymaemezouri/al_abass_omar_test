@@ -101,6 +101,7 @@ async def _run_programme_rag(
     question: str,
     language: str,
     generate_media: bool,
+    include_followups: bool = True,
 ) -> ChatResponse:
     """Strict RAG path — retrieve from KB then reformulate in user language."""
     history = _history_text(session)
@@ -141,23 +142,31 @@ async def _run_programme_rag(
         return RagResult(hits=hits, best_score=best_score, above_threshold=above)
 
     with time_step("rag_multi"):
-        searches: list[RagResult] = []
-        # 1) query as written (hits FR/Darija paraphrase chunks)
-        searches.append(await _search_raw(search_question))
-        # 2) Arabic translation (hits MSA programme chunks)
-        if language != "ar":
+        # Primary search (FR/Darija paraphrases). Skip AR translate when already strong.
+        primary = await _search_raw(search_question)
+        searches: list[RagResult] = [primary]
+        if language != "ar" and (primary.best_score or 0) < 0.78:
             with time_step("translate"):
                 ar_q = await translate_query_to_arabic(search_question, language)
             if ar_q.strip() and ar_q.strip() != search_question.strip():
                 searches.append(await _search_raw(ar_q))
-        # 3) original user wording if expand/extract changed it
         if search_question.strip() != question.strip():
             searches.append(await _search_raw(question))
-            if language != "ar":
-                ar_orig = await translate_query_to_arabic(question, language)
-                if ar_orig.strip() and ar_orig.strip() != question.strip():
-                    searches.append(await _search_raw(ar_orig))
         rag_result = await _merge_results(*searches)
+
+    async def _maybe_followups(
+        best_hit: RagHit | None, hits: list[RagHit], answered: str
+    ) -> list[str]:
+        if not include_followups:
+            return []
+        return await build_followups(
+            db,
+            language=language,
+            best=best_hit,
+            hits=hits,
+            answered_question=answered,
+            limit=3,
+        )
 
     if not rag_result.above_threshold or not rag_result.hits:
         logger.info(
@@ -167,14 +176,7 @@ async def _run_programme_rag(
             language,
         )
         answer = FALLBACK_MESSAGES.get(language, FALLBACK_MESSAGES["fr"])
-        followups = await build_followups(
-            db,
-            language=language,
-            best=None,
-            hits=[],
-            answered_question=question,
-            limit=3,
-        )
+        followups = await _maybe_followups(None, [], question)
         return await _finalize(
             db,
             session,
@@ -202,14 +204,7 @@ async def _run_programme_rag(
             language,
         )
         answer = FALLBACK_MESSAGES.get(language, FALLBACK_MESSAGES["fr"])
-        followups = await build_followups(
-            db,
-            language=language,
-            best=None,
-            hits=[],
-            answered_question=question,
-            limit=3,
-        )
+        followups = await _maybe_followups(None, [], question)
         return await _finalize(
             db,
             session,
@@ -238,8 +233,23 @@ async def _run_programme_rag(
         len(rag_result.hits),
     )
 
-    # Fast path: Arabic MSA + near-exact match → return source without LLM
-    if language == "ar" and (best.score or 0) >= 0.92:
+    hit_lang = (best.langue or "").lower()
+    # Fast path: high-confidence hit already in user language → skip reformulate
+    if (best.score or 0) >= 0.88 and (
+        (language == "ar" and hit_lang.startswith("ar"))
+        or (language == "fr" and hit_lang.startswith("fr"))
+        or (
+            language == "ary"
+            and ("ary" in hit_lang or "darija" in hit_lang or hit_lang.startswith("ar"))
+        )
+    ):
+        logger.info(
+            "llm_skip_high_confidence score=%.4f hit_lang=%s",
+            best.score or 0,
+            hit_lang,
+        )
+        answer = reponse_source
+    elif language == "ar" and (best.score or 0) >= 0.92:
         logger.info("llm_skip_high_confidence_ar score=%.4f", best.score or 0)
         answer = reponse_source
     else:
@@ -288,14 +298,7 @@ async def _run_programme_rag(
             )
 
     with time_step("followups"):
-        followups = await build_followups(
-            db,
-            language=language,
-            best=best,
-            hits=rag_result.hits,
-            answered_question=best.question,
-            limit=3,
-        )
+        followups = await _maybe_followups(best, rag_result.hits, best.question)
 
     return await _finalize(
         db,
@@ -320,6 +323,7 @@ async def run_text_pipeline(
     client_hash: Optional[str],
     language_hint: Optional[str] = None,
     generate_media: bool = True,
+    include_followups: bool = True,
 ) -> ChatResponse:
     start_latency_profile()
     await purge_expired_sessions(db)
@@ -481,7 +485,12 @@ async def run_text_pipeline(
                 "empty" if not conv else "unsafe_content",
             )
             return await _run_programme_rag(
-                db, session, question, language, generate_media
+                db,
+                session,
+                question,
+                language,
+                generate_media,
+                include_followups=include_followups,
             )
         with time_step("conversational_llm"):
             conv2 = await generate_conversational_reply(language, question)
@@ -519,7 +528,12 @@ async def run_text_pipeline(
         )
 
     return await _run_programme_rag(
-        db, session, question, language, generate_media
+        db,
+        session,
+        question,
+        language,
+        generate_media,
+        include_followups=include_followups,
     )
 
 
@@ -550,7 +564,9 @@ async def _finalize(
             if get_settings().avatar_provider.lower() != "mock":
                 avatar = get_avatar_service()
                 with time_step("avatar"):
-                    avatar_result = await avatar.generate(audio_url or "", answer)
+                    avatar_result = await avatar.generate(
+                        audio_url or "", answer, language=language
+                    )
                 if avatar_result.success:
                     video_url = avatar_result.url
                 else:

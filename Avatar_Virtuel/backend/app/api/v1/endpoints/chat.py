@@ -14,6 +14,8 @@ from app.core.prompts import STT_FAILURE
 from app.core.security import get_client_hash, limiter
 from app.db.session import get_db
 from app.schemas.chat import (
+    AvatarMediaRequest,
+    AvatarMediaResponse,
     ChatResponse,
     ChatTextRequest,
     SimplifyRequest,
@@ -21,6 +23,7 @@ from app.schemas.chat import (
     SpeakRequest,
     SpeakResponse,
 )
+from app.services.avatar import get_avatar_service
 from app.services.language import get_language_service
 from app.services.pipeline import run_text_pipeline, simplify_answer
 from app.services.stt import get_stt_service
@@ -84,6 +87,33 @@ async def chat_speak(request: Request, body: SpeakRequest) -> SpeakResponse:
         return SpeakResponse(audio_url=None, success=False)
 
 
+@router.post("/avatar", response_model=AvatarMediaResponse)
+@limiter.limit(get_settings().rate_limit_chat)
+async def chat_avatar(request: Request, body: AvatarMediaRequest) -> AvatarMediaResponse:
+    """Lip-sync video only (HeyGen/D-ID) — called after fast text/TTS so chat stays snappy."""
+    settings = get_settings()
+    lang = body.language if body.language in {"fr", "ar", "ary"} else "fr"
+    if settings.avatar_provider.lower() == "mock":
+        return AvatarMediaResponse(video_url=None, success=True, provider="mock")
+    try:
+        avatar = get_avatar_service()
+        result = await avatar.generate(audio_url="", text=body.text, language=lang)
+        return AvatarMediaResponse(
+            video_url=result.url if result.success else None,
+            success=result.success,
+            provider=result.provider,
+            error=None if result.success else result.error,
+        )
+    except Exception as exc:
+        logger.exception("chat_avatar_error")
+        return AvatarMediaResponse(
+            video_url=None,
+            success=False,
+            provider=settings.avatar_provider,
+            error=str(exc),
+        )
+
+
 @router.post("/simplify", response_model=SimplifyResponse)
 @limiter.limit(get_settings().rate_limit_chat)
 async def chat_simplify(request: Request, body: SimplifyRequest) -> SimplifyResponse:
@@ -125,14 +155,18 @@ async def chat_stream(
                 client_hash=client_hash,
                 language_hint=body.language_hint,
                 generate_media=False,
+                include_followups=False,
             )
-            # Word-by-word reveal (pipeline is sync; tokens improve perceived latency)
+            # Reveal quickly (pipeline already finished; avoid slow fake typing)
             text = result.answer or ""
             words = text.split(" ") if text else []
-            for i, word in enumerate(words):
-                piece = word + (" " if i < len(words) - 1 else "")
+            chunk_size = 4
+            for i in range(0, len(words), chunk_size):
+                piece = " ".join(words[i : i + chunk_size])
+                if i + chunk_size < len(words):
+                    piece += " "
                 yield _sse({"type": "token", "text": piece})
-                await asyncio.sleep(0.018)
+                await asyncio.sleep(0)
             payload = result.model_dump(mode="json")
             yield _sse({"type": "done", "data": payload})
         except Exception as exc:
@@ -193,7 +227,8 @@ async def chat_audio(
 
     try:
         stt = get_stt_service()
-        transcript = await stt.transcribe(raw, filename)
+        transcript = await stt.transcribe(raw, filename, language_hint=hint)
+        logger.info("stt_transcript_preview len=%s hint=%s", len(transcript or ""), hint)
     except Exception:
         logger.exception("stt_failed")
         language = hint or "fr"
