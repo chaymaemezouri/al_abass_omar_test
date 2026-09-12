@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════
    Video Dialogue — 2026 Light Premium Theme
-   Clean institutional design · White & warm grays · Red accent
+   Clean institutional design · White & warm grays · Navy accent
    Font: Inter · Scale: 11 / 12 / 13 / 14 / 16 / 20 / 28px
    ════════════════════════════════════════════════════════════════ */
 
@@ -13,13 +13,13 @@
   --vd-bg-raised: #ffffff;
   --vd-bg-card: #ffffff;
   --vd-bg-card-hover: #f0f3f7;
-  --vd-bg-card-active: #fef2f3;
+  --vd-bg-card-active: #eef3f9;
   --vd-bg-input: #f0f2f5;
   --vd-bg-player: #0c1017;
-  --vd-red: #c41425;
-  --vd-red-hover: #a8101f;
-  --vd-red-soft: #fef2f3;
-  --vd-red-glow: rgba(196, 20, 37, 0.06);
+  --vd-red: #143a66;
+  --vd-red-hover: #0f2d50;
+  --vd-red-soft: #eef3f9;
+  --vd-red-glow: rgba(20, 58, 102, 0.08);
   --vd-ink: #1a1f2e;
   --vd-ink-2: #4a5568;
   --vd-ink-3: #8a95a8;
@@ -95,7 +95,7 @@
   font-size: 30px;
   font-weight: 800;
   line-height: 1.15;
-  color: var(--vd-ink);
+  color: #c55a27;
   margin: 0 0 8px;
   letter-spacing: -0.02em;
 }
@@ -182,16 +182,16 @@
 .vd-format-switch button[aria-pressed="true"] {
   background: var(--vd-red);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(196, 20, 37, 0.25);
+  box-shadow: 0 2px 8px rgba(197, 90, 39, 0.25);
 }
 .vd-format-switch button:not([aria-pressed="true"]):hover:not(:disabled) {
   color: var(--vd-ink);
   background: var(--vd-bg-card-hover);
 }
 
-/* ── Now-playing info below video ── */
+/* ── Now-playing info above video ── */
 .vd-now-playing {
-  margin-top: 18px;
+  margin: 12px 0 14px;
   padding: 20px 24px;
   background: var(--vd-bg-white);
   border: 1px solid var(--vd-border);
@@ -296,10 +296,10 @@
   aspect-ratio: 9/16;
   max-height: min(520px, 58svh);
   margin: 0 auto;
-  background: #000;
+  background: #f4f0e8;
   overflow: hidden;
   border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(9, 28, 57, 0.14);
   touch-action: pan-x;
 }
 .episode-frame video {
@@ -308,6 +308,40 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  background: #f4f0e8;
+}
+.episode-idle {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px 20px;
+  overflow: hidden;
+  background: #ffffff;
+  pointer-events: none;
+}
+.episode-idle-logo {
+  width: min(72%, 210px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(20, 58, 102, 0.12));
+}
+.episode-idle-play {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  color: #fff;
+  background: #143a66;
+  box-shadow: 0 10px 24px rgba(9, 28, 57, 0.28);
+}
+.episode-idle-play svg {
+  margin-inline-start: 2px;
 }
 .episode-navigation {
   display: flex;
@@ -400,7 +434,7 @@
 .episode-transcript-tools { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .episode-transcript-line { display: grid; grid-template-columns: 44px minmax(0,1fr); gap: 10px; text-align: start; width: 100%; padding: 10px; border-radius: 6px; font-size: 13px; line-height: 1.7; }
 .episode-transcript-line > span:first-child { color: #6b7a8d; font-size: 11px; font-variant-numeric: tabular-nums; }
-.episode-transcript-line.is-current { background: rgba(196,20,37,0.1); border-inline-start: 2px solid var(--vd-red); }
+.episode-transcript-line.is-current { background: rgba(197,90,39,0.1); border-inline-start: 2px solid var(--vd-red); }
 .episode-chapters { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 10px; }
 .episode-chapters button { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #a8b5c4; }
 .episode-chapters span { color: #6b7a8d; font-variant-numeric: tabular-nums; }
@@ -501,7 +535,7 @@
   background: var(--vd-red);
   border-color: var(--vd-red);
   color: white;
-  box-shadow: 0 2px 6px rgba(196,20,37,0.2);
+  box-shadow: 0 2px 6px rgba(197,90,39,0.2);
 }
 
 /* ── Sort ── */
@@ -569,7 +603,7 @@
 .vd-question-card.is-active {
   border-color: var(--vd-red);
   background: var(--vd-bg-card-active);
-  box-shadow: 0 0 0 1px var(--vd-red), 0 4px 16px rgba(196,20,37,0.08);
+  box-shadow: 0 0 0 1px var(--vd-red), 0 4px 16px rgba(197,90,39,0.08);
 }
 .vd-question-card.is-active::before {
   content: "";
@@ -587,18 +621,20 @@
   position: relative;
   width: 54px;
   height: 66px;
-  background: #edf0f4;
+  background: #ffffff;
   border-radius: var(--vd-radius-sm);
   overflow: hidden;
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  border: 1px solid var(--vd-border);
 }
 .vd-thumbnail > img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: top;
+  object-fit: contain;
+  object-position: center bottom;
+  background: #ffffff;
 }
 .vd-thumbnail > svg { color: var(--vd-ink-3); }
 .vd-thumbnail-number {
@@ -1041,7 +1077,14 @@
   .vd-sheet { display: block; }
   .vd-player { position: relative; }
   .vd-player-meta { margin-bottom: 8px; }
-  .vd-now-playing { display: none; }
+  .vd-now-playing {
+    display: block;
+    margin: 10px 0 12px;
+    padding: 14px 16px;
+  }
+  .vd-now-playing h3 {
+    font-size: 16px;
+  }
 
   /* Mobile: video only, 2px frame, no dark stage/blur */
   .episode-stage {
@@ -1071,16 +1114,15 @@
     max-height: min(72svh, 620px);
     margin: 0;
     border: 2px solid var(--vd-ink);
-    border-radius: 14px 14px 0 0;
+    border-radius: 14px;
     box-shadow: none;
-    background: #000;
+    background: #f4f0e8;
   }
   .vd-mobile-rail {
     margin: 0;
     padding: 10px 10px 8px;
     border: 2px solid var(--vd-ink);
-    border-top: 0;
-    border-radius: 0 0 14px 14px;
+    border-radius: 14px;
     background: var(--vd-bg-white);
     box-shadow: none;
   }
@@ -1094,14 +1136,13 @@
   .vd-sidebar-header { padding: 16px 16px 0; }
   .vd-sidebar-scroll { padding: 0 16px 12px; }
   .vd-mobile-chip-text { max-width: 9.5rem; }
-  .episode-frame {
-    border-width: 2px;
-    border-radius: 12px 12px 0 0;
-  }
   .vd-mobile-rail {
     border-width: 2px;
-    border-top: 0;
-    border-radius: 0 0 12px 12px;
+    border-radius: 12px;
+  }
+  .episode-frame {
+    border-width: 2px;
+    border-radius: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

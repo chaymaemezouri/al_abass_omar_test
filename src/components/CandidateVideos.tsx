@@ -8,7 +8,7 @@ import {
   Search,
   X,
 } from "lucide-react";
-import portrait from "@/assets/image-original-cutout.png";
+import portrait from "@/assets/condidat.png";
 import { Logo, BasmaMark } from "@/components/Logo";
 import {
   candidateVideos,
@@ -154,7 +154,7 @@ export function CandidateVideos() {
     url.hash = "";
     window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`);
     if (window.matchMedia("(max-width: 1023px)").matches)
-      document.getElementById("video-dialogue-player")?.scrollIntoView({
+      document.getElementById("vd-question-rail")?.scrollIntoView({
         block: "start",
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
       });
@@ -181,7 +181,7 @@ export function CandidateVideos() {
   }
 
   const themeColor: Record<string, string> = {
-    programme: "#c41425",
+    programme: "#143a66",
     numerique: "#6db8ff",
     emploi: "#4dd991",
     economie: "#5dd0a4",
@@ -333,13 +333,6 @@ export function CandidateVideos() {
           </div>
           <div className="vd-counter">
             <Logo decorative className="hidden h-12 w-auto sm:block" />
-            <span className="vd-counter-pill">
-              <span className="vd-dot" />
-              {candidateVideos.filter((v) => v.src).length} {ar ? "فيديو" : "vidéos"}
-            </span>
-            <span className="vd-counter-pill">
-              {candidateVideos.length} {ar ? "سؤال" : "questions"}
-            </span>
           </div>
         </div>
       </div>
@@ -383,29 +376,8 @@ export function CandidateVideos() {
               </div>
             </div>
 
-            <VideoEpisode
-              key={`${active.id}-${format}-${episodeKey}`}
-              video={active}
-              recording={recording}
-              shouldPlay={playOnSelection}
-              onPlaying={setPlaying}
-              onDuration={(value) => {
-                if (format === "detailed")
-                  setDurations((state) =>
-                    state[active.id] === value ? state : { ...state, [active.id]: value },
-                  );
-              }}
-              position={`${String(activeIndex + 1).padStart(2, "0")} / ${candidateVideos.length}`}
-              onPrevious={previous ? () => choose(previous) : undefined}
-              onNext={next ? () => choose(next) : undefined}
-              onEnded={() => {
-                setEnded(true);
-                if (autoNext && nextAvailable) choose(nextAvailable);
-              }}
-            />
-
-            {/* Mobile: carousel glued under the video */}
-            <div className="vd-mobile-rail">
+            {/* Question chips above the video */}
+            <div className="vd-mobile-rail" id="vd-question-rail">
               <div className="vd-mobile-rail-head">
                 <p className="vd-mobile-rail-meta">
                   {String(activeIndex + 1).padStart(2, "0")} / {candidateVideos.length}
@@ -430,7 +402,7 @@ export function CandidateVideos() {
                       type="button"
                       className={`vd-mobile-chip ${isActive ? "is-active" : ""}`}
                       aria-pressed={isActive}
-                      onClick={() => choose(video)}
+                      onClick={() => choose(video, true)}
                     >
                       <span className="vd-mobile-chip-num">
                         {String(index).padStart(2, "0")}
@@ -450,11 +422,32 @@ export function CandidateVideos() {
               <div className="vd-now-playing-theme">
                 <span
                   className="vd-dot"
-                  style={{ background: themeColor[active.theme] ?? "#c41425" }}
+                  style={{ background: themeColor[active.theme] ?? "#143a66" }}
                 />
                 {themeLabel(active.theme)}
               </div>
             </div>
+
+            <VideoEpisode
+              key={`${active.id}-${format}-${episodeKey}`}
+              video={active}
+              recording={recording}
+              shouldPlay={playOnSelection}
+              onPlaying={setPlaying}
+              onDuration={(value) => {
+                if (format === "detailed")
+                  setDurations((state) =>
+                    state[active.id] === value ? state : { ...state, [active.id]: value },
+                  );
+              }}
+              position={`${String(activeIndex + 1).padStart(2, "0")} / ${candidateVideos.length}`}
+              onPrevious={previous ? () => choose(previous) : undefined}
+              onNext={next ? () => choose(next) : undefined}
+              onEnded={() => {
+                setEnded(true);
+                if (autoNext && nextAvailable) choose(nextAvailable);
+              }}
+            />
           </div>
 
           <aside

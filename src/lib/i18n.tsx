@@ -57,6 +57,8 @@ export const ui = {
     fr: "Cette solution vise à passer de la présentation traditionnelle du programme électoral à un modèle moderne fondé sur la communication numérique, l'interaction, la transparence, et la facilitation de l'accès du citoyen à l'information électorale.",
     ar: "ويهدف هذا الحل إلى الانتقال من العرض التقليدي للبرنامج الانتخابي إلى نموذج حديث يقوم على التواصل الرقمي، التفاعل، الشفافية، وتيسير وصول المواطن إلى المعلومة الانتخابية.",
   },
+  aboutContact: { fr: "Contact", ar: "للتواصل" },
+  aboutLinkedIn: { fr: "LinkedIn — Mostafa Ezziyyani", ar: "LinkedIn — مصطفى الزياني" },
   ctaProgram: { fr: "Découvrir la plateforme électorale", ar: "اكتشف الأرضية الانتخابية" },
   ctaChat: { fr: "Parler à la version numérique", ar: "تحدث مع النسخة الرقمية" },
   keyFigures: { fr: "Chiffres clés", ar: "أرقام أساسية" },

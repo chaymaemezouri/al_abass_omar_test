@@ -16,7 +16,9 @@ import {
   Menu,
   MessageSquareText,
   Mic,
+  Mail,
   MonitorSmartphone,
+  Phone,
   RadioTower,
   Scale,
   Send,
@@ -35,6 +37,7 @@ import candidatePortrait from "@/assets/image-original-cutout.png";
 import programmePdf from "@/assets/programme-electoral-2026.pdf";
 import companyLogo from "@/assets/expertise-consulting.png";
 import companyLogoMark from "@/assets/expertise-consulting-mark.png";
+import linkedInQr from "@/assets/QR_LinkedIn_Mostafa_Ezziyyani.png";
 import carte1 from "@/assets/cartes/carte1 (1).png";
 import carte2 from "@/assets/cartes/carte1 (2).png";
 import carte3 from "@/assets/cartes/carte1 (3).png";
@@ -550,7 +553,7 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
               <div className="flex-1" />
 
               {/* Big KPI */}
-              <p className="text-3xl font-black leading-none text-white drop-shadow-lg">
+              <p className="text-3xl font-black leading-none text-white drop-shadow-lg" dir="ltr">
                 {engagement.bigNumber}
               </p>
               <p className="mt-0.5 text-xs font-semibold text-white/75">
@@ -578,7 +581,10 @@ function EngagementCard({ engagement }: { engagement: Engagement }) {
           {/* ══════ BACK ══════ */}
           <div className="absolute inset-0 overflow-hidden rounded-2xl border border-border bg-white shadow-card [backface-visibility:hidden] [transform:rotateY(180deg)]">
             {/* Watermark number */}
-            <span className="pointer-events-none absolute -bottom-4 -right-2 select-none text-[80px] font-black leading-none text-navy/[0.04]">
+            <span
+              className="pointer-events-none absolute -bottom-4 -right-2 select-none text-[80px] font-black leading-none text-navy/[0.04]"
+              dir="ltr"
+            >
               {engagement.bigNumber}
             </span>
 
@@ -697,7 +703,9 @@ function AxisPanel({ axisId }: { axisId: (typeof axes)[number]["id"] }) {
           </div>
         )}
         <div className="mt-5 flex items-baseline gap-3 rounded-md bg-ivory p-4">
-          <span className="text-2xl font-extrabold text-morocco">{axis.stat.value}</span>
+          <span className="text-2xl font-extrabold text-morocco" dir="ltr">
+            {axis.stat.value}
+          </span>
           <span className="text-xs text-muted-foreground">{t(axis.stat.label)}</span>
         </div>
       </article>
@@ -988,7 +996,7 @@ function Page() {
                 <div className="hero-features mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5">
                   {heroFeatures.map((item) => (
                     <div key={item.label.fr} className="text-center sm:text-start">
-                      <item.icon className="mx-auto h-5 w-5 text-[#b57905] sm:mx-0 sm:h-6 sm:w-6" />
+                      <item.icon className="mx-auto h-5 w-5 text-morocco sm:mx-0 sm:h-6 sm:w-6" />
                       <p className="mt-1.5 text-[0.68rem] font-semibold leading-snug text-navy sm:text-[0.72rem]">
                         {t(item.label)}
                       </p>
@@ -1029,23 +1037,23 @@ function Page() {
                         {t(copy.captionCandidateShort)}
                       </p>
                     </div>
-                    <img
-                      src={candidatePortrait}
-                      alt={t(copy.heroCandidateName)}
+                <img
+                  src={candidatePortrait}
+                  alt={t(copy.heroCandidateName)}
                       className="hero-candidate-img relative z-0 mx-auto h-auto max-h-[min(72vh,580px)] w-full object-contain object-bottom"
-                    />
-                  </div>
-                </div>
+                />
+            </div>
+          </div>
               </Reveal>
 
               <Reveal className="assistant-hero-card relative z-10 flex w-full flex-col gap-3 self-center overflow-hidden rounded-2xl bg-navy/95 p-4 text-white shadow-elegant backdrop-blur-sm sm:gap-3.5 sm:p-5 lg:max-w-[21rem] lg:justify-self-center lg:self-center lg:rounded-2xl lg:pb-4">
                 <BasmaMark tone="white" size="md" className="-end-6 -bottom-8 rotate-12" />
                 <div className="flex items-start gap-3">
-                  <img
-                    src={assistantPortrait}
-                    alt={t(copy.assistantNote)}
+                <img
+                  src={assistantPortrait}
+                  alt={t(copy.assistantNote)}
                     className="h-12 w-12 shrink-0 rounded-full border border-white/30 object-cover object-top shadow-elegant sm:h-14 sm:w-14"
-                  />
+                />
                   <div className="min-w-0">
                     <h2 className="text-base font-extrabold leading-snug sm:text-lg">
                       {t(copy.assistantNote)}
@@ -1119,7 +1127,9 @@ function Page() {
                           {t(metric.detail)}
                         </span>
                       </div>
-                      <p className="mt-4 text-3xl font-extrabold text-navy">{metric.value}</p>
+                      <p className="mt-4 text-3xl font-extrabold text-navy" dir="ltr">
+                        {metric.value}
+                      </p>
                       <p className="mt-1 text-sm font-semibold text-muted-foreground">
                         {t(metric.label)}
                       </p>
@@ -1352,25 +1362,25 @@ function Page() {
         <section className="relative overflow-hidden bg-ivory py-10 sm:py-20">
           <BasmaMark tone="teal" size="lg" className="left-1/2 top-8 -translate-x-1/2 opacity-[0.09]" />
           <div className="relative mx-auto max-w-7xl px-4">
-            <SectionHeading title={t(financing.title)} lead={t(financing.note)} />
+              <SectionHeading title={t(financing.title)} lead={t(financing.note)} />
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {financing.items.map((item) => (
-                <Reveal key={item.share}>
-                  <article className="group rounded-md border border-border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-morocco/40">
-                    <div className="flex items-center justify-between gap-4">
-                      <h3 className="text-base text-navy">{t(item.label)}</h3>
-                      <span className="grid h-11 w-11 place-items-center rounded-md bg-morocco/10 text-xl font-extrabold text-morocco">
-                        {item.share}
-                      </span>
-                    </div>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                      {t(item.detail)}
-                    </p>
-                  </article>
-                </Reveal>
-              ))}
+                {financing.items.map((item) => (
+                  <Reveal key={item.share}>
+                    <article className="group rounded-md border border-border bg-card p-5 shadow-card transition-all hover:-translate-y-0.5 hover:border-morocco/40">
+                      <div className="flex items-center justify-between gap-4">
+                        <h3 className="text-base text-navy">{t(item.label)}</h3>
+                        <span className="grid h-11 w-11 place-items-center rounded-md bg-morocco/10 text-xl font-extrabold text-morocco">
+                          {item.share}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                        {t(item.detail)}
+                      </p>
+                    </article>
+                  </Reveal>
+                ))}
+              </div>
             </div>
-          </div>
         </section>
 
         <section id="apropos" className="relative scroll-mt-28 overflow-hidden bg-white py-10 sm:py-16">
@@ -1382,6 +1392,39 @@ function Page() {
               <p>{t(ui.aboutP2)}</p>
               <p>{t(ui.aboutP3)}</p>
               <p>{t(ui.aboutP4)}</p>
+              <div className="pt-1">
+                <p className="text-[0.7rem] font-extrabold uppercase tracking-[0.12em] text-morocco">
+                  {t(ui.aboutContact)}
+                </p>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+                  <div className="flex min-w-0 flex-col gap-1.5" dir="ltr">
+                    <a
+                      href="mailto:ezziyyani@gmail.com"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-navy transition-colors hover:text-morocco"
+                    >
+                      <Mail className="h-3.5 w-3.5 shrink-0 text-morocco" />
+                      <span className="truncate">ezziyyani@gmail.com</span>
+                    </a>
+                    <a
+                      href="tel:+212661630301"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-navy transition-colors hover:text-morocco"
+                    >
+                      <Phone className="h-3.5 w-3.5 shrink-0 text-morocco" />
+                      +212 661-630301
+                    </a>
+                  </div>
+                  <figure className="flex items-center gap-2">
+                    <img
+                      src={linkedInQr}
+                      alt={t(ui.aboutLinkedIn)}
+                      className="h-11 w-11 rounded bg-white object-contain sm:h-12 sm:w-12"
+                    />
+                    <figcaption className="max-w-[5.5rem] text-[0.65rem] font-semibold leading-snug text-muted-foreground">
+                      {t(ui.aboutLinkedIn)}
+                    </figcaption>
+                  </figure>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -1406,8 +1449,8 @@ function Page() {
               <p className="text-xs font-bold text-morocco-light" dir="rtl">
                 صوتوا على الشباب · صوتوا على رمز البصمة
               </p>
-              <p className="text-sm font-extrabold text-morocco-light" dir="ltr">
-                #عمل_جيم_للشباب
+              <p className="text-sm font-extrabold text-morocco-light" dir="rtl">
+                {"\u200F"}#عمل_جيم_للشباب
               </p>
             </div>
 
@@ -1441,14 +1484,14 @@ function Page() {
                   <Download className="h-4 w-4" />
                   {t(copy.download)}
                 </a>
-                <button
-                  type="button"
-                  onClick={openChat}
+                  <button
+                    type="button"
+                    onClick={openChat}
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/25 bg-white/5 px-4 text-sm font-extrabold text-white transition-colors hover:bg-white/10 lg:justify-start"
-                >
+                  >
                   <MessageSquareText className="h-4 w-4" />
                   {t(ui.nav.chat)}
-                </button>
+                  </button>
               </div>
               <p className="mt-4 text-xs leading-relaxed text-white/55">{t(ui.footerLegal)}</p>
             </div>

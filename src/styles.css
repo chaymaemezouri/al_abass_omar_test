@@ -64,9 +64,9 @@
   --radius: 0.5rem;
   --navy: oklch(0.235 0.061 256);
   --royal: oklch(0.34 0.076 250);
-  --morocco: oklch(0.48 0.19 27);
-  --morocco-dark: oklch(0.38 0.16 27);
-  --morocco-light: oklch(0.72 0.17 36);
+  --morocco: #c55a27;
+  --morocco-dark: #9e461c;
+  --morocco-light: #e08a5a;
   --teal: oklch(0.48 0.09 185);
   --ivory: oklch(0.975 0.012 92);
   --surface: oklch(0.965 0.008 98);
@@ -82,13 +82,13 @@
   --secondary-foreground: oklch(0.235 0.061 256);
   --muted: oklch(0.944 0.012 96);
   --muted-foreground: oklch(0.48 0.035 256);
-  --accent: oklch(0.48 0.19 27);
+  --accent: #c55a27;
   --accent-foreground: oklch(0.99 0.004 96);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.87 0.018 94);
   --input: oklch(0.87 0.018 94);
-  --ring: oklch(0.48 0.19 27);
+  --ring: #c55a27;
   --chart-1: var(--navy);
   --chart-2: var(--morocco);
   --chart-3: var(--teal);
@@ -101,7 +101,7 @@
   --sidebar-accent: oklch(0.93 0.014 96);
   --sidebar-accent-foreground: oklch(0.235 0.061 256);
   --sidebar-border: oklch(0.87 0.018 94);
-  --sidebar-ring: oklch(0.48 0.19 27);
+  --sidebar-ring: #c55a27;
   --gradient-hero: linear-gradient(
     135deg,
     var(--navy) 0%,
@@ -126,21 +126,21 @@
   --secondary-foreground: oklch(0.97 0.006 96);
   --muted: oklch(0.26 0.04 256);
   --muted-foreground: oklch(0.72 0.025 256);
-  --accent: oklch(0.62 0.17 30);
+  --accent: #e08a5a;
   --accent-foreground: oklch(0.98 0.006 96);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.62 0.17 30);
+  --ring: #e08a5a;
   --sidebar: oklch(0.18 0.035 256);
   --sidebar-foreground: oklch(0.97 0.006 96);
-  --sidebar-primary: oklch(0.62 0.17 30);
+  --sidebar-primary: #e08a5a;
   --sidebar-primary-foreground: oklch(0.98 0.006 96);
   --sidebar-accent: oklch(0.26 0.04 256);
   --sidebar-accent-foreground: oklch(0.97 0.006 96);
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.62 0.17 30);
+  --sidebar-ring: #e08a5a;
 }
 
 @layer base {
@@ -300,7 +300,7 @@
   border-color: var(--morocco);
   box-shadow:
     4px 5px 0 var(--morocco),
-    0 10px 22px rgba(196, 20, 37, 0.14);
+    0 10px 22px rgba(197, 90, 39, 0.14);
 }
 
 .hero-caption--candidate::after {
