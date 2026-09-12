@@ -76,11 +76,14 @@ async def chat_text(
 @router.post("/speak", response_model=SpeakResponse)
 @limiter.limit(get_settings().rate_limit_chat)
 async def chat_speak(request: Request, body: SpeakRequest) -> SpeakResponse:
-    """TTS only — used after fast text reply so the UI is not blocked on audio."""
+    """TTS only — keep clips short so Edge TTS stays snappy."""
     lang = body.language if body.language in {"fr", "ar", "ary"} else "fr"
     try:
         tts = get_tts_service()
-        result = await tts.synthesize(body.text, lang)
+        raw = (body.text or "").strip()
+        # Client sends ~480-char chunks; allow a little headroom per request.
+        text = raw if len(raw) <= 520 else raw[:520].rsplit(" ", 1)[0]
+        result = await tts.synthesize(text, lang)
         return SpeakResponse(audio_url=result.url if result.success else None, success=result.success)
     except Exception:
         logger.exception("chat_speak_error")

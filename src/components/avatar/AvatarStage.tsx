@@ -3,6 +3,8 @@ import { useEffect, useRef } from "react";
 type Props = {
   videoUrl: string | null;
   audioUrl?: string | null;
+  /** Pre-recorded loop: video muted + loop, TTS audio separate. */
+  videoMuted?: boolean;
   idle: boolean;
   speaking: boolean;
   name: string;
@@ -14,6 +16,7 @@ type Props = {
 export function AvatarStage({
   videoUrl,
   audioUrl,
+  videoMuted = false,
   idle,
   speaking,
   name,
@@ -28,25 +31,33 @@ export function AvatarStage({
   useEffect(() => {
     const el = videoRef.current;
     if (!el || !videoUrl) return;
-    // Stop any Edge TTS so only HeyGen voice plays with lip-sync.
-    const audio = audioRef.current;
-    if (audio) {
-      audio.pause();
-      audio.removeAttribute("src");
-      audio.load();
+
+    if (videoMuted) {
+      el.muted = true;
+      el.loop = true;
+    } else {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+        audio.removeAttribute("src");
+        audio.load();
+      }
+      el.muted = false;
+      el.loop = false;
     }
+
     el.style.display = "";
-    el.muted = false;
     el.load();
     el.play().catch(() => undefined);
-  }, [videoUrl]);
+  }, [videoUrl, videoMuted]);
 
   useEffect(() => {
     const el = audioRef.current;
-    if (!el || !audioUrl || videoUrl) return;
+    if (!el || !audioUrl) return;
+    if (!videoMuted && videoUrl) return;
     el.load();
     el.play().catch(() => undefined);
-  }, [audioUrl, videoUrl]);
+  }, [audioUrl, videoUrl, videoMuted]);
 
   const live = speaking || !idle;
 
@@ -72,9 +83,10 @@ export function AvatarStage({
               ref={videoRef}
               src={videoUrl}
               playsInline
-              muted={false}
+              muted={videoMuted}
+              loop={videoMuted}
               className="avx-video"
-              onEnded={onAudioEnded}
+              onEnded={videoMuted ? undefined : onAudioEnded}
               onError={() => {
                 if (videoRef.current) videoRef.current.style.display = "none";
               }}
@@ -103,7 +115,7 @@ export function AvatarStage({
         )}
       </div>
 
-      {audioUrl && !videoUrl && (
+      {audioUrl && (videoMuted || !videoUrl) && (
         <audio
           ref={audioRef}
           src={audioUrl}

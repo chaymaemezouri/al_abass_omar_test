@@ -13,7 +13,7 @@ import {
   Wand2,
 } from "lucide-react";
 
-import candidatePortrait from "@/assets/heygen-avatar.png";
+import candidatePortrait from "@/assets/Avatar.png";
 import { useLang, suggestions } from "@/lib/i18n";
 import {
   askAvatarAudio,
@@ -24,6 +24,7 @@ import {
   type AvatarChatResponse,
 } from "@/lib/avatar-api";
 import { AvatarStage } from "@/components/avatar/AvatarStage";
+import { isPrerecordedAvatarEnabled, pickSpeakingClip } from "@/lib/prerecorded-avatar";
 import "@/components/avatar/avatar-experience.css";
 
 type Bi = { fr: string; ar: string };
@@ -77,6 +78,11 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const lastLanguageRef = useRef<string>("fr");
   const speakReqRef = useRef(0);
   const avatarStartedRef = useRef(false);
+  const earlyPrefixRef = useRef("");
+  const ttsQueueRef = useRef<string[]>([]);
+  const ttsPlayingRef = useRef(false);
+  const speakingClipRef = useRef("");
+  const prerecordedAvatarEnabled = isPrerecordedAvatarEnabled();
 
   const copy = {
     brand: "Al Abass Omar",
@@ -131,6 +137,10 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   function stopVoice() {
     speakReqRef.current += 1;
     avatarStartedRef.current = false;
+    earlyPrefixRef.current = "";
+    ttsQueueRef.current = [];
+    ttsPlayingRef.current = false;
+    speakingClipRef.current = "";
     setAudioUrl(null);
     setVideoUrl(null);
     setSpeaking(false);
@@ -179,38 +189,134 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     return undefined;
   }
 
-  // HeyGen lip-sync on by default. Set VITE_HEYGEN_VIDEO=false for Edge TTS only (faster demo).
-  const heygenVideoEnabled =
-    String(import.meta.env["VITE_HEYGEN_VIDEO"] ?? "true").toLowerCase() !== "false";
+  // HeyGen lip-sync DISABLED — Bitmoji + Edge TTS only (fast).
+  const heygenVideoEnabled = false;
 
+  function normalizeSpeakText(text: string): string {
+    return text.replace(/\s+/g, " ").trim();
+  }
+
+  /** First sentence so TTS can start while the answer is still streaming. */
   function firstSpeakableClip(text: string): string | null {
-    if (!heygenVideoEnabled) return null;
-    const cleaned = text.replace(/\s+/g, " ").trim();
-    if (cleaned.length < 28) return null;
-    for (const sep of [". ", "! ", "? ", "۔", "؟"]) {
+    const cleaned = normalizeSpeakText(text);
+    if (cleaned.length < 18) return null;
+    for (const sep of [". ", "! ", "? ", "۔", "؟", "\n"]) {
       const idx = cleaned.indexOf(sep);
-      if (idx >= 24) {
-        const clip = cleaned.slice(0, idx + 1).trim();
-        if (clip.length >= 24) return clip.slice(0, 100);
+      if (idx >= 16) {
+        const clip = cleaned.slice(0, idx + (sep === "\n" ? 0 : 1)).trim();
+        if (clip.length >= 16) return clip;
       }
     }
-    if (cleaned.length >= 55) return cleaned.slice(0, 100);
+    if (cleaned.length >= 48) return cleaned.slice(0, 220);
     return null;
   }
 
-  async function maybeSpeak(
-    answer: string,
-    language: string,
-    blocked: boolean,
-    gen: number,
-  ) {
-    if (voiceMode !== "voice" || !answer || blocked) return;
-    const url = await speakAvatar(answer, language);
-    if (url && speakReqRef.current === gen) {
-      setVideoUrl(null);
-      setAudioUrl(url);
-      setSpeaking(true);
+  function splitIntoTtsSegments(text: string, maxLen = 480): string[] {
+    const cleaned = normalizeSpeakText(text);
+    if (!cleaned) return [];
+    if (cleaned.length <= maxLen) return [cleaned];
+
+    const segments: string[] = [];
+    let rest = cleaned;
+    while (rest.length > maxLen) {
+      let cut = -1;
+      for (const sep of [". ", "! ", "? ", "۔", "؟"]) {
+        const idx = rest.lastIndexOf(sep, maxLen);
+        if (idx > maxLen * 0.35) cut = Math.max(cut, idx + sep.length);
+      }
+      if (cut <= 0) cut = rest.lastIndexOf(" ", maxLen);
+      if (cut <= 0) cut = maxLen;
+      segments.push(rest.slice(0, cut).trim());
+      rest = rest.slice(cut).trim();
     }
+    if (rest) segments.push(rest);
+    return segments.filter(Boolean);
+  }
+
+  function remainderAfterPrefix(full: string, prefix: string): string | null {
+    const f = normalizeSpeakText(full);
+    const p = normalizeSpeakText(prefix);
+    if (!p) return f;
+    if (f.startsWith(p)) return f.slice(p.length).trim() || null;
+    const idx = f.indexOf(p);
+    if (idx >= 0) {
+      const rest = f.slice(idx + p.length).trim();
+      return rest || null;
+    }
+    return null;
+  }
+
+  function ensureSpeakingClip() {
+    if (!prerecordedAvatarEnabled || voiceMode !== "voice") return;
+    if (speakingClipRef.current) return;
+    const clip = pickSpeakingClip();
+    if (!clip) return;
+    speakingClipRef.current = clip;
+    setVideoUrl(clip);
+  }
+
+  function clearSpeakingClip() {
+    speakingClipRef.current = "";
+    if (prerecordedAvatarEnabled) setVideoUrl(null);
+  }
+
+  async function playTtsQueue(gen: number, language: string) {
+    if (ttsPlayingRef.current || speakReqRef.current !== gen) return;
+    const next = ttsQueueRef.current.shift();
+    if (!next) {
+      ttsPlayingRef.current = false;
+      setSpeaking(false);
+      clearSpeakingClip();
+      return;
+    }
+    ttsPlayingRef.current = true;
+    ensureSpeakingClip();
+    const url = await speakAvatar(next, language);
+    if (!url || speakReqRef.current !== gen) {
+      ttsQueueRef.current = [];
+      ttsPlayingRef.current = false;
+      setSpeaking(false);
+      clearSpeakingClip();
+      return;
+    }
+    if (!prerecordedAvatarEnabled) setVideoUrl(null);
+    setAudioUrl(url);
+    setSpeaking(true);
+  }
+
+  function enqueueTtsSegments(segments: string[], language: string, gen: number) {
+    if (!segments.length || voiceMode !== "voice") return;
+    ttsQueueRef.current.push(...segments);
+    void playTtsQueue(gen, language);
+  }
+
+  function handleAudioEnded() {
+    ttsPlayingRef.current = false;
+    void playTtsQueue(speakReqRef.current, lastLanguageRef.current);
+  }
+
+  function speakFullAnswer(answer: string, language: string, blocked: boolean, gen: number) {
+    if (voiceMode !== "voice" || !answer || blocked) return;
+    const full = normalizeSpeakText(answer);
+    if (!full) return;
+
+    if (avatarStartedRef.current && earlyPrefixRef.current) {
+      const rest = remainderAfterPrefix(full, earlyPrefixRef.current);
+      earlyPrefixRef.current = "";
+      if (rest) enqueueTtsSegments(splitIntoTtsSegments(rest), language, gen);
+      return;
+    }
+
+    avatarStartedRef.current = true;
+    earlyPrefixRef.current = "";
+    enqueueTtsSegments(splitIntoTtsSegments(full), language, gen);
+  }
+
+  function speakEarlyClip(clip: string, language: string, gen: number) {
+    if (voiceMode !== "voice" || !clip) return;
+    avatarStartedRef.current = true;
+    earlyPrefixRef.current = clip;
+    enqueueTtsSegments([clip], language, gen);
   }
 
   async function maybeAvatarVideo(
@@ -276,10 +382,10 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     const gen = speakReqRef.current;
     if (data.video_url || data.blocked) return;
 
-    // HeyGen video when enabled; otherwise Edge TTS only.
+    // Bitmoji + Edge TTS: read full answer (early clip + rest queued).
     if (!heygenVideoEnabled) {
       if (!data.audio_url) {
-        void maybeSpeak(data.answer, data.language, data.blocked, gen);
+        speakFullAnswer(data.answer, data.language, data.blocked, gen);
       }
       return;
     }
@@ -294,7 +400,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
         gen,
       );
       if (!gotVideo && speakReqRef.current === gen) {
-        await maybeSpeak(data.answer, data.language, data.blocked, gen);
+        speakFullAnswer(data.answer, data.language, data.blocked, gen);
       }
     })();
   }
@@ -337,13 +443,17 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
             }
             return next;
           });
-          // Start HeyGen ASAP on first sentence — hides ~half the wait.
+          // Start voice ASAP on first sentence (don't wait for full RAG + long TTS).
           if (!avatarStartedRef.current) {
             const clip = firstSpeakableClip(snapshot);
             if (clip) {
               avatarStartedRef.current = true;
               lastLanguageRef.current = languageHint || "fr";
-              void maybeAvatarVideo(clip, languageHint || "fr", false, gen);
+              if (heygenVideoEnabled) {
+                void maybeAvatarVideo(clip, languageHint || "fr", false, gen);
+              } else {
+                speakEarlyClip(clip, languageHint || "fr", gen);
+              }
             }
           }
         },
@@ -453,7 +563,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
         }
         return next;
       });
-      void maybeSpeak(simpler, lastLanguageRef.current, false);
+      speakFullAnswer(simpler, lastLanguageRef.current, false, speakReqRef.current);
     } catch (err) {
       setError(err instanceof Error ? err.message : t(copy.offline));
     } finally {
@@ -524,6 +634,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
           <AvatarStage
             videoUrl={videoUrl}
             audioUrl={audioUrl}
+            videoMuted={prerecordedAvatarEnabled && Boolean(videoUrl)}
             idle={!loading && !speaking}
             speaking={speaking}
             name={copy.brand}
@@ -535,7 +646,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
                   ? t(copy.statusSpeaking)
                   : t(copy.statusIdle)
             }
-            onAudioEnded={() => setSpeaking(false)}
+            onAudioEnded={handleAudioEnded}
           />
         </section>
 
