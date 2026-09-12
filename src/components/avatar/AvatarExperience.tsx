@@ -179,14 +179,18 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     return undefined;
   }
 
+  // HeyGen lip-sync on by default. Set VITE_HEYGEN_VIDEO=false for Edge TTS only (faster demo).
+  const heygenVideoEnabled =
+    String(import.meta.env["VITE_HEYGEN_VIDEO"] ?? "true").toLowerCase() !== "false";
+
   function firstSpeakableClip(text: string): string | null {
+    if (!heygenVideoEnabled) return null;
     const cleaned = text.replace(/\s+/g, " ").trim();
     if (cleaned.length < 28) return null;
     for (const sep of [". ", "! ", "? ", "۔", "؟"]) {
       const idx = cleaned.indexOf(sep);
       if (idx >= 24) {
-        const end = idx + (sep.length === 1 ? 1 : 1);
-        const clip = cleaned.slice(0, end).trim();
+        const clip = cleaned.slice(0, idx + 1).trim();
         if (clip.length >= 24) return clip.slice(0, 100);
       }
     }
@@ -215,7 +219,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     blocked: boolean,
     gen: number,
   ) {
-    if (!answer || blocked) return false;
+    if (!heygenVideoEnabled || !answer || blocked) return false;
     setAvatarGenerating(true);
     try {
       const url = await generateAvatarVideo(answer, language);
@@ -272,7 +276,14 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     const gen = speakReqRef.current;
     if (data.video_url || data.blocked) return;
 
-    // Don't block the chat UI on HeyGen — run in background.
+    // HeyGen video when enabled; otherwise Edge TTS only.
+    if (!heygenVideoEnabled) {
+      if (!data.audio_url) {
+        void maybeSpeak(data.answer, data.language, data.blocked, gen);
+      }
+      return;
+    }
+
     if (avatarStartedRef.current) return;
     avatarStartedRef.current = true;
     void (async () => {

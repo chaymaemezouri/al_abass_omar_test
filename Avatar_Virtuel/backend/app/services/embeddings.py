@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+import time
 from typing import Literal
 
 from app.config import get_settings
@@ -19,10 +20,20 @@ TaskType = Literal[
     "clustering",
 ]
 
+# Process-local query cache (demo / free-tier friendly).
+_EMBED_CACHE: dict[str, tuple[float, list[float]]] = {}
+_CACHE_TTL_S = 3600.0
+_CACHE_MAX = 256
+
 
 def _l2_normalize(vec: list[float]) -> list[float]:
     norm = sum(x * x for x in vec) ** 0.5 or 1.0
     return [x / norm for x in vec]
+
+
+def _cache_key(text: str, task_type: str, model: str, dims: int) -> str:
+    raw = f"{model}|{dims}|{task_type}|{text.strip().lower()}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 class GeminiEmbeddingService(EmbeddingService):
@@ -53,16 +64,20 @@ class GeminiEmbeddingService(EmbeddingService):
         import google.generativeai as genai
 
         genai.configure(api_key=self.api_key)
+        now = time.monotonic()
 
         async def _one(text: str) -> list[float]:
+            key = _cache_key(text, task_type, self.model, self.dimensions)
+            cached = _EMBED_CACHE.get(key)
+            if cached and now - cached[0] < _CACHE_TTL_S:
+                return cached[1]
+
             def _call() -> list[float]:
-                # output_dimensionality uses Matryoshka Representation Learning
                 kwargs = {
                     "model": self.model,
                     "content": text,
                     "task_type": task_type,
                 }
-                # Newer google-generativeai accepts output_dimensionality
                 try:
                     resp = genai.embed_content(
                         **kwargs, output_dimensionality=self.dimensions
@@ -72,17 +87,21 @@ class GeminiEmbeddingService(EmbeddingService):
                 values = list(resp["embedding"])
                 if len(values) > self.dimensions:
                     values = values[: self.dimensions]
-                # Always L2-normalize after truncation (Google recommendation)
                 return _l2_normalize(values)
 
-            return await asyncio.to_thread(_call)
+            # Hard cap — never block the chat for tens of seconds on free-tier 429.
+            vec = await asyncio.wait_for(asyncio.to_thread(_call), timeout=8.0)
+            if len(_EMBED_CACHE) >= _CACHE_MAX:
+                oldest = min(_EMBED_CACHE.items(), key=lambda kv: kv[1][0])[0]
+                _EMBED_CACHE.pop(oldest, None)
+            _EMBED_CACHE[key] = (time.monotonic(), vec)
+            return vec
 
-        # Sequential with pacing + retry on free-tier 429
         out: list[list[float]] = []
         for i, t in enumerate(texts):
-            delay = 1.0
+            delay = 0.4
             last_exc: Exception | None = None
-            for attempt in range(8):
+            for attempt in range(2):
                 try:
                     out.append(await _one(t))
                     last_exc = None
@@ -91,21 +110,25 @@ class GeminiEmbeddingService(EmbeddingService):
                     last_exc = exc
                     name = type(exc).__name__
                     msg = str(exc).lower()
-                    if "resourceexhausted" in name.lower() or "429" in msg or "quota" in msg:
+                    if (
+                        "resourceexhausted" in name.lower()
+                        or "429" in msg
+                        or "quota" in msg
+                        or isinstance(exc, asyncio.TimeoutError)
+                    ):
                         logger.warning(
-                            "embedding_rate_limited attempt=%s sleep=%.1fs",
+                            "embedding_retry attempt=%s err=%s",
                             attempt + 1,
-                            delay,
+                            type(exc).__name__,
                         )
                         await asyncio.sleep(delay)
-                        delay = min(delay * 2, 60.0)
+                        delay = min(delay * 2, 1.5)
                         continue
                     raise
             if last_exc is not None:
                 raise last_exc
-            # Free-tier: stay under ~60–100 embed RPM
             if i + 1 < len(texts):
-                await asyncio.sleep(1.2)
+                await asyncio.sleep(0.05)
         return out
 
 

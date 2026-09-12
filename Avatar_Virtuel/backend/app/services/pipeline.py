@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -40,15 +40,30 @@ from app.services.rag import hit_is_relevant
 logger = logging.getLogger(__name__)
 
 MAX_HISTORY_TURNS = 3  # 3 exchanges = up to 6 messages
+_last_purge_mono: float = 0.0
+_PURGE_EVERY_S = 120.0
 
 
 async def purge_expired_sessions(db: AsyncSession) -> int:
-    """Ephemeral session retention — delete sessions past expires_at."""
-    now = datetime.now(timezone.utc)
-    result = await db.execute(
-        delete(ConversationSession).where(ConversationSession.expires_at < now)
-    )
-    return result.rowcount or 0
+    """Ephemeral session retention — best-effort, throttled (never block chat)."""
+    global _last_purge_mono
+    import time
+
+    now_m = time.monotonic()
+    if now_m - _last_purge_mono < _PURGE_EVERY_S:
+        return 0
+    _last_purge_mono = now_m
+    try:
+        await db.execute(text("SET LOCAL statement_timeout = '1500ms'"))
+        now = datetime.now(timezone.utc)
+        result = await db.execute(
+            delete(ConversationSession).where(ConversationSession.expires_at < now)
+        )
+        return result.rowcount or 0
+    except Exception:
+        logger.warning("purge_expired_sessions_skipped", exc_info=True)
+        await db.rollback()
+        return 0
 
 
 async def get_or_create_session(
