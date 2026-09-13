@@ -17,10 +17,7 @@ const CLIP_PATHS = [
 let lastClipIndex = -1;
 
 export function isPrerecordedAvatarEnabled(): boolean {
-  // On by default; set VITE_PRERECORDED_AVATAR=false to disable.
-  return (
-    String(import.meta.env["VITE_PRERECORDED_AVATAR"] ?? "").toLowerCase() !== "false"
-  );
+  return true;
 }
 
 /** Random clip; avoids repeating the same file twice in a row when possible. */

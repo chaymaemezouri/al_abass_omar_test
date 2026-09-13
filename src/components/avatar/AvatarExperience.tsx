@@ -13,8 +13,7 @@ import {
   Wand2,
 } from "lucide-react";
 
-import candidatePortraitFallback from "@/assets/Avatar.png";
-import candidateIdlePortrait from "../../../public/candidate-speaking/avatar-idle.png";
+import candidateIdlePortrait from "@/assets/candidate-idle.png";
 import { useLang, suggestions } from "@/lib/i18n";
 import {
   askAvatarAudio,
@@ -25,7 +24,7 @@ import {
   type AvatarChatResponse,
 } from "@/lib/avatar-api";
 import { AvatarStage } from "@/components/avatar/AvatarStage";
-import { isPrerecordedAvatarEnabled, pickSpeakingClip } from "@/lib/prerecorded-avatar";
+import { pickSpeakingClip } from "@/lib/prerecorded-avatar";
 import "@/components/avatar/avatar-experience.css";
 
 type Bi = { fr: string; ar: string };
@@ -83,10 +82,9 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const ttsQueueRef = useRef<string[]>([]);
   const ttsPlayingRef = useRef(false);
   const speakingClipRef = useRef("");
-  const prerecordedAvatarEnabled = isPrerecordedAvatarEnabled();
-  const candidatePortrait = prerecordedAvatarEnabled
-    ? candidateIdlePortrait
-    : candidatePortraitFallback;
+  // Always on for /avatar demo (portrait frame + pre-recorded loops + Edge TTS).
+  const prerecordedAvatarEnabled = true;
+  const candidatePortrait = candidateIdlePortrait;
 
   const copy = {
     brand: "Al Abass Omar",
