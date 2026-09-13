@@ -29,6 +29,7 @@ export function AvatarStage({
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const lastPlayedAudioRef = useRef<string | null>(null);
   const showPortrait = Boolean(portraitSrc) && !videoUrl;
   const usePortraitFrame = portraitFrame || Boolean(videoUrl && videoMuted);
 
@@ -57,13 +58,26 @@ export function AvatarStage({
 
   useEffect(() => {
     const el = audioRef.current;
-    if (!el || !audioUrl) return;
+    if (!el) return;
+
+    if (!audioUrl) {
+      lastPlayedAudioRef.current = null;
+      el.pause();
+      el.removeAttribute("src");
+      el.load();
+      return;
+    }
+
+    // HeyGen lip-sync carries audio on the video element — skip hidden audio.
     if (!videoMuted && videoUrl) return;
+    if (lastPlayedAudioRef.current === audioUrl) return;
+    lastPlayedAudioRef.current = audioUrl;
+
     el.pause();
     el.currentTime = 0;
-    el.load();
+    el.src = audioUrl;
     void el.play().catch(() => undefined);
-  }, [audioUrl, videoUrl, videoMuted]);
+  }, [audioUrl, videoMuted, videoUrl]);
 
   const live = speaking || !idle;
 
@@ -125,14 +139,7 @@ export function AvatarStage({
         )}
       </div>
 
-      {audioUrl && (videoMuted || !videoUrl) && (
-        <audio
-          ref={audioRef}
-          src={audioUrl}
-          className="avx-audio-hidden"
-          onEnded={onAudioEnded}
-        />
-      )}
+      <audio ref={audioRef} className="avx-audio-hidden" onEnded={onAudioEnded} />
     </div>
   );
 }

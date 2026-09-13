@@ -81,6 +81,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const earlyPrefixRef = useRef("");
   const ttsQueueRef = useRef<string[]>([]);
   const ttsPlayingRef = useRef(false);
+  const speakFinalScheduledRef = useRef(false);
   const speakingClipRef = useRef("");
   // Always on for /avatar demo (portrait frame + pre-recorded loops + Edge TTS).
   const prerecordedAvatarEnabled = true;
@@ -142,6 +143,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     earlyPrefixRef.current = "";
     ttsQueueRef.current = [];
     ttsPlayingRef.current = false;
+    speakFinalScheduledRef.current = false;
     speakingClipRef.current = "";
     setAudioUrl(null);
     setVideoUrl(null);
@@ -264,6 +266,13 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
 
   async function playTtsQueue(gen: number, language: string) {
     if (ttsPlayingRef.current || speakReqRef.current !== gen) return;
+    if (!ttsQueueRef.current.length) {
+      ttsPlayingRef.current = false;
+      setSpeaking(false);
+      clearSpeakingClip();
+      return;
+    }
+    ttsPlayingRef.current = true;
     const next = ttsQueueRef.current.shift();
     if (!next) {
       ttsPlayingRef.current = false;
@@ -271,7 +280,6 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
       clearSpeakingClip();
       return;
     }
-    ttsPlayingRef.current = true;
     ensureSpeakingClip();
     const url = await speakAvatar(next, language);
     if (!url || speakReqRef.current !== gen) {
@@ -299,18 +307,22 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
 
   function speakFullAnswer(answer: string, language: string, blocked: boolean, gen: number) {
     if (voiceMode !== "voice" || !answer || blocked) return;
+    if (speakFinalScheduledRef.current) return;
+    speakFinalScheduledRef.current = true;
+
     const full = normalizeSpeakText(answer);
     if (!full) return;
 
-    if (avatarStartedRef.current && earlyPrefixRef.current) {
-      const rest = remainderAfterPrefix(full, earlyPrefixRef.current);
-      earlyPrefixRef.current = "";
+    const prefix = earlyPrefixRef.current;
+    earlyPrefixRef.current = "";
+
+    if (prefix) {
+      const rest = remainderAfterPrefix(full, prefix);
       if (rest) enqueueTtsSegments(splitIntoTtsSegments(rest), language, gen);
       return;
     }
 
     avatarStartedRef.current = true;
-    earlyPrefixRef.current = "";
     enqueueTtsSegments(splitIntoTtsSegments(full), language, gen);
   }
 
@@ -446,12 +458,12 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
             return next;
           });
           // Start voice ASAP on first sentence (don't wait for full RAG + long TTS).
-          if (!avatarStartedRef.current) {
+          if (!earlyPrefixRef.current && !speakFinalScheduledRef.current) {
             const clip = firstSpeakableClip(snapshot);
             if (clip) {
-              avatarStartedRef.current = true;
               lastLanguageRef.current = languageHint || "fr";
               if (heygenVideoEnabled) {
+                avatarStartedRef.current = true;
                 void maybeAvatarVideo(clip, languageHint || "fr", false, gen);
               } else {
                 speakEarlyClip(clip, languageHint || "fr", gen);
