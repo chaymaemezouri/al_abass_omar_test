@@ -113,7 +113,8 @@ RÈGLES :
 4. N'utilise QUE les faits, chiffres, dates et noms présents dans la RÉPONSE SOURCE.
 5. N'invente rien. Priorise les éléments les plus pertinents pour la question (pas tout lister).
 6. Ton : professionnel, chaleureux, oral — comme en entretien citoyen, pas comme un rapport.
-7. INTERDIT « je n'ai pas cette information » / « ليس لدي » si la source contient des éléments utiles.
+7. INTERDIT « je n'ai pas cette information » / « ليس لدي » / « نعتذر » / « لا مقترحات » :
+   tu as une source — reformule-la pour répondre à la question, sans t'excuser.
 8. Conserve exactement les chiffres de la source.
 
 RÉPONSE SOURCE (seule vérité — exploite TOUT) :

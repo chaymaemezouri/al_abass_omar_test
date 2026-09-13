@@ -31,7 +31,12 @@ from app.services.intent import (
 from app.services.language import get_language_service
 from app.services.latency import finish_latency_profile, start_latency_profile, time_step
 from app.services.llm import get_llm_service
-from app.services.rag import PgVectorRAGService, keyword_overlap, lexical_similarity
+from app.services.rag import (
+    PgVectorRAGService,
+    filter_hits_by_topic,
+    keyword_overlap,
+    lexical_similarity,
+)
 from app.services.rerank import rerank_hits
 from app.services.translate import translate_answer_to_language, translate_query_to_arabic
 from app.services.tts import get_tts_service
@@ -255,9 +260,11 @@ async def _run_programme_rag(
         enriched = await _enrich_rag_hits(
             db, search_question or question, rag_result.hits, rag_result.hits[0]
         )
+        topic_q = search_question or question
+        filtered = filter_hits_by_topic(topic_q, enriched)
         rag_result = RagResult(
-            hits=enriched,
-            best_score=enriched[0].score if enriched else rag_result.best_score,
+            hits=filtered,
+            best_score=filtered[0].score if filtered else rag_result.best_score,
             above_threshold=rag_result.above_threshold,
         )
 

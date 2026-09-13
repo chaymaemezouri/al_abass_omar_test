@@ -47,6 +47,9 @@ def topic_alignment_multiplier(query: str, question: str, reponse: str) -> float
             mult *= 0.42
         elif youth_doc:
             mult = max(mult, 1.18)
+        women_only = ("نساء" in doc or "المرأة" in doc or "المنتخبات" in doc) and not youth_doc
+        if women_only:
+            mult *= 0.32
 
     women_query = any(t in qn for t in ("نساء", "femmes", "femme"))
     women_doc = "نساء" in doc or "femme" in doc
@@ -333,6 +336,49 @@ class PgVectorRAGService(RAGService):
         self.db.add(chunk)
         await self.db.flush()
         return chunk, True
+
+
+def filter_hits_by_topic(query: str, hits: list[RagHit]) -> list[RagHit]:
+    """Drop chunks from the wrong sub-topic (e.g. women Q&A for a youth employment question)."""
+    qn = _normalize(query)
+    youth_q = any(t in qn for t in ("شباب", "jeunes", "jeune", "neet")) or (
+        "تشغيل" in qn and "شباب" in qn
+    )
+    women_q = any(t in qn for t in ("نساء", "femmes", "femme", "المرأة", "مرأة"))
+
+    if not youth_q and not women_q:
+        return hits
+
+    kept: list[RagHit] = []
+    for hit in hits:
+        doc = _normalize(f"{hit.question} {hit.reponse}")
+        youth_doc = any(
+            t in doc
+            for t in (
+                "شباب",
+                "neet",
+                "تشغيل",
+                "بطالة",
+                "أوراش",
+                "فرصة",
+                "37.2",
+                "25.6",
+                "4.5",
+                "تكوين",
+                "توجيه",
+            )
+        )
+        women_doc = any(
+            t in doc for t in ("نساء", "المرأة", "نسوية", "المنتخبات", "20.5", "الأجور")
+        )
+
+        if youth_q and not women_q and women_doc and not youth_doc:
+            continue
+        if women_q and not youth_q and youth_doc and not women_doc:
+            continue
+        kept.append(hit)
+
+    return kept if kept else hits
 
 
 def hit_is_relevant(query: str, hit: RagHit, threshold: float) -> bool:
