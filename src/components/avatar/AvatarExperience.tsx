@@ -13,7 +13,7 @@ import {
   Wand2,
 } from "lucide-react";
 
-import candidateIdlePortrait from "@/assets/candidate-idle-cutout.png";
+import candidateIdlePortrait from "@/assets/candidate-idle.png";
 import { useLang, suggestions } from "@/lib/i18n";
 import {
   askAvatarAudio,

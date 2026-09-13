@@ -227,6 +227,8 @@ body.avx-lock {
   user-select: none;
   pointer-events: none;
   filter: drop-shadow(0 12px 28px rgba(7, 26, 51, 0.35));
+  /* White studio bg blends into the navy stage */
+  mix-blend-mode: darken;
 }
 
 .avx-video {
@@ -1166,6 +1168,7 @@ body.avx-lock {
     object-position: center 8%;
     transform: scale(0.93);
     filter: drop-shadow(0 10px 22px rgba(7, 26, 51, 0.35));
+    mix-blend-mode: darken;
   }
 
   .avx-video {
