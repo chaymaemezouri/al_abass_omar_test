@@ -1110,12 +1110,11 @@ body.avx-lock {
 @media (max-width: 980px) {
   .avx-shell {
     grid-template-columns: 1fr;
-    /* Give the avatar a tall enough band so the full figure fits */
-    grid-template-rows: minmax(340px, 58%) minmax(0, 1fr);
+    grid-template-rows: minmax(220px, 36%) minmax(0, 1fr);
   }
 
   .avx-shell:has(.avx-panel.has-chat) {
-    grid-template-rows: minmax(280px, 48%) minmax(0, 1fr);
+    grid-template-rows: minmax(190px, 30%) minmax(0, 1fr);
   }
 
   .avx-panel {
@@ -1135,22 +1134,23 @@ body.avx-lock {
     width: 100%;
     height: 100%;
     min-height: 0;
-    padding: 0.55rem 0.6rem 3.35rem;
+    padding: 0.35rem 0.5rem 2.35rem;
     justify-content: center;
     box-sizing: border-box;
   }
 
-  /* Size by available height — circular Bitmoji frame */
+  /* Size by available height — circular portrait frame */
   .avx-avatar-scene {
     width: auto;
-    height: 100%;
-    max-width: min(70vw, 280px);
-    max-height: 100%;
+    height: auto;
+    max-width: min(52vw, 200px);
+    max-height: min(52vw, 200px);
     aspect-ratio: 1;
   }
 
   .avx-shell:has(.avx-panel.has-chat) .avx-avatar-scene {
-    max-width: min(58vw, 240px);
+    max-width: min(46vw, 168px);
+    max-height: min(46vw, 168px);
   }
 
   .avx-avatar-ring {
@@ -1196,19 +1196,19 @@ body.avx-lock {
   }
 
   .avx-stage-meta {
-    bottom: 0.4rem;
-    inset-inline: 0.75rem;
-    width: calc(100% - 1.5rem);
+    bottom: 0.25rem;
+    inset-inline: 0.6rem;
+    width: calc(100% - 1.2rem);
   }
 
   .avx-stage-name {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
   }
 
   .avx-stage-status {
-    margin-top: 0.3rem;
-    font-size: 0.7rem;
-    padding: 0.28rem 0.65rem;
+    margin-top: 0.2rem;
+    font-size: 0.62rem;
+    padding: 0.22rem 0.55rem;
   }
 
   .avx-bar-brand span:last-child {
@@ -1226,23 +1226,25 @@ body.avx-lock {
   }
 
   .avx-shell {
-    grid-template-rows: minmax(300px, 54%) minmax(0, 1fr);
+    grid-template-rows: minmax(200px, 34%) minmax(0, 1fr);
   }
 
   .avx-shell:has(.avx-panel.has-chat) {
-    grid-template-rows: minmax(250px, 44%) minmax(0, 1fr);
+    grid-template-rows: minmax(170px, 28%) minmax(0, 1fr);
   }
 
   .avx-avatar-scene {
-    max-width: min(72vw, 260px);
+    max-width: min(48vw, 176px);
+    max-height: min(48vw, 176px);
   }
 
   .avx-shell:has(.avx-panel.has-chat) .avx-avatar-scene {
-    max-width: min(62vw, 220px);
+    max-width: min(42vw, 152px);
+    max-height: min(42vw, 152px);
   }
 
   .avx-stage-inner {
-    padding: 0.4rem 0.45rem 3.1rem;
+    padding: 0.25rem 0.4rem 2rem;
   }
 
   .avx-panel-head h1 {
