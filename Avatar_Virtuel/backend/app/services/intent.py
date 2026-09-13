@@ -12,6 +12,8 @@ from app.core.prompts import (
     build_followup_expand_prompt,
     build_intent_classification_prompt,
     build_programme_query_extract_prompt,
+    get_greeting_with_identity,
+    get_identity_intro,
 )
 from app.services.guardrails import extract_numbers
 
@@ -26,7 +28,8 @@ _MAX_CONV_WORDS = 55
 _GREETING_ONLY = re.compile(
     r"^[\s\W]*(salam|salut|bonjour|bonsoir|hello|hi|hey|merci|thanks|thank you|"
     r"au revoir|bye|bslama|beslama|labas|bikhir|cv\b|ça va|ca va|"
-    r"السلام|مرحبا|أهلا|شكرا|بسلامة|بخير|لاباس|كيف حالك|واش بخير)"
+    r"السلام(?:\s+عليكم)?|مرحبا(?:\s+بكم)?|أهلا(?:\s+وسهلا)?|"
+    r"شكرا|بسلامة|بخير|لاباس|كيف حالك|واش بخير)"
     r"[\s\W]*$",
     re.IGNORECASE,
 )
@@ -68,6 +71,24 @@ _RISK_CUES = re.compile(
 )
 
 
+_FORBIDDEN_IDENTITY = re.compile(
+    r"assistant\s+virtuel|aide\s+virtuelle|chat\s*bot|chatbot|\bbot\b|"
+    r"virtual\s+assistant|avatar\s+virtuel|"
+    r"مساعد\s+افتراضي|مساعد\s+رقمي|روبوت|شات\s*بوت|"
+    r"الذكاء\s+الاصطناعي\s+العام",
+    re.IGNORECASE,
+)
+
+
+def identity_wording_is_valid(text: str) -> bool:
+    """Self-presentation must say version numérique / النسخة الرقمية, never assistant virtuel."""
+    cleaned = (text or "").strip()
+    if not cleaned or _FORBIDDEN_IDENTITY.search(cleaned):
+        return False
+    lower = cleaned.lower()
+    return "version numérique" in lower or "النسخة الرقمية" in cleaned
+
+
 def conversational_reply_looks_unsafe(text: str, *, allow_digits: bool = False) -> bool:
     """True if free reply likely invents programme facts → force RAG re-route."""
     cleaned = (text or "").strip()
@@ -85,12 +106,38 @@ def conversational_reply_looks_unsafe(text: str, *, allow_digits: bool = False) 
     return False
 
 
+_IDENTITY_QUESTION = re.compile(
+    r"(qui\s+(es[- ]tu|êtes[- ]vous)\b|"
+    r"tu\s+es\s+qui\b|c['']est\s+qui\b|"
+    r"presente[- ]?toi\b|présente[- ]?toi\b|"
+    r"who\s+are\s+you\b|what\s+are\s+you\b|"
+    r"من\s+أنت\b|"
+    r"شكون\s+نت\b|"
+    r"واش\s+نت\b|"
+    r"introduis[- ]?toi\b|"
+    r"identit[eé]\s+(de\s+l[''])?(avatar|assistant|version)|"
+    r"نسخة\s+رقمية\s+(من|ل|dyal|دي))",
+    re.IGNORECASE,
+)
+
 _CLARIFY = re.compile(
     r"(pas\s+compris|j[' ]?ai\s+pas\s+compris|je\s+comprends\s+pas|"
     r"explique|clarifie|plus\s+clair|repete|répète|what\s+do\s+you\s+mean|"
     r"ما\s*فهمتش|ما\s*فهمت|وضح|عاود|اشرح|شنو\s*قصدتي|ما\s*فهمتش)",
     re.IGNORECASE,
 )
+
+
+def is_greeting_only(question: str) -> bool:
+    q = (question or "").strip()
+    return bool(q) and bool(_GREETING_ONLY.match(q))
+
+
+def is_identity_question(question: str) -> bool:
+    q = (question or "").strip()
+    if not q:
+        return False
+    return bool(_IDENTITY_QUESTION.search(q))
 
 
 def is_clarification(question: str) -> bool:
@@ -279,15 +326,32 @@ async def generate_clarification_reply(
 
 async def generate_conversational_reply(language: str, question: str) -> str:
     """Free natural reply about the assistant role — no programme source."""
+    if is_identity_question(question):
+        return get_identity_intro(language)
+    if is_greeting_only(question):
+        return get_greeting_with_identity(language)
+
     prompt = build_conversational_prompt(language, question)
     try:
-        text = await _gemini_short(prompt, temperature=0.55, max_output_tokens=120)
+        text = await _gemini_short(prompt, temperature=0.55, max_output_tokens=160)
+        cleaned = (text or "").strip()
+        mentions_self = bool(
+            re.search(
+                r"qui\s+(es|êtes)|who\s+are|من\s+أنت|شكون\s+نت|"
+                r"presente|présente|identit|version|نسخة|مساعد|assistant",
+                question,
+                re.IGNORECASE,
+            )
+        )
+        if mentions_self and not identity_wording_is_valid(cleaned):
+            logger.info("conversational_reply_identity_fallback lang=%s", language)
+            return get_identity_intro(language)
         logger.info(
             "conversational_reply_ok lang=%s len=%s",
             language,
-            len(text or ""),
+            len(cleaned),
         )
-        return (text or "").strip()
+        return cleaned
     except Exception:
         logger.exception("conversational_reply_failed")
         return ""

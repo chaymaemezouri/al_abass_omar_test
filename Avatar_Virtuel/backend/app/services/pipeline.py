@@ -11,7 +11,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.config import get_settings
-from app.core.prompts import FALLBACK_MESSAGES, SENSITIVE_FALLBACK
+from app.core.prompts import (
+    FALLBACK_MESSAGES,
+    SENSITIVE_FALLBACK,
+    get_greeting_with_identity,
+    get_identity_intro,
+)
 from app.db.models import ConversationSession, KnowledgeChunk, Message
 from app.schemas.chat import ChatResponse
 from app.services.avatar import get_avatar_service
@@ -26,6 +31,8 @@ from app.services.intent import (
     generate_clarification_reply,
     generate_conversational_reply,
     is_clarification,
+    is_greeting_only,
+    is_identity_question,
     is_off_topic,
 )
 from app.services.language import get_language_service
@@ -540,6 +547,38 @@ async def run_text_pipeline(
                     generate_media=generate_media,
                     source_type=None,
                 )
+
+        if is_identity_question(question):
+            logger.info("rag_chunk_retained outcome=identity_intro lang=%s", language)
+            return await _finalize(
+                db,
+                session,
+                question,
+                get_identity_intro(language),
+                language,
+                similarity=None,
+                used_fallback=False,
+                blocked=False,
+                sources=[],
+                generate_media=generate_media,
+                source_type=None,
+            )
+
+        if is_greeting_only(question):
+            logger.info("rag_chunk_retained outcome=greeting_identity lang=%s", language)
+            return await _finalize(
+                db,
+                session,
+                question,
+                get_greeting_with_identity(language),
+                language,
+                similarity=None,
+                used_fallback=False,
+                blocked=False,
+                sources=[],
+                generate_media=generate_media,
+                source_type=None,
+            )
 
         # Hors-sujet clair → fallback (pas de RAG inventif)
         if is_off_topic(question):
