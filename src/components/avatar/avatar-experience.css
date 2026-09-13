@@ -215,24 +215,33 @@ body.avx-lock {
   box-shadow: none;
 }
 
-.avx-portrait-img,
+.avx-portrait-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Anchor on upper body so the full head stays inside the circle */
+  object-position: center 8%;
+  transform: scale(0.88);
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 12px 28px rgba(7, 26, 51, 0.35));
+  /* White studio bg blends into the navy stage */
+  mix-blend-mode: darken;
+}
+
 .avx-video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 38%;
-  transform: scale(1.03);
+  object-position: center center;
+  transform: none;
   user-select: none;
   pointer-events: none;
   filter: drop-shadow(0 12px 28px rgba(7, 26, 51, 0.35));
-}
-
-.avx-portrait-img {
-  /* White studio bg blends into the navy stage; face stays visible */
-  mix-blend-mode: darken;
-  transform: scale(1.03) translateY(4%);
 }
 
 .avx-video-frame {
@@ -1154,17 +1163,19 @@ body.avx-lock {
     overflow: hidden;
   }
 
-  .avx-portrait-img,
-  .avx-video {
+  .avx-portrait-img {
     object-fit: cover;
-    object-position: center 38%;
-    transform: scale(1.03);
+    object-position: center 8%;
+    transform: scale(0.88);
     filter: drop-shadow(0 10px 22px rgba(7, 26, 51, 0.35));
+    mix-blend-mode: darken;
   }
 
-  .avx-portrait-img {
-    mix-blend-mode: darken;
-    transform: scale(1.03) translateY(4%);
+  .avx-video {
+    object-fit: cover;
+    object-position: center center;
+    transform: none;
+    filter: drop-shadow(0 10px 22px rgba(7, 26, 51, 0.35));
   }
 
   .avx-avatar-scene--portrait {
