@@ -13,7 +13,6 @@ import {
   Wand2,
 } from "lucide-react";
 
-import candidateIdlePortrait from "@/assets/candidate-idle.png";
 import { useLang, suggestions } from "@/lib/i18n";
 import {
   askAvatarAudio,
@@ -24,7 +23,7 @@ import {
   type AvatarChatResponse,
 } from "@/lib/avatar-api";
 import { AvatarStage } from "@/components/avatar/AvatarStage";
-import { pickSpeakingClip } from "@/lib/prerecorded-avatar";
+import { CANDIDATE_IDLE_PORTRAIT, pickSpeakingClip } from "@/lib/prerecorded-avatar";
 import "@/components/avatar/avatar-experience.css";
 
 type Bi = { fr: string; ar: string };
@@ -35,6 +34,7 @@ type Turn = {
   text: string;
   meta?: string;
   streaming?: boolean;
+  followups?: string[];
 };
 
 type VoiceMode = "text" | "voice";
@@ -62,13 +62,11 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [speaking, setSpeaking] = useState(false);
-  const [followups, setFollowups] = useState<string[]>([]);
   const [bootstrapped, setBootstrapped] = useState(false);
   const [recording, setRecording] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [copiedTurnIndex, setCopiedTurnIndex] = useState<number | null>(null);
+  const [simplifyingTurnIndex, setSimplifyingTurnIndex] = useState<number | null>(null);
   const [voiceMode, setVoiceMode] = useState<VoiceMode>(loadVoiceMode);
-  const [simplifying, setSimplifying] = useState(false);
   const [avatarGenerating, setAvatarGenerating] = useState(false);
   const historyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -85,7 +83,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const speakingClipRef = useRef("");
   // Portrait image only — pre-recorded speaking videos disabled; Edge TTS for voice.
   const prerecordedAvatarEnabled = false;
-  const candidatePortrait = candidateIdlePortrait;
+  const candidatePortrait = CANDIDATE_IDLE_PORTRAIT;
 
   const copy = {
     brand: "Al Abass Omar",
@@ -166,8 +164,6 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     setTurns([]);
     setError(null);
     setQuestion("");
-    setFollowups([]);
-    setShowSuggestions(true);
     lastQuestionRef.current = "";
     inputRef.current?.focus();
   }
@@ -362,6 +358,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     setSessionId(data.session_id);
     lastLanguageRef.current = data.language || "fr";
     const meta = assistantMeta(data);
+    const related = data.followups?.filter(Boolean).slice(0, 3) ?? [];
     setTurns((prev) => {
       if (replaceStreaming && prev.length > 0 && prev[prev.length - 1]?.role === "assistant") {
         const next = [...prev];
@@ -369,6 +366,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
           role: "assistant",
           text: data.answer,
           ...(meta ? { meta } : {}),
+          ...(related.length ? { followups: related } : {}),
         };
         return next;
       }
@@ -378,6 +376,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
           role: "assistant",
           text: data.answer,
           ...(meta ? { meta } : {}),
+          ...(related.length ? { followups: related } : {}),
         },
       ];
     });
@@ -387,11 +386,6 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
       setVideoUrl(data.video_url);
       setSpeaking(true);
     }
-    setFollowups(data.followups?.filter(Boolean).slice(0, 3) ?? []);
-    const wide =
-      typeof window !== "undefined" &&
-      window.matchMedia("(min-width: 981px)").matches;
-    setShowSuggestions(wide);
 
     const gen = speakReqRef.current;
     if ((data.video_url && heygenVideoEnabled) || data.blocked) return;
@@ -427,7 +421,6 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     setQuestion("");
     setLoading(true);
     setError(null);
-    setShowSuggestions(false);
     stopVoice();
     avatarStartedRef.current = false;
     const gen = speakReqRef.current;
@@ -494,7 +487,6 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   async function onAudio(blob: Blob, filename: string) {
     setLoading(true);
     setError(null);
-    setShowSuggestions(false);
     stopVoice();
     try {
       const data = await askAvatarAudio(blob, filename, sessionId, languageHint);
@@ -539,41 +531,40 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     setRecording(false);
   }
 
-  async function copyLastAnswer() {
-    const last = [...turns].reverse().find((t) => t.role === "assistant");
-    if (!last?.text) return;
+  async function copyAnswer(turnIndex: number) {
+    const turn = turns[turnIndex];
+    if (turn?.role !== "assistant" || !turn.text) return;
     try {
-      await navigator.clipboard.writeText(last.text);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
+      await navigator.clipboard.writeText(turn.text);
+      setCopiedTurnIndex(turnIndex);
+      window.setTimeout(() => setCopiedTurnIndex(null), 1600);
     } catch {
       /* ignore */
     }
   }
 
-  async function simplifyLastAnswer() {
-    const last = [...turns].reverse().find((t) => t.role === "assistant" && t.text);
-    if (!last?.text || simplifying || loading) return;
-    setSimplifying(true);
+  async function simplifyAnswer(turnIndex: number) {
+    const turn = turns[turnIndex];
+    if (turn?.role !== "assistant" || !turn.text || simplifyingTurnIndex !== null || loading) {
+      return;
+    }
+    setSimplifyingTurnIndex(turnIndex);
     setError(null);
     stopVoice();
     try {
       const simpler = await simplifyAvatarAnswer(
-        last.text,
+        turn.text,
         lastLanguageRef.current,
         sessionId,
       );
       setTurns((prev) => {
         const next = [...prev];
-        for (let i = next.length - 1; i >= 0; i -= 1) {
-          if (next[i]?.role === "assistant") {
-            next[i] = {
-              ...next[i],
-              text: simpler,
-              meta: ar ? "صيغة أبسط" : "Version plus simple",
-            };
-            break;
-          }
+        if (next[turnIndex]?.role === "assistant") {
+          next[turnIndex] = {
+            ...next[turnIndex],
+            text: simpler,
+            meta: ar ? "صيغة أبسط" : "Version plus simple",
+          };
         }
         return next;
       });
@@ -581,7 +572,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     } catch (err) {
       setError(err instanceof Error ? err.message : t(copy.offline));
     } finally {
-      setSimplifying(false);
+      setSimplifyingTurnIndex(null);
     }
   }
 
@@ -601,10 +592,10 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     };
   }, []);
 
-  const starterSuggestions = suggestions.slice(0, 3);
-  const activeSuggestions = followups.length > 0 ? followups : starterSuggestions.map((s) => t(s));
-  const suggestionsTitle = followups.length > 0 ? t(copy.related) : t(copy.suggestions);
-  const lastAssistant = [...turns].reverse().find((t) => t.role === "assistant" && t.text);
+  const starterSuggestions = suggestions.slice(0, 3).map((s) => t(s));
+  const lastAssistantIndex = turns.findLastIndex(
+    (turn) => turn.role === "assistant" && turn.text && !turn.streaming,
+  );
 
   return (
     <div className="avx" dir={dir}>
@@ -700,36 +691,6 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
             </div>
           </div>
 
-          <div className="avx-suggestions" aria-label={suggestionsTitle}>
-            {(turns.length === 0 || showSuggestions) && (
-              <p className="avx-suggestions-label">{suggestionsTitle}</p>
-            )}
-            {turns.length > 0 && (
-              <button
-                type="button"
-                className="avx-linkish"
-                onClick={() => setShowSuggestions((v) => !v)}
-              >
-                {showSuggestions ? t(copy.hideSuggestions) : t(copy.showSuggestions)}
-              </button>
-            )}
-            {showSuggestions && (
-              <div className="avx-chips">
-                {activeSuggestions.map((item, index) => (
-                  <button
-                    key={`${item}-${index}`}
-                    type="button"
-                    className="avx-chip"
-                    disabled={loading}
-                    onClick={() => void submitQuestion(item)}
-                  >
-                    <span className="avx-chip-text">{item}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
           <div ref={historyRef} className="avx-history" aria-live="polite">
             {turns.length === 0 && !loading ? (
               <div className="avx-empty">
@@ -738,25 +699,118 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
                 </div>
                 <h2>{t(copy.emptyTitle)}</h2>
                 <p>{t(copy.empty)}</p>
+                <div className="avx-turn-suggestions avx-turn-suggestions--empty" aria-label={t(copy.suggestions)}>
+                  <p className="avx-suggestions-label">{t(copy.suggestions)}</p>
+                  <div className="avx-chips">
+                    {starterSuggestions.map((item, index) => (
+                      <button
+                        key={`${item}-${index}`}
+                        type="button"
+                        className="avx-chip"
+                        disabled={loading}
+                        onClick={() => void submitQuestion(item)}
+                      >
+                        <span className="avx-chip-text">{item}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : (
-              turns.map((turn, i) => (
-                <article
-                  key={`${turn.role}-${i}`}
-                  className={`avx-bubble ${turn.role}${turn.streaming ? " is-streaming" : ""}`}
-                >
-                  <p>
-                    {turn.text}
-                    {turn.streaming && !turn.text ? "…" : null}
-                    {turn.streaming && turn.text ? (
-                      <span className="avx-cursor" aria-hidden>
-                        |
-                      </span>
-                    ) : null}
-                  </p>
-                  {turn.meta && <small>{turn.meta}</small>}
-                </article>
-              ))
+              turns.map((turn, i) => {
+                if (turn.role === "user") {
+                  return (
+                    <article key={`user-${i}`} className="avx-bubble user">
+                      <p>{turn.text}</p>
+                    </article>
+                  );
+                }
+
+                const isLastAssistant = i === lastAssistantIndex;
+                const showActions = Boolean(turn.text) && !turn.streaming;
+
+                return (
+                  <div key={`assistant-${i}`} className="avx-turn-block">
+                    <article className={`avx-bubble assistant${turn.streaming ? " is-streaming" : ""}`}>
+                      <p>
+                        {turn.text}
+                        {turn.streaming && !turn.text ? "…" : null}
+                        {turn.streaming && turn.text ? (
+                          <span className="avx-cursor" aria-hidden>
+                            |
+                          </span>
+                        ) : null}
+                      </p>
+                      {turn.meta && <small>{turn.meta}</small>}
+                    </article>
+
+                    {showActions && (
+                      <div className="avx-turn-toolbar">
+                        <button
+                          type="button"
+                          className="avx-tool-btn"
+                          disabled={loading || simplifyingTurnIndex !== null}
+                          onClick={() => void copyAnswer(i)}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                          <span>
+                            {copiedTurnIndex === i ? t(copy.copied) : t(copy.copyAnswer)}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          className="avx-tool-btn"
+                          disabled={loading || simplifyingTurnIndex !== null}
+                          onClick={() => void simplifyAnswer(i)}
+                        >
+                          <Wand2 className="h-3.5 w-3.5" />
+                          <span>
+                            {simplifyingTurnIndex === i
+                              ? t(copy.simplifying)
+                              : t(copy.simplify)}
+                          </span>
+                        </button>
+                        {isLastAssistant && (speaking || audioUrl) && (
+                          <button type="button" className="avx-tool-btn" onClick={stopVoice}>
+                            <VolumeX className="h-3.5 w-3.5" />
+                            <span>{t(copy.stopAudio)}</span>
+                          </button>
+                        )}
+                        {isLastAssistant && error && lastQuestionRef.current && (
+                          <button
+                            type="button"
+                            className="avx-tool-btn"
+                            disabled={loading}
+                            onClick={() => void submitQuestion(lastQuestionRef.current)}
+                          >
+                            <RotateCcw className="h-3.5 w-3.5" />
+                            <span>{t(copy.retry)}</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {showActions && turn.followups && turn.followups.length > 0 && (
+                      <div className="avx-turn-suggestions" aria-label={t(copy.related)}>
+                        <p className="avx-suggestions-label">{t(copy.related)}</p>
+                        <div className="avx-chips">
+                          {turn.followups.map((item, index) => (
+                            <button
+                              key={`${item}-${index}`}
+                              type="button"
+                              className="avx-chip"
+                              disabled={loading}
+                              onClick={() => void submitQuestion(item)}
+                            >
+                              <span className="avx-chip-text">{item}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
             )}
             {loading && !turns.some((t) => t.streaming) && (
               <div className="avx-typing" aria-hidden>
@@ -766,46 +820,6 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
               </div>
             )}
           </div>
-
-          {lastAssistant && (
-            <div className="avx-toolbar">
-              <button
-                type="button"
-                className="avx-tool-btn"
-                disabled={loading || simplifying}
-                onClick={() => void copyLastAnswer()}
-              >
-                <Copy className="h-3.5 w-3.5" />
-                <span>{copied ? t(copy.copied) : t(copy.copyAnswer)}</span>
-              </button>
-              <button
-                type="button"
-                className="avx-tool-btn"
-                disabled={loading || simplifying}
-                onClick={() => void simplifyLastAnswer()}
-              >
-                <Wand2 className="h-3.5 w-3.5" />
-                <span>{simplifying ? t(copy.simplifying) : t(copy.simplify)}</span>
-              </button>
-              {(speaking || audioUrl) && (
-                <button type="button" className="avx-tool-btn" onClick={stopVoice}>
-                  <VolumeX className="h-3.5 w-3.5" />
-                  <span>{t(copy.stopAudio)}</span>
-                </button>
-              )}
-              {error && lastQuestionRef.current && (
-                <button
-                  type="button"
-                  className="avx-tool-btn"
-                  disabled={loading}
-                  onClick={() => void submitQuestion(lastQuestionRef.current)}
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  <span>{t(copy.retry)}</span>
-                </button>
-              )}
-            </div>
-          )}
 
           <form onSubmit={onSubmit} className="avx-composer">
             <div className="avx-composer-shell">

@@ -158,7 +158,7 @@ async def chat_stream(
                 client_hash=client_hash,
                 language_hint=body.language_hint,
                 generate_media=False,
-                include_followups=False,
+                include_followups=True,
             )
             # Reveal quickly (pipeline already finished; avoid slow fake typing)
             text = result.answer or ""
