@@ -37,7 +37,7 @@ class GeminiLLMService(LLMService):
                 self.model_name,
                 generation_config={
                     "temperature": 0.2,
-                    "max_output_tokens": 1536,
+                    "max_output_tokens": 384,
                 },
             )
             prompt = build_reformulation_prompt(
@@ -45,7 +45,7 @@ class GeminiLLMService(LLMService):
             )
             response = await asyncio.wait_for(
                 asyncio.to_thread(model.generate_content, prompt),
-                timeout=45.0,
+                timeout=25.0,
             )
             text = (response.text or "").strip()
             return LlmResult(text=text, provider="gemini", model=self.model_name)
@@ -71,7 +71,7 @@ class GeminiLLMService(LLMService):
                 self.model_name,
                 generation_config={
                     "temperature": 0.2,
-                    "max_output_tokens": 1536,
+                    "max_output_tokens": 384,
                 },
             )
             prompt = build_reformulation_prompt(
@@ -167,7 +167,7 @@ class AnthropicLLMService(LLMService):
             )
             resp = await client.messages.create(
                 model=self.model_name,
-                max_tokens=1536,
+                max_tokens=512,
                 temperature=0.15,
                 messages=[{"role": "user", "content": prompt}],
             )

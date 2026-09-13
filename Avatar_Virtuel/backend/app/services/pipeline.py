@@ -159,10 +159,10 @@ async def _enrich_rag_hits(
             source_type=getattr(row, "source_type", None) or "qa",
         )
 
-    return sorted(by_id.values(), key=lambda h: h.score or 0.0, reverse=True)[:8]
+    return sorted(by_id.values(), key=lambda h: h.score or 0.0, reverse=True)[:3]
 
 
-def _combine_rag_sources(best: RagHit, hits: list[RagHit], max_chunks: int = 6) -> str:
+def _combine_rag_sources(best: RagHit, hits: list[RagHit], max_chunks: int = 2) -> str:
     """Merge nearby RAG hits so the LLM can produce richer, still faithful answers."""
     parts: list[str] = []
     seen: set[str] = set()

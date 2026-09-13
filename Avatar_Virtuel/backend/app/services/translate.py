@@ -107,13 +107,12 @@ async def translate_answer_to_language(
         return text.strip()
 
     lang_note = {
-        "fr": "français clair, oral et développé (8 phrases minimum si le texte le permet)",
-        "ary": "darija marocaine naturelle en alphabet arabe, développée (8 جمل على الأقل)",
+        "fr": "français clair et oral (4 à 6 phrases maximum)",
+        "ary": "darija marocaine naturelle (4–6 جمل كحد أقصى)",
     }.get(target_language, "français clair")
 
-    prompt = f"""Traduis et développe fidèlement cette réponse du programme en {lang_note}.
-Règles : conserve TOUS les chiffres et faits, n'invente rien, développe chaque mesure
-mentionnée, pas d'intro superflue.
+    prompt = f"""Traduis fidèlement cette réponse du programme en {lang_note}.
+Règles : conserve TOUS les chiffres et faits, n'invente rien, reste concis.
 Texte :
 {text.strip()}
 """
@@ -123,7 +122,7 @@ Texte :
         genai.configure(api_key=settings.gemini_api_key)
         model = genai.GenerativeModel(
             settings.translation_model or settings.llm_model,
-            generation_config={"temperature": 0.0, "max_output_tokens": 1024},
+            generation_config={"temperature": 0.0, "max_output_tokens": 384},
         )
         response = await asyncio.to_thread(model.generate_content, prompt)
         out = (response.text or "").strip()

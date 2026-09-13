@@ -17,9 +17,11 @@ const CLIP_PATHS = [
 let lastClipIndex = -1;
 
 export function isPrerecordedAvatarEnabled(): boolean {
-  return (
-    String(import.meta.env["VITE_PRERECORDED_AVATAR"] || "").toLowerCase() === "true"
-  );
+  const raw = String(import.meta.env["VITE_PRERECORDED_AVATAR"] ?? "").toLowerCase();
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  // Prod: enabled by default when env omitted at build (assets in public/candidate-speaking/)
+  return Boolean(import.meta.env.PROD);
 }
 
 /** Random clip; avoids repeating the same file twice in a row when possible. */
