@@ -83,8 +83,8 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const ttsPlayingRef = useRef(false);
   const speakFinalScheduledRef = useRef(false);
   const speakingClipRef = useRef("");
-  // Always on for /avatar demo (portrait frame + pre-recorded loops + Edge TTS).
-  const prerecordedAvatarEnabled = true;
+  // Portrait image only — pre-recorded speaking videos disabled; Edge TTS for voice.
+  const prerecordedAvatarEnabled = false;
   const candidatePortrait = candidateIdlePortrait;
 
   const copy = {
@@ -382,7 +382,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
       ];
     });
 
-    if (data.video_url) {
+    if (data.video_url && heygenVideoEnabled) {
       setAudioUrl(null);
       setVideoUrl(data.video_url);
       setSpeaking(true);
@@ -394,7 +394,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     setShowSuggestions(wide);
 
     const gen = speakReqRef.current;
-    if (data.video_url || data.blocked) return;
+    if ((data.video_url && heygenVideoEnabled) || data.blocked) return;
 
     // Bitmoji + Edge TTS: read full answer (early clip + rest queued).
     if (!heygenVideoEnabled) {
@@ -648,8 +648,8 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
           <AvatarStage
             videoUrl={videoUrl}
             audioUrl={audioUrl}
-            videoMuted={prerecordedAvatarEnabled && Boolean(videoUrl)}
-            portraitFrame={prerecordedAvatarEnabled}
+            videoMuted={false}
+            portraitFrame
             idle={!loading && !speaking}
             speaking={speaking}
             name={copy.brand}

@@ -17,7 +17,7 @@ const CLIP_PATHS = [
 let lastClipIndex = -1;
 
 export function isPrerecordedAvatarEnabled(): boolean {
-  return true;
+  return false;
 }
 
 /** Random clip; avoids repeating the same file twice in a row when possible. */
