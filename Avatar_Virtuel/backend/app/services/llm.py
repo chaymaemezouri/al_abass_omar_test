@@ -36,8 +36,8 @@ class GeminiLLMService(LLMService):
             model = genai.GenerativeModel(
                 self.model_name,
                 generation_config={
-                    "temperature": 0.1,
-                    "max_output_tokens": 180,
+                    "temperature": 0.2,
+                    "max_output_tokens": 1536,
                 },
             )
             prompt = build_reformulation_prompt(
@@ -45,7 +45,7 @@ class GeminiLLMService(LLMService):
             )
             response = await asyncio.wait_for(
                 asyncio.to_thread(model.generate_content, prompt),
-                timeout=15.0,
+                timeout=45.0,
             )
             text = (response.text or "").strip()
             return LlmResult(text=text, provider="gemini", model=self.model_name)
@@ -70,8 +70,8 @@ class GeminiLLMService(LLMService):
             model = genai.GenerativeModel(
                 self.model_name,
                 generation_config={
-                    "temperature": 0.1,
-                    "max_output_tokens": 180,
+                    "temperature": 0.2,
+                    "max_output_tokens": 1536,
                 },
             )
             prompt = build_reformulation_prompt(
@@ -167,7 +167,7 @@ class AnthropicLLMService(LLMService):
             )
             resp = await client.messages.create(
                 model=self.model_name,
-                max_tokens=512,
+                max_tokens=1536,
                 temperature=0.15,
                 messages=[{"role": "user", "content": prompt}],
             )

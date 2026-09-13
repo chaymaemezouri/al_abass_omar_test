@@ -9,6 +9,8 @@ type Props = {
   speaking: boolean;
   name: string;
   portraitSrc?: string;
+  /** Same portrait frame for idle image + pre-recorded video (no circle). */
+  portraitFrame?: boolean;
   statusLabel?: string;
   onAudioEnded?: () => void;
 };
@@ -21,12 +23,14 @@ export function AvatarStage({
   speaking,
   name,
   portraitSrc,
+  portraitFrame = false,
   statusLabel,
   onAudioEnded,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const showPortrait = Boolean(portraitSrc) && !videoUrl;
+  const usePortraitFrame = portraitFrame || Boolean(videoUrl && videoMuted);
 
   useEffect(() => {
     const el = videoRef.current;
@@ -65,7 +69,9 @@ export function AvatarStage({
     <div
       className={`avx-stage-inner ${live ? "is-speaking" : ""} ${idle ? "is-idle" : ""}`}
     >
-      <div className="avx-avatar-scene">
+      <div
+        className={`avx-avatar-scene${usePortraitFrame ? " avx-avatar-scene--portrait" : ""}`}
+      >
         <div className="avx-avatar-ring" aria-hidden />
         <div className="avx-avatar-ring avx-avatar-ring--soft" aria-hidden />
 
@@ -79,18 +85,20 @@ export function AvatarStage({
           ) : null}
 
           {videoUrl && (
-            <video
-              ref={videoRef}
-              src={videoUrl}
-              playsInline
-              muted={videoMuted}
-              loop={videoMuted}
-              className="avx-video"
-              onEnded={videoMuted ? undefined : onAudioEnded}
-              onError={() => {
-                if (videoRef.current) videoRef.current.style.display = "none";
-              }}
-            />
+            <div className="avx-video-frame">
+              <video
+                ref={videoRef}
+                src={videoUrl}
+                playsInline
+                muted={videoMuted}
+                loop={videoMuted}
+                className="avx-video"
+                onEnded={videoMuted ? undefined : onAudioEnded}
+                onError={() => {
+                  if (videoRef.current) videoRef.current.style.display = "none";
+                }}
+              />
+            </div>
           )}
         </div>
 

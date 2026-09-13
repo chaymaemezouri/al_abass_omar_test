@@ -6,13 +6,13 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import delete, select, text
+from sqlalchemy import delete, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.config import get_settings
 from app.core.prompts import FALLBACK_MESSAGES, SENSITIVE_FALLBACK
-from app.db.models import ConversationSession, Message
+from app.db.models import ConversationSession, KnowledgeChunk, Message
 from app.schemas.chat import ChatResponse
 from app.services.avatar import get_avatar_service
 from app.services.base import RagHit, RagResult
@@ -31,7 +31,7 @@ from app.services.intent import (
 from app.services.language import get_language_service
 from app.services.latency import finish_latency_profile, start_latency_profile, time_step
 from app.services.llm import get_llm_service
-from app.services.rag import PgVectorRAGService
+from app.services.rag import PgVectorRAGService, keyword_overlap, lexical_similarity
 from app.services.rerank import rerank_hits
 from app.services.translate import translate_answer_to_language, translate_query_to_arabic
 from app.services.tts import get_tts_service
@@ -110,6 +110,88 @@ def _history_text(session: ConversationSession) -> str:
     return "\n".join(lines)
 
 
+async def _enrich_rag_hits(
+    db: AsyncSession,
+    question: str,
+    hits: list[RagHit],
+    best: RagHit,
+) -> list[RagHit]:
+    """Add same-theme chapter chunks so broad questions get enough material to develop."""
+    q_lower = question.lower()
+    chapter_filters: list = []
+
+    if "شباب" in question or "jeune" in q_lower:
+        chapter_filters.append(KnowledgeChunk.chapitre.contains("الشباب"))
+    if any(t in question for t in ("نساء", "المرأة")) or "femme" in q_lower:
+        chapter_filters.append(KnowledgeChunk.chapitre.contains("النساء"))
+
+    if chapter_filters:
+        stmt = select(KnowledgeChunk).where(or_(*chapter_filters)).limit(60)
+    else:
+        stmt = (
+            select(KnowledgeChunk)
+            .where(KnowledgeChunk.chapitre == best.chapitre)
+            .limit(40)
+        )
+
+    rows = (await db.execute(stmt)).scalars().all()
+    by_id = {h.chunk_id: h for h in hits}
+
+    for row in rows:
+        cid = str(row.id)
+        if cid in by_id:
+            continue
+        kw = max(
+            keyword_overlap(question, row.question or ""),
+            keyword_overlap(question, (row.reponse or "")[:600]),
+            0.85 * lexical_similarity(question, row.question or ""),
+        )
+        if kw < 0.12:
+            continue
+        by_id[cid] = RagHit(
+            chunk_id=cid,
+            chapitre=row.chapitre,
+            question=row.question,
+            reponse=row.reponse,
+            langue=row.langue,
+            score=min(0.92, 0.55 + kw),
+            source_page=row.source_page,
+            source_type=getattr(row, "source_type", None) or "qa",
+        )
+
+    return sorted(by_id.values(), key=lambda h: h.score or 0.0, reverse=True)[:8]
+
+
+def _combine_rag_sources(best: RagHit, hits: list[RagHit], max_chunks: int = 6) -> str:
+    """Merge nearby RAG hits so the LLM can produce richer, still faithful answers."""
+    parts: list[str] = []
+    seen: set[str] = set()
+    best_score = best.score or 0.0
+    threshold = max(0.55, get_settings().rag_similarity_threshold - 0.05)
+
+    for hit in hits:
+        if hit.chunk_id in seen:
+            continue
+        score = hit.score or 0.0
+        if hit.chunk_id != best.chunk_id and (
+            score < threshold or score < best_score - 0.15
+        ):
+            continue
+        reponse = (hit.reponse or "").strip()
+        if not reponse or reponse in parts:
+            continue
+        question = (hit.question or "").strip()
+        block = f"Question : {question}\nRéponse : {reponse}" if question else reponse
+        parts.append(block)
+        seen.add(hit.chunk_id)
+        if len(parts) >= max_chunks:
+            break
+
+    if not parts:
+        return (best.reponse or "").strip()
+    return "\n\n---\n\n".join(parts)
+
+
 async def _run_programme_rag(
     db: AsyncSession,
     session: ConversationSession,
@@ -153,7 +235,7 @@ async def _run_programme_rag(
         soft = max(0.48, threshold - 0.05)
         best_score = ranked[0].score if ranked else 0.0
         above = (best_score or 0) >= soft
-        hits = ranked[: max(3, get_settings().rag_top_k)]
+        hits = ranked[: max(8, get_settings().rag_top_k)]
         return RagResult(hits=hits, best_score=best_score, above_threshold=above)
 
     with time_step("rag_multi"):
@@ -168,6 +250,16 @@ async def _run_programme_rag(
         if search_question.strip() != question.strip():
             searches.append(await _search_raw(question))
         rag_result = await _merge_results(*searches)
+
+    if rag_result.hits:
+        enriched = await _enrich_rag_hits(
+            db, search_question or question, rag_result.hits, rag_result.hits[0]
+        )
+        rag_result = RagResult(
+            hits=enriched,
+            best_score=enriched[0].score if enriched else rag_result.best_score,
+            above_threshold=rag_result.above_threshold,
+        )
 
     async def _maybe_followups(
         best_hit: RagHit | None, hits: list[RagHit], answered: str
@@ -235,8 +327,8 @@ async def _run_programme_rag(
             followups=followups,
         )
 
-    reponse_source = best.reponse.strip()
-    sources = [best.chapitre]
+    reponse_source = _combine_rag_sources(best, rag_result.hits)
+    sources = list(dict.fromkeys([best.chapitre] + [h.chapitre for h in rag_result.hits[:3]]))
     logger.info(
         "rag_chunk_retained outcome=answer score=%.4f chunk_id=%s source_type=%s "
         "chapitre=%s lang=%s ranked_n=%s",
@@ -248,69 +340,56 @@ async def _run_programme_rag(
         len(rag_result.hits),
     )
 
-    hit_lang = (best.langue or "").lower()
-    # Fast path: high-confidence hit already in user language → skip reformulate
-    if (best.score or 0) >= 0.88 and (
-        (language == "ar" and hit_lang.startswith("ar"))
-        or (language == "fr" and hit_lang.startswith("fr"))
-        or (
-            language == "ary"
-            and ("ary" in hit_lang or "darija" in hit_lang or hit_lang.startswith("ar"))
+    llm = get_llm_service()
+    with time_step("reformulate"):
+        llm_result = await llm.reformulate(
+            language, reponse_source, question, historique=history
         )
-    ):
-        logger.info(
-            "llm_skip_high_confidence score=%.4f hit_lang=%s",
-            best.score or 0,
-            hit_lang,
+    guardrails = get_guardrail_service()
+
+    if llm_result.text.strip():
+        valid, answer = guardrails.validate_reformulation(
+            llm_result.text, reponse_source, language
         )
-        answer = reponse_source
-    elif language == "ar" and (best.score or 0) >= 0.92:
-        logger.info("llm_skip_high_confidence_ar score=%.4f", best.score or 0)
-        answer = reponse_source
-    else:
-        llm = get_llm_service()
-        with time_step("reformulate"):
-            llm_result = await llm.reformulate(
-                language, reponse_source, question, historique=history
-            )
-        guardrails = get_guardrail_service()
+        if not valid:
+            logger.info("llm_reformulation_rejected lang=%s — keep usable answer", language)
+            from app.services.guardrails import invented_numbers
 
-        if llm_result.text.strip():
-            valid, answer = guardrails.validate_reformulation(
-                llm_result.text, reponse_source, language
-            )
-            if not valid:
-                logger.info("llm_reformulation_rejected lang=%s — keep usable answer", language)
-                from app.services.guardrails import invented_numbers
-
-                # Prefer LLM wording if it invents no numbers; else translate source
-                if language != "ar" and not invented_numbers(
-                    reponse_source, llm_result.text
-                ):
-                    answer = llm_result.text.strip()
-                elif language == "ar":
-                    answer = reponse_source
-                else:
-                    with time_step("translate_answer"):
-                        answer = await translate_answer_to_language(
-                            reponse_source, language
-                        )
-        else:
-            # Never claim "no info" when RAG found a chunk
-            logger.info("llm_empty_after_rag provider=%s — translate source", llm_result.provider)
-            if language == "ar":
+            # Prefer LLM wording if it invents no numbers; else translate source
+            if language != "ar" and not invented_numbers(
+                reponse_source, llm_result.text
+            ):
+                answer = llm_result.text.strip()
+            elif language == "ar":
                 answer = reponse_source
             else:
                 with time_step("translate_answer"):
-                    answer = await translate_answer_to_language(reponse_source, language)
+                    answer = await translate_answer_to_language(
+                        reponse_source, language
+                    )
+    else:
+        # Never claim "no info" when RAG found a chunk
+        logger.info("llm_empty_after_rag provider=%s — translate source", llm_result.provider)
+        if language == "ar":
+            answer = reponse_source
+        else:
+            with time_step("translate_answer"):
+                answer = await translate_answer_to_language(reponse_source, language)
 
-        # Last safety: empty answer must not become FALLBACK if we have source
-        if not (answer or "").strip():
-            answer = (
-                reponse_source
-                if language == "ar"
-                else await translate_answer_to_language(reponse_source, language)
-            )
+    # Last safety: empty answer must not become FALLBACK if we have source
+    if not (answer or "").strip():
+        answer = (
+            reponse_source
+            if language == "ar"
+            else await translate_answer_to_language(reponse_source, language)
+        )
+
+    # Prefer longer LLM wording if pipeline fell back to a one-line KB snippet
+    if llm_result.text.strip() and len((answer or "").split()) < 40:
+        from app.services.guardrails import invented_numbers
+
+        if not invented_numbers(reponse_source, llm_result.text):
+            answer = llm_result.text.strip()
 
     with time_step("followups"):
         followups = await _maybe_followups(best, rag_result.hits, best.question)

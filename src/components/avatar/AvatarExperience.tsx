@@ -13,7 +13,7 @@ import {
   Wand2,
 } from "lucide-react";
 
-import candidatePortrait from "@/assets/Avatar.png";
+import candidatePortraitFallback from "@/assets/Avatar.png";
 import { useLang, suggestions } from "@/lib/i18n";
 import {
   askAvatarAudio,
@@ -24,7 +24,11 @@ import {
   type AvatarChatResponse,
 } from "@/lib/avatar-api";
 import { AvatarStage } from "@/components/avatar/AvatarStage";
-import { isPrerecordedAvatarEnabled, pickSpeakingClip } from "@/lib/prerecorded-avatar";
+import {
+  CANDIDATE_IDLE_PORTRAIT,
+  isPrerecordedAvatarEnabled,
+  pickSpeakingClip,
+} from "@/lib/prerecorded-avatar";
 import "@/components/avatar/avatar-experience.css";
 
 type Bi = { fr: string; ar: string };
@@ -83,6 +87,9 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const ttsPlayingRef = useRef(false);
   const speakingClipRef = useRef("");
   const prerecordedAvatarEnabled = isPrerecordedAvatarEnabled();
+  const candidatePortrait = prerecordedAvatarEnabled
+    ? CANDIDATE_IDLE_PORTRAIT
+    : candidatePortraitFallback;
 
   const copy = {
     brand: "Al Abass Omar",
@@ -635,6 +642,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
             videoUrl={videoUrl}
             audioUrl={audioUrl}
             videoMuted={prerecordedAvatarEnabled && Boolean(videoUrl)}
+            portraitFrame={prerecordedAvatarEnabled}
             idle={!loading && !speaking}
             speaking={speaking}
             name={copy.brand}

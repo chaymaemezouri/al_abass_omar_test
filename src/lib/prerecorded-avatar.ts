@@ -5,10 +5,13 @@
  * Video plays muted + looped; Edge TTS audio is the real voice (sync feeling, not letter-perfect).
  */
 
+/** Idle portrait shown when the speaking clip is not playing. */
+export const CANDIDATE_IDLE_PORTRAIT = "/candidate-speaking/avatar-idle.png";
+
 const CLIP_PATHS = [
   "/candidate-speaking/speak-1.mp4",
   "/candidate-speaking/speak-2.mp4",
-  "/candidate-speaking/speak-3.mp4",
+  // Add when ready: "/candidate-speaking/speak-3.mp4",
 ] as const;
 
 let lastClipIndex = -1;

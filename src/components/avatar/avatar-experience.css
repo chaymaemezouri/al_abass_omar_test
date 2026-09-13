@@ -229,9 +229,61 @@ body.avx-lock {
   filter: drop-shadow(0 12px 28px rgba(7, 26, 51, 0.35));
 }
 
+.avx-video-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: rgba(7, 26, 51, 0.92);
+}
+
 .avx-video {
   z-index: 2;
   background: transparent;
+}
+
+/* Portrait frame (9:16): idle avatar.png + pre-recorded video — no circle, no stretch */
+.avx-avatar-scene--portrait {
+  width: min(76%, 300px);
+  aspect-ratio: 9 / 16;
+  max-height: min(66vh, 520px);
+}
+
+.avx-avatar-scene--portrait .avx-avatar-ring {
+  inset: -3%;
+  border-radius: 1.35rem;
+}
+
+.avx-avatar-scene--portrait .avx-avatar-ring--soft {
+  display: block;
+  inset: -6%;
+  border-radius: 1.5rem;
+  opacity: 0.85;
+}
+
+.avx-avatar-scene--portrait .avx-avatar-card {
+  border-radius: 1.2rem;
+  background: rgba(7, 26, 51, 0.55);
+  box-shadow:
+    0 20px 44px rgba(7, 26, 51, 0.42),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.avx-avatar-scene--portrait .avx-portrait-img,
+.avx-avatar-scene--portrait .avx-video {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  filter: none;
+}
+
+.avx-avatar-scene--portrait .avx-video-frame {
+  border-radius: inherit;
 }
 
 .avx-portrait-fallback {
@@ -1101,6 +1153,19 @@ body.avx-lock {
     object-fit: contain;
     object-position: center center;
     filter: drop-shadow(0 10px 22px rgba(7, 26, 51, 0.35));
+  }
+
+  .avx-avatar-scene--portrait {
+    width: auto;
+    max-width: min(68vw, 260px);
+    max-height: min(58vh, 460px);
+    aspect-ratio: 9 / 16;
+  }
+
+  .avx-avatar-scene--portrait .avx-portrait-img,
+  .avx-avatar-scene--portrait .avx-video {
+    object-fit: contain;
+    filter: none;
   }
 
   .avx-stage-meta {

@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     session_retention_hours: int = 24
 
     rag_similarity_threshold: float = 0.65
-    rag_top_k: int = 3
+    rag_top_k: int = 5
     # Ranking window before picking the single answer chunk (must be >= rag_top_k)
     rag_fetch_multiplier: int = 5
     embedding_provider: str = "gemini"

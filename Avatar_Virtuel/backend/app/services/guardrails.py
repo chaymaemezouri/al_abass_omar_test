@@ -159,11 +159,6 @@ class DefaultGuardrailService(GuardrailService):
                 logger.info("guardrail_output_block")
                 return False, source
 
-        # Reject extremely long expansions (likely free generation)
-        if len(cleaned) > max(len(source) * 3, len(source) + 400):
-            logger.warning("guardrail_reformulation_too_long")
-            return False, source
-
         return True, cleaned
 
 

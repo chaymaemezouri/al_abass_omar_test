@@ -32,6 +32,32 @@ def _normalize(text: str) -> str:
     return " ".join((text or "").lower().split())
 
 
+def topic_alignment_multiplier(query: str, question: str, reponse: str) -> float:
+    """Penalize chunks whose topic diverges from the citizen question (e.g. teachers vs youth)."""
+    qn = _normalize(query)
+    doc = _normalize(f"{question} {reponse}")
+    mult = 1.0
+
+    youth_query = any(t in qn for t in ("شباب", "jeunes", "jeune", "neet", "تشغيل الشباب"))
+    youth_doc = any(t in doc for t in ("شباب", "neet", "أوراش", "فرصة", "4.5", "37.2"))
+    teacher_doc = any(t in doc for t in ("أساتذة", "أستاذ", "professeur", "enseignant"))
+
+    if youth_query:
+        if teacher_doc and not youth_doc:
+            mult *= 0.42
+        elif youth_doc:
+            mult = max(mult, 1.18)
+
+    women_query = any(t in qn for t in ("نساء", "femmes", "femme"))
+    women_doc = "نساء" in doc or "femme" in doc
+    if women_query and women_doc:
+        mult = max(mult, 1.12)
+    if women_query and teacher_doc and not women_doc:
+        mult *= 0.55
+
+    return mult
+
+
 def lexical_similarity(query: str, candidate: str) -> float:
     """Token Jaccard + exact/substring boost — complements vector search."""
     q = _normalize(query)
@@ -153,6 +179,9 @@ class PgVectorRAGService(RAGService):
                 score = max(vec, lex_q, 0.65 * vec + 0.35 * kw)
                 if kw >= 0.4:
                     score = max(score, min(0.95, vec + 0.08 * kw))
+                score *= topic_alignment_multiplier(
+                    query, row["question"] or "", row["reponse"] or ""
+                )
                 scored.append(
                     RagHit(
                         chunk_id=str(row["id"]),
