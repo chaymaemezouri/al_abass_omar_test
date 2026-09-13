@@ -59,8 +59,10 @@ export function AvatarStage({
     const el = audioRef.current;
     if (!el || !audioUrl) return;
     if (!videoMuted && videoUrl) return;
+    el.pause();
+    el.currentTime = 0;
     el.load();
-    el.play().catch(() => undefined);
+    void el.play().catch(() => undefined);
   }, [audioUrl, videoUrl, videoMuted]);
 
   const live = speaking || !idle;
@@ -127,7 +129,6 @@ export function AvatarStage({
         <audio
           ref={audioRef}
           src={audioUrl}
-          autoPlay
           className="avx-audio-hidden"
           onEnded={onAudioEnded}
         />
