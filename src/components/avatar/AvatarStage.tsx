@@ -9,7 +9,7 @@ type Props = {
   speaking: boolean;
   name: string;
   portraitSrc?: string;
-  /** Same portrait frame for idle image + pre-recorded video (no circle). */
+  /** Legacy 9:16 frame for pre-recorded video (disabled — circle portrait by default). */
   portraitFrame?: boolean;
   statusLabel?: string;
   onAudioEnded?: () => void;

@@ -649,7 +649,6 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
             videoUrl={videoUrl}
             audioUrl={audioUrl}
             videoMuted={false}
-            portraitFrame
             idle={!loading && !speaking}
             speaking={speaking}
             name={copy.brand}
