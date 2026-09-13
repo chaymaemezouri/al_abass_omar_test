@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import candidatePortraitFallback from "@/assets/Avatar.png";
+import candidateIdlePortrait from "../../../public/candidate-speaking/avatar-idle.png";
 import { useLang, suggestions } from "@/lib/i18n";
 import {
   askAvatarAudio,
@@ -24,11 +25,7 @@ import {
   type AvatarChatResponse,
 } from "@/lib/avatar-api";
 import { AvatarStage } from "@/components/avatar/AvatarStage";
-import {
-  CANDIDATE_IDLE_PORTRAIT,
-  isPrerecordedAvatarEnabled,
-  pickSpeakingClip,
-} from "@/lib/prerecorded-avatar";
+import { isPrerecordedAvatarEnabled, pickSpeakingClip } from "@/lib/prerecorded-avatar";
 import "@/components/avatar/avatar-experience.css";
 
 type Bi = { fr: string; ar: string };
@@ -88,7 +85,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const speakingClipRef = useRef("");
   const prerecordedAvatarEnabled = isPrerecordedAvatarEnabled();
   const candidatePortrait = prerecordedAvatarEnabled
-    ? CANDIDATE_IDLE_PORTRAIT
+    ? candidateIdlePortrait
     : candidatePortraitFallback;
 
   const copy = {
