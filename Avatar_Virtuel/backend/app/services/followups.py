@@ -83,8 +83,12 @@ async def build_followups(
         seen.add(key)
         raw.append(cleaned)
 
-    for h in hits[1:]:
-        if h.source_type == "qa":
+    best_q = (best.question or "").strip() if best else ""
+
+    for h in hits:
+        if best and (h.question or "").strip() == best_q:
+            continue
+        if h.source_type == "qa" or (h.question or "").strip():
             _add(h.question)
         if len(raw) >= limit:
             break
@@ -94,13 +98,27 @@ async def build_followups(
             await db.execute(
                 select(KnowledgeChunk.question)
                 .where(
-                    KnowledgeChunk.chapitre == best.chapitre,
                     KnowledgeChunk.source_type == "qa",
+                    KnowledgeChunk.chapitre == best.chapitre,
                 )
                 .order_by(KnowledgeChunk.external_id.asc().nulls_last())
-                .limit(12)
+                .limit(16)
             )
         ).scalars().all()
+        if len(rows) < 2 and best.chapitre:
+            token = best.chapitre.split(" و", 1)[0].strip()
+            if len(token) >= 4:
+                rows = (
+                    await db.execute(
+                        select(KnowledgeChunk.question)
+                        .where(
+                            KnowledgeChunk.source_type == "qa",
+                            KnowledgeChunk.chapitre.contains(token),
+                        )
+                        .order_by(KnowledgeChunk.external_id.asc().nulls_last())
+                        .limit(16)
+                    )
+                ).scalars().all()
         for q in rows:
             _add(q)
             if len(raw) >= limit:

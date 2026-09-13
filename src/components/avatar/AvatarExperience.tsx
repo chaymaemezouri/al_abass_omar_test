@@ -728,6 +728,12 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
 
                 const isLastAssistant = i === lastAssistantIndex;
                 const showActions = Boolean(turn.text) && !turn.streaming;
+                const suggestionChips =
+                  turn.followups && turn.followups.length > 0
+                    ? turn.followups
+                    : isLastAssistant
+                      ? starterSuggestions
+                      : [];
 
                 return (
                   <div key={`assistant-${i}`} className="avx-turn-block">
@@ -790,11 +796,11 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
                       </div>
                     )}
 
-                    {showActions && turn.followups && turn.followups.length > 0 && (
+                    {showActions && suggestionChips.length > 0 && (
                       <div className="avx-turn-suggestions" aria-label={t(copy.related)}>
                         <p className="avx-suggestions-label">{t(copy.related)}</p>
                         <div className="avx-chips">
-                          {turn.followups.map((item, index) => (
+                          {suggestionChips.map((item, index) => (
                             <button
                               key={`${item}-${index}`}
                               type="button"

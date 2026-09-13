@@ -406,7 +406,7 @@ async def _run_programme_rag(
             answer = llm_result.text.strip()
 
     with time_step("followups"):
-        followups = await _maybe_followups(best, rag_result.hits, best.question)
+        followups = await _maybe_followups(best, rag_result.hits, question)
 
     return await _finalize(
         db,
