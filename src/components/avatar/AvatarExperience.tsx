@@ -23,7 +23,8 @@ import {
   type AvatarChatResponse,
 } from "@/lib/avatar-api";
 import { AvatarStage } from "@/components/avatar/AvatarStage";
-import { CANDIDATE_IDLE_PORTRAIT, pickSpeakingClip } from "@/lib/prerecorded-avatar";
+import avatarIdlePortrait from "@/assets/candidate-idle.png";
+import { pickSpeakingClip } from "@/lib/prerecorded-avatar";
 import "@/components/avatar/avatar-experience.css";
 
 type Bi = { fr: string; ar: string };
@@ -83,7 +84,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const speakingClipRef = useRef("");
   // Portrait image only — pre-recorded speaking videos disabled; Edge TTS for voice.
   const prerecordedAvatarEnabled = false;
-  const candidatePortrait = CANDIDATE_IDLE_PORTRAIT;
+  const candidatePortrait = avatarIdlePortrait;
 
   const copy = {
     brand: "Al Abass Omar",

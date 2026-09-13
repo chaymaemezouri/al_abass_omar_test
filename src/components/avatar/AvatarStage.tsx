@@ -133,7 +133,16 @@ export function AvatarStage({
         <p className="avx-stage-name">{name}</p>
         {statusLabel && (
           <p className={`avx-stage-status ${live ? "is-live" : ""}`}>
-            <span className="avx-stage-live-dot" />
+            {live ? (
+              <span className="avx-eq avx-eq--inline" aria-hidden>
+                <span />
+                <span />
+                <span />
+                <span />
+              </span>
+            ) : (
+              <span className="avx-stage-live-dot" />
+            )}
             {statusLabel}
           </p>
         )}
