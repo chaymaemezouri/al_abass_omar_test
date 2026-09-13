@@ -223,7 +223,7 @@ body.avx-lock {
   object-fit: cover;
   /* Anchor on upper body so the full head stays inside the circle */
   object-position: center 8%;
-  transform: scale(0.88);
+  transform: scale(0.93);
   user-select: none;
   pointer-events: none;
   filter: drop-shadow(0 12px 28px rgba(7, 26, 51, 0.35));
@@ -1166,7 +1166,7 @@ body.avx-lock {
   .avx-portrait-img {
     object-fit: cover;
     object-position: center 8%;
-    transform: scale(0.88);
+    transform: scale(0.93);
     filter: drop-shadow(0 10px 22px rgba(7, 26, 51, 0.35));
     mix-blend-mode: darken;
   }
