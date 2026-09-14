@@ -198,16 +198,19 @@ class PgVectorRAGService(RAGService):
                     )
                 )
 
-            # If still weak, scan all chunks lexically on QUESTIONS only
+            # Weak vector match: limited lexical fallback (never full-table scan — VPS timeout).
             best = max((h.score for h in scored), default=0.0)
             if best < threshold:
-                all_rows = (
+                fallback_rows = (
                     await self.db.execute(
-                        select(KnowledgeChunk).order_by(KnowledgeChunk.created_at.desc())
+                        select(KnowledgeChunk)
+                        .where(KnowledgeChunk.source_type == "qa")
+                        .order_by(KnowledgeChunk.external_id.desc().nullslast())
+                        .limit(80)
                     )
                 ).scalars().all()
-                for row in all_rows:
-                    lex = lexical_similarity(query, row.question)
+                for row in fallback_rows:
+                    lex = lexical_similarity(query, row.question or "")
                     if lex >= threshold:
                         scored.append(
                             RagHit(
