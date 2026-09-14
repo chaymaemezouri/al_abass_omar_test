@@ -296,6 +296,9 @@ class PgVectorRAGService(RAGService):
         existing = await self.db.scalar(
             select(KnowledgeChunk).where(KnowledgeChunk.content_hash == ch)
         )
+        if existing:
+            return existing, False
+
         # QA: embed question + reponse concatenated (same chunk, full context).
         # Document: embed the passage body for topical retrieval.
         if source_type == "qa":
@@ -307,19 +310,6 @@ class PgVectorRAGService(RAGService):
                 [text_for_embed], task_type="retrieval_document"
             )
         )[0]
-
-        if existing:
-            existing.chapitre = chapitre
-            existing.question = question
-            existing.reponse = reponse
-            existing.langue = langue
-            existing.source_type = source_type
-            existing.source_page = source_page
-            existing.external_id = external_id
-            existing.chapitre_numero = chapitre_numero
-            existing.embedding = embedding
-            await self.db.flush()
-            return existing, False
 
         chunk = KnowledgeChunk(
             chapitre=chapitre,

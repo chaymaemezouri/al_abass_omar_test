@@ -130,6 +130,8 @@ async def ingest_qa(db: AsyncSession, path: Path) -> dict:
         )
         if is_new:
             created += 1
+            # Free-tier Gemini embedding quota: 100 req/min — pace new chunks.
+            await asyncio.sleep(0.7)
         else:
             updated += 1
 
@@ -381,9 +383,13 @@ async def run(
             assert qa_path is not None
             results.append(await ingest_qa(db, qa_path))
             await db.commit()
-            # Optional FR / Darija paraphrases alongside the Arabic QA file
+            # Optional FR / Darija paraphrases (default QA file only)
+            default_qa = qa_path.parent / "questions_reponses.json"
             para = qa_path.parent / "questions_reponses_paraphrases.json"
-            if para.exists() and para.resolve() != qa_path.resolve():
+            if (
+                para.exists()
+                and qa_path.resolve() == default_qa.resolve()
+            ):
                 results.append(await ingest_qa(db, para))
                 await db.commit()
         if do_doc:
