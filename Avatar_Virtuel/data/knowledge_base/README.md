@@ -5,7 +5,8 @@
 ```
 data/knowledge_base/
 ├── qa/
-│   └── questions_reponses.json      # 120 Q/R structurées (source_type=qa)
+│   ├── questions_reponses.json      # 150 Q/R structurées (source_type=qa)
+│   └── campaign_guide_tanger_asilah_30.json  # source modulaire (ids 121–150, fusionné)
 └── documents/
     └── *.pdf                        # Programme / أرضية انتخابية (source_type=document)
 ```
