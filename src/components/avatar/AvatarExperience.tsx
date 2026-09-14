@@ -421,11 +421,15 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     const gen = speakReqRef.current;
     if ((data.video_url && heygenVideoEnabled) || data.blocked) return;
 
-    // Bitmoji + Edge TTS: read full answer (early clip + rest queued).
+    // Bitmoji + Edge TTS: server audio (vocal STT path) or client-side speak queue (text stream).
     if (!heygenVideoEnabled) {
-      if (!data.audio_url) {
-        speakFullAnswer(data.answer, data.language, data.blocked, gen);
+      if (data.audio_url && voiceMode === "voice") {
+        setVideoUrl(null);
+        setAudioUrl(data.audio_url);
+        setSpeaking(true);
+        return;
       }
+      speakFullAnswer(data.answer, data.language, data.blocked, gen);
       return;
     }
 
