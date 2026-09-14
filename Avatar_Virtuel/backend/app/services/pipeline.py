@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
@@ -174,6 +175,30 @@ async def _enrich_rag_hits(
     return sorted(by_id.values(), key=lambda h: h.score or 0.0, reverse=True)[:3]
 
 
+def _strip_qa_labels(text: str) -> str:
+    """Remove accidental « Question : / Réponse : » formatting from user-facing text."""
+    t = (text or "").strip()
+    if not t:
+        return t
+    if re.search(r"Question\s*:", t, re.IGNORECASE):
+        split = re.split(r"\n\s*Réponse\s*:\s*", t, maxsplit=1, flags=re.IGNORECASE)
+        if len(split) == 2:
+            return split[1].strip()
+        split = re.split(r"\n\s*Reponse\s*:\s*", t, maxsplit=1, flags=re.IGNORECASE)
+        if len(split) == 2:
+            return split[1].strip()
+    for prefix in (
+        r"^Réponse\s*:\s*",
+        r"^Reponse\s*:\s*",
+        r"^Question\s*:\s*",
+        r"^الجواب\s*:\s*",
+        r"^الإجابة\s*:\s*",
+        r"^السؤال\s*:\s*",
+    ):
+        t = re.sub(prefix, "", t, count=1, flags=re.IGNORECASE | re.MULTILINE).strip()
+    return t
+
+
 def _combine_rag_sources(best: RagHit, hits: list[RagHit], max_chunks: int = 2) -> str:
     """Merge nearby RAG hits so the LLM can produce richer, still faithful answers."""
     parts: list[str] = []
@@ -192,9 +217,7 @@ def _combine_rag_sources(best: RagHit, hits: list[RagHit], max_chunks: int = 2) 
         reponse = (hit.reponse or "").strip()
         if not reponse or reponse in parts:
             continue
-        question = (hit.question or "").strip()
-        block = f"Question : {question}\nRéponse : {reponse}" if question else reponse
-        parts.append(block)
+        parts.append(reponse)
         seen.add(hit.chunk_id)
         if len(parts) >= max_chunks:
             break
@@ -691,6 +714,7 @@ async def _finalize(
     source_type: Optional[str] = None,
     followups: Optional[list[str]] = None,
 ) -> ChatResponse:
+    answer = _strip_qa_labels(answer or "")
     audio_url = None
     video_url = None
 

@@ -162,6 +162,8 @@ RÈGLES :
 7. INTERDIT « je n'ai pas cette information » / « ليس لدي » / « نعتذر » / « لا مقترحات » :
    tu as une source — reformule-la pour répondre à la question, sans t'excuser.
 8. Conserve exactement les chiffres de la source.
+9. INTERDIT d'écrire « Question : », « Réponse : », « السؤال », « الجواب » ou de recopier la question :
+   réponds DIRECTEMENT à l'utilisateur comme dans un entretien (sans labels ni format Q/R).
 
 RÉPONSE SOURCE (seule vérité — exploite TOUT) :
 {reponse_source}
