@@ -79,6 +79,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const earlyPrefixRef = useRef("");
   const ttsQueueRef = useRef<string[]>([]);
   const ttsPlayingRef = useRef(false);
+  const ttsPrefetchRef = useRef<Map<string, Promise<string | null>>>(new Map());
   const speakFinalScheduledRef = useRef(false);
   const speakingClipRef = useRef("");
   // Portrait image only — pre-recorded speaking videos disabled; Edge TTS for voice.
@@ -141,6 +142,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     earlyPrefixRef.current = "";
     ttsQueueRef.current = [];
     ttsPlayingRef.current = false;
+    ttsPrefetchRef.current.clear();
     speakFinalScheduledRef.current = false;
     speakingClipRef.current = "";
     setAudioUrl(null);
@@ -260,6 +262,30 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
     if (prerecordedAvatarEnabled) setVideoUrl(null);
   }
 
+  function ttsCacheKey(gen: number, text: string) {
+    return `${gen}::${text}`;
+  }
+
+  /** Start Edge TTS fetch early so the next chunk is ready before the current one ends. */
+  function prefetchTts(text: string, language: string, gen: number) {
+    const key = ttsCacheKey(gen, text);
+    if (ttsPrefetchRef.current.has(key)) return;
+    ttsPrefetchRef.current.set(
+      key,
+      speakAvatar(text, language).then((url) => (speakReqRef.current === gen ? url : null)),
+    );
+  }
+
+  async function resolveTts(text: string, language: string, gen: number) {
+    const key = ttsCacheKey(gen, text);
+    let pending = ttsPrefetchRef.current.get(key);
+    if (!pending) {
+      pending = speakAvatar(text, language).then((url) => (speakReqRef.current === gen ? url : null));
+      ttsPrefetchRef.current.set(key, pending);
+    }
+    return pending;
+  }
+
   async function playTtsQueue(gen: number, language: string) {
     if (ttsPlayingRef.current || speakReqRef.current !== gen) return;
     if (!ttsQueueRef.current.length) {
@@ -276,8 +302,12 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
       clearSpeakingClip();
       return;
     }
+    // Warm the chunk after this one while the current audio plays.
+    if (ttsQueueRef.current[0]) {
+      prefetchTts(ttsQueueRef.current[0], language, gen);
+    }
     ensureSpeakingClip();
-    const url = await speakAvatar(next, language);
+    const url = await resolveTts(next, language, gen);
     if (!url || speakReqRef.current !== gen) {
       ttsQueueRef.current = [];
       ttsPlayingRef.current = false;
@@ -292,6 +322,7 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
 
   function enqueueTtsSegments(segments: string[], language: string, gen: number) {
     if (!segments.length || voiceMode !== "voice") return;
+    for (const seg of segments) prefetchTts(seg, language, gen);
     ttsQueueRef.current.push(...segments);
     void playTtsQueue(gen, language);
   }
