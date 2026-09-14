@@ -46,7 +46,7 @@ async def rerank_hits(question: str, hits: list[RagHit]) -> RagHit:
     top_score = top.score or 0.0
     gap = top_score - (second.score or 0.0)
     # Skip LLM when the vector ranking is already decisive (saves ~0.8–1s).
-    if top_score >= 0.84 and gap >= 0.04:
+    if top_score >= 0.78 and gap >= 0.03:
         logger.info(
             "rerank_skip_confident score=%.4f gap=%.4f",
             top_score,

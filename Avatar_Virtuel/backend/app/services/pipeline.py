@@ -1,6 +1,7 @@
 """End-to-end chat pipeline orchestration."""
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 from datetime import datetime, timedelta, timezone
@@ -21,7 +22,7 @@ from app.core.prompts import (
 from app.db.models import ConversationSession, KnowledgeChunk, Message
 from app.schemas.chat import ChatResponse
 from app.services.avatar import get_avatar_service
-from app.services.base import RagHit, RagResult
+from app.services.base import LlmResult, RagHit, RagResult
 from app.services.followups import build_followups
 from app.services.guardrails import get_guardrail_service
 from app.services.intent import (
@@ -378,13 +379,31 @@ async def _run_programme_rag(
     )
 
     llm = get_llm_service()
-    with time_step("reformulate"):
-        llm_result = await llm.reformulate(
-            language, reponse_source, question, historique=history
-        )
+    score = best.score or 0.0
+    # Strong Arabic KB hit — skip reformulation LLM (~2–4s saved).
+    fast_ar_kb = language == "ar" and score >= 0.78
+
+    async def _reformulate_task() -> LlmResult:
+        if fast_ar_kb:
+            return LlmResult(text="", provider="fast_path", model="kb")
+        with time_step("reformulate"):
+            return await llm.reformulate(
+                language, reponse_source, question, historique=history
+            )
+
+    async def _followups_task() -> list[str]:
+        with time_step("followups"):
+            return await _maybe_followups(best, rag_result.hits, question)
+
+    llm_result, followups = await asyncio.gather(
+        _reformulate_task(),
+        _followups_task(),
+    )
     guardrails = get_guardrail_service()
 
-    if llm_result.text.strip():
+    if fast_ar_kb:
+        answer = reponse_source
+    elif llm_result.text.strip():
         valid, answer = guardrails.validate_reformulation(
             llm_result.text, reponse_source, language
         )
@@ -427,9 +446,6 @@ async def _run_programme_rag(
 
         if not invented_numbers(reponse_source, llm_result.text):
             answer = llm_result.text.strip()
-
-    with time_step("followups"):
-        followups = await _maybe_followups(best, rag_result.hits, question)
 
     return await _finalize(
         db,
