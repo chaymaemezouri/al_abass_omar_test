@@ -1,4 +1,25 @@
-# CI/CD — environnement TEST (`test-avatar.academyskills.net`)
+# CI/CD — TEST + PROD (deux environnements séparés)
+
+## Architecture VPS (3 dossiers)
+
+| Rôle | Chemin VPS | Domaine | Déploiement |
+|------|------------|---------|-------------|
+| **Frontend TEST** | `/var/www/avatar-candidat/app` | test-avatar.academyskills.net | **Auto** à chaque `push` sur `main` |
+| **Frontend PROD** | `/var/www/al-abass-omar/app` | al-abass-omar.academyskills.net | **Manuel** (bouton GitHub Actions) |
+| **API IA (Docker)** | `/var/www/avatar-candidat/app/Avatar_Virtuel` | api-avatar.academyskills.net | Manuel ou case à cocher dans Deploy PROD |
+
+Les deux frontends partagent la **même API IA**. L’IA reste active sur le domaine prod tant que le backend Docker tourne — un déploiement frontend prod **ne casse pas** l’IA.
+
+### Workflow recommandé pour l’équipe
+
+1. Ta copine **push** sur `main` → le **test** se met à jour tout seul.
+2. Vous vérifiez sur `https://test-avatar.academyskills.net`.
+3. Quand c’est bon → GitHub **Actions** → **Deploy PROD (al-abass-omar)** → **Run workflow**.
+4. Si vous avez modifié le backend (`Avatar_Virtuel/`) → cocher **Also restart Avatar backend**.
+
+---
+
+## TEST — auto-deploy (`test-avatar.academyskills.net`)
 
 Ce pipeline déploie **uniquement** l’environnement de test :
 
@@ -107,6 +128,35 @@ curl -sS https://test-avatar.academyskills.net/api/health
 4. `npm install` + `npm run build`.
 5. `pm2 reload avatar-candidat` (ou `pm2 start deploy/ecosystem.config.cjs` au premier run).
 6. Boucle healthcheck sur `/api/health` — **échec du job** si pas HTTP 200.
+
+---
+
+## PROD — déploiement manuel (`al-abass-omar.academyskills.net`)
+
+Workflow : `.github/workflows/deploy-prod.yml`
+
+- **Ne se lance pas** au push (volontaire — le site officiel ne bouge que quand vous décidez).
+- GitHub → **Actions** → **Deploy PROD (al-abass-omar)** → **Run workflow**.
+- Option : cocher **restart Avatar backend** si vous avez changé `Avatar_Virtuel/` (prompts, pipeline, RAG…).
+
+Prérequis VPS (une fois) : voir `deploy/PROD_DEPLOY.md` (`/var/www/al-abass-omar/shared/.env`, PM2 `al-abass-omar`, port 3011).
+
+Déploiement manuel SSH (alternative) :
+
+```bash
+cd /var/www/al-abass-omar/app
+git pull origin main
+npm install --no-fund --no-audit
+rm -rf .output && npm run build
+pm2 reload al-abass-omar --update-env
+```
+
+Backend IA seul :
+
+```bash
+cd /var/www/avatar-candidat/app && git pull origin main
+cd Avatar_Virtuel && docker compose restart backend
+```
 
 ---
 

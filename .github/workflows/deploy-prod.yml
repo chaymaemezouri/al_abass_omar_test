@@ -1,0 +1,104 @@
+# PRODUCTION — al-abass-omar.academyskills.net
+# Manual trigger ONLY (does not run on push). Test env keeps auto-deploy on push.
+name: Deploy PROD (al-abass-omar)
+
+on:
+  workflow_dispatch:
+    inputs:
+      restart_avatar_backend:
+        description: "Also restart Avatar_Virtuel Docker backend (IA / RAG changes)"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: deploy-prod-al-abass-omar
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to VPS (al-abass-omar)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script_stop: true
+          command_timeout: 25m
+          script: |
+            set -euo pipefail
+
+            DEPLOY_PATH="/var/www/al-abass-omar/app"
+            SHARED_ENV="/var/www/al-abass-omar/shared/.env"
+            APP_NAME="al-abass-omar"
+            BRANCH="main"
+            RESTART_BACKEND="${{ inputs.restart_avatar_backend }}"
+
+            echo "==> Deploy PROD path: $DEPLOY_PATH"
+            cd "$DEPLOY_PATH"
+
+            if [ ! -f "$SHARED_ENV" ]; then
+              echo "ERROR: missing $SHARED_ENV — see deploy/PROD_DEPLOY.md"
+              exit 1
+            fi
+
+            ln -sfn "$SHARED_ENV" "$DEPLOY_PATH/.env"
+
+            echo "==> Sync git ($BRANCH)"
+            git fetch --prune origin
+            git checkout "$BRANCH"
+            git reset --hard "origin/$BRANCH"
+
+            echo "==> Install dependencies"
+            npm install --no-fund --no-audit
+
+            echo "==> Clean previous build"
+            rm -rf .output
+
+            echo "==> Build (Nitro node-server)"
+            npm run build
+
+            echo "==> Reload PM2 ($APP_NAME only)"
+            if pm2 describe "$APP_NAME" >/dev/null 2>&1; then
+              pm2 reload "$APP_NAME" --update-env
+            else
+              pm2 start deploy/ecosystem.prod.config.cjs
+            fi
+            pm2 save
+
+            if [ "$RESTART_BACKEND" = "true" ]; then
+              echo "==> Restart Avatar backend (shared API)"
+              cd /var/www/avatar-candidat/app/Avatar_Virtuel
+              docker compose restart backend
+            else
+              echo "==> Skipping Avatar backend (frontend-only deploy)"
+            fi
+
+            echo "==> Healthcheck PROD"
+            HEALTH_URL="https://al-abass-omar.academyskills.net/api/health"
+            ok=0
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              code=$(curl -sS -o /tmp/prod-health.json -w "%{http_code}" "$HEALTH_URL" || true)
+              if [ "$code" = "200" ]; then
+                echo "Healthcheck OK (HTTP $code) attempt $i"
+                cat /tmp/prod-health.json || true
+                ok=1
+                break
+              fi
+              echo "Healthcheck attempt $i failed (HTTP ${code:-000}), retry in 3s..."
+              sleep 3
+            done
+
+            if [ "$ok" != "1" ]; then
+              echo "ERROR: healthcheck failed: $HEALTH_URL"
+              pm2 logs "$APP_NAME" --lines 80 --nostream || true
+              exit 1
+            fi
+
+            echo "==> Deploy PROD succeeded"
