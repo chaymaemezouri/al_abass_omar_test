@@ -55,23 +55,19 @@ async def rerank_hits(question: str, hits: list[RagHit]) -> RagHit:
         return top
 
     settings = get_settings()
-    if not settings.gemini_api_key or settings.gemini_api_key.startswith("your-"):
+    from app.services.gemini_client import gemini_generate_content, has_gemini_api_key
+
+    if not has_gemini_api_key():
         return hits[0]
 
     prompt = build_rerank_prompt(question, hits)
     try:
-        import google.generativeai as genai
-
-        genai.configure(api_key=settings.gemini_api_key)
-        model = genai.GenerativeModel(
-            settings.translation_model,
+        text, _label = await gemini_generate_content(
+            prompt=prompt,
+            model_name=settings.translation_model,
             generation_config={"temperature": 0.0, "max_output_tokens": 8},
-        )
-        raw = await asyncio.wait_for(
-            asyncio.to_thread(model.generate_content, prompt),
             timeout=10.0,
         )
-        text = (raw.text or "").strip()
         m = re.search(r"[123]", text)
         if not m:
             logger.info("rerank_parse_failed raw=%r", text[:40])

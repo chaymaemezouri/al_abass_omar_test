@@ -23,7 +23,9 @@ async def _localize_questions(questions: list[str], language: str) -> list[str]:
         return questions[:3]
 
     settings = get_settings()
-    if not settings.gemini_api_key or settings.gemini_api_key.startswith("your-"):
+    from app.services.gemini_client import gemini_generate_content, has_gemini_api_key
+
+    if not has_gemini_api_key():
         return questions[:3]
 
     numbered = "\n".join(f"{i+1}. {q}" for i, q in enumerate(questions[:3]))
@@ -33,17 +35,15 @@ Une question par ligne, même ordre, sans numéros, sans guillemets, sans commen
 {numbered}
 """
     try:
-        import google.generativeai as genai
-
-        genai.configure(api_key=settings.gemini_api_key)
-        model = genai.GenerativeModel(
-            settings.translation_model,
+        raw, _label = await gemini_generate_content(
+            prompt=prompt,
+            model_name=settings.translation_model,
             generation_config={"temperature": 0.0, "max_output_tokens": 220},
+            timeout=15.0,
         )
-        response = await asyncio.to_thread(model.generate_content, prompt)
         lines = [
             re.sub(r"^\d+[\).\:\-]\s*", "", ln).strip().strip('"')
-            for ln in (response.text or "").splitlines()
+            for ln in raw.splitlines()
             if ln.strip()
         ]
         if len(lines) >= 2:

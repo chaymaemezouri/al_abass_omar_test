@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     # Lightweight model for FR/Darija → AR query translation (separate quota when possible)
     translation_model: str = "gemini-3.5-flash-lite"
     gemini_api_key: str = ""
+    # Used automatically when primary key hits quota (429 / ResourceExhausted).
+    gemini_api_key_fallback: str = ""
     anthropic_api_key: str = ""
 
     stt_provider: str = "faster_whisper"

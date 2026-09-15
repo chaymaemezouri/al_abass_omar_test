@@ -243,24 +243,25 @@ async def _gemini_short(
     temperature: float,
     max_output_tokens: int,
 ) -> str:
-    settings = get_settings()
-    if not settings.gemini_api_key or settings.gemini_api_key.startswith("your-"):
-        return ""
-    import google.generativeai as genai
+    from app.services.gemini_client import gemini_generate_content, has_gemini_api_key
 
-    genai.configure(api_key=settings.gemini_api_key)
-    model = genai.GenerativeModel(
-        settings.translation_model,
-        generation_config={
-            "temperature": temperature,
-            "max_output_tokens": max_output_tokens,
-        },
-    )
-    response = await asyncio.wait_for(
-        asyncio.to_thread(model.generate_content, prompt),
-        timeout=12.0,
-    )
-    return (response.text or "").strip()
+    settings = get_settings()
+    if not has_gemini_api_key():
+        return ""
+    try:
+        text, _label = await gemini_generate_content(
+            prompt=prompt,
+            model_name=settings.translation_model,
+            generation_config={
+                "temperature": temperature,
+                "max_output_tokens": max_output_tokens,
+            },
+            timeout=12.0,
+        )
+        return text
+    except Exception:
+        logger.exception("gemini_short_failed")
+        return ""
 
 
 async def classify_intent(question: str) -> Intent:

@@ -9,6 +9,12 @@ from typing import Literal
 
 from app.config import get_settings
 from app.services.base import EmbeddingService
+from app.services.gemini_client import (
+    gemini_embed_sync,
+    has_gemini_api_key,
+    is_gemini_quota_error,
+    list_gemini_api_keys,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +50,7 @@ class GeminiEmbeddingService(EmbeddingService):
 
     def __init__(self) -> None:
         settings = get_settings()
-        self.api_key = settings.gemini_api_key
+        self.api_keys = list_gemini_api_keys()
         self.model = settings.embedding_model
         if not self.model.startswith("models/"):
             self.model = f"models/{self.model}"
@@ -58,43 +64,44 @@ class GeminiEmbeddingService(EmbeddingService):
     ) -> list[list[float]]:
         if not texts:
             return []
-        if not self.api_key or self.api_key.startswith("your-"):
+        if not self.api_keys:
             raise RuntimeError("GEMINI_API_KEY manquante pour les embeddings")
 
-        import google.generativeai as genai
-
-        genai.configure(api_key=self.api_key)
         now = time.monotonic()
 
         async def _one(text: str) -> list[float]:
-            key = _cache_key(text, task_type, self.model, self.dimensions)
-            cached = _EMBED_CACHE.get(key)
+            cache_k = _cache_key(text, task_type, self.model, self.dimensions)
+            cached = _EMBED_CACHE.get(cache_k)
             if cached and now - cached[0] < _CACHE_TTL_S:
                 return cached[1]
 
-            def _call() -> list[float]:
-                kwargs = {
-                    "model": self.model,
-                    "content": text,
-                    "task_type": task_type,
-                }
-                try:
-                    resp = genai.embed_content(
-                        **kwargs, output_dimensionality=self.dimensions
-                    )
-                except TypeError:
-                    resp = genai.embed_content(**kwargs)
-                values = list(resp["embedding"])
-                if len(values) > self.dimensions:
-                    values = values[: self.dimensions]
-                return _l2_normalize(values)
+            def _call_with_keys() -> list[float]:
+                last_exc: Exception | None = None
+                for i, api_key in enumerate(self.api_keys):
+                    try:
+                        return gemini_embed_sync(
+                            api_key=api_key,
+                            model=self.model,
+                            text=text,
+                            task_type=task_type,
+                            dimensions=self.dimensions,
+                        )
+                    except Exception as exc:
+                        last_exc = exc
+                        if is_gemini_quota_error(exc) and i + 1 < len(self.api_keys):
+                            logger.warning(
+                                "embedding_key_failover err=%s",
+                                type(exc).__name__,
+                            )
+                            continue
+                        raise
+                raise last_exc or RuntimeError("embedding_failed")
 
-            # Hard cap — never block the chat for tens of seconds on free-tier 429.
-            vec = await asyncio.wait_for(asyncio.to_thread(_call), timeout=8.0)
+            vec = await asyncio.wait_for(asyncio.to_thread(_call_with_keys), timeout=8.0)
             if len(_EMBED_CACHE) >= _CACHE_MAX:
                 oldest = min(_EMBED_CACHE.items(), key=lambda kv: kv[1][0])[0]
                 _EMBED_CACHE.pop(oldest, None)
-            _EMBED_CACHE[key] = (time.monotonic(), vec)
+            _EMBED_CACHE[cache_k] = (time.monotonic(), vec)
             return vec
 
         out: list[list[float]] = []
@@ -108,13 +115,8 @@ class GeminiEmbeddingService(EmbeddingService):
                     break
                 except Exception as exc:
                     last_exc = exc
-                    name = type(exc).__name__
-                    msg = str(exc).lower()
-                    if (
-                        "resourceexhausted" in name.lower()
-                        or "429" in msg
-                        or "quota" in msg
-                        or isinstance(exc, asyncio.TimeoutError)
+                    if is_gemini_quota_error(exc) or isinstance(
+                        exc, asyncio.TimeoutError
                     ):
                         logger.warning(
                             "embedding_retry attempt=%s err=%s",
@@ -163,7 +165,7 @@ def get_embedding_service() -> EmbeddingService:
     provider = settings.embedding_provider.lower()
     if provider == "local":
         return LocalHashEmbeddingService(settings.embedding_dimensions)
-    if not settings.gemini_api_key or settings.gemini_api_key.startswith("your-"):
+    if not has_gemini_api_key():
         logger.warning("embedding_fallback_local reason=missing_gemini_key")
         return LocalHashEmbeddingService(settings.embedding_dimensions)
     return GeminiEmbeddingService()

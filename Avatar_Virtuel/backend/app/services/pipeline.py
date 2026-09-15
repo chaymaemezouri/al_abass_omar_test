@@ -356,13 +356,8 @@ async def _run_programme_rag(
     )
 
     llm = get_llm_service()
-    score = best.score or 0.0
-    # Strong Arabic KB hit — skip reformulation LLM (~2–4s saved).
-    fast_ar_kb = language == "ar" and score >= 0.78
 
     async def _reformulate_task() -> LlmResult:
-        if fast_ar_kb:
-            return LlmResult(text="", provider="fast_path", model="kb")
         with time_step("reformulate"):
             return await llm.reformulate(
                 language, reponse_source, question, historique=history
@@ -378,9 +373,7 @@ async def _run_programme_rag(
     )
     guardrails = get_guardrail_service()
 
-    if fast_ar_kb:
-        answer = reponse_source
-    elif llm_result.text.strip():
+    if llm_result.text.strip():
         valid, answer = guardrails.validate_reformulation(
             llm_result.text, reponse_source, language
         )
