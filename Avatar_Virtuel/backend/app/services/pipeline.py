@@ -55,6 +55,48 @@ from app.services.rag import hit_is_relevant
 logger = logging.getLogger(__name__)
 
 MAX_HISTORY_TURNS = 3  # 3 exchanges = up to 6 messages
+
+_ORAL_AR_STARTERS = ("بالنسبة", "بما يخص", "في ما يخص", "حسب", "وفق", "في إطار")
+
+
+def _looks_like_raw_kb_copy(answer: str, source: str) -> bool:
+    """True when the answer is essentially the KB line with no oral framing."""
+    a = (answer or "").strip()
+    s = (source or "").strip()
+    if not a or not s:
+        return False
+    if a == s:
+        return True
+    # Source is one chunk inside answer with almost no extra words
+    if s in a and len(a.split()) <= len(s.split()) + 4:
+        return not any(a.startswith(p) for p in _ORAL_AR_STARTERS)
+    return False
+
+
+def _oral_wrap_fallback(language: str, source: str, question: str = "") -> str:
+    """Last resort when LLM is unavailable — light framing, zero new facts."""
+    text = (source or "").strip()
+    if not text:
+        return text
+    q = (question or "").strip()
+    if language == "ar":
+        if any(text.startswith(p) for p in _ORAL_AR_STARTERS):
+            return text
+        if "neet" in q.lower() or "NEET" in q:
+            return f"بالنسبة لبرنامج شباب NEET، {text}"
+        if "شباب" in q and ("تشغيل" in q or "عمل" in q or "NEET" in q):
+            return f"فيما يخص تشغيل الشباب، {text}"
+        if "شباب" in q:
+            return f"بخصوص الشباب، {text}"
+        return f"بالنسبة لموضوعكم، {text}"
+    if language == "fr":
+        low = text.lower()
+        if low.startswith(("en matière", "concernant", "s'agissant", "pour ce qui")):
+            return text
+        return f"Concernant votre question, {text[0].lower()}{text[1:]}" if text else text
+    if language == "ary":
+        return f"بالنسبة للموضوع ديالكم، {text}"
+    return text
 _last_purge_mono: float = 0.0
 _PURGE_EVERY_S = 120.0
 
@@ -357,12 +399,8 @@ async def _run_programme_rag(
 
     llm = get_llm_service()
     source_words = len((reponse_source or "").split())
-    short_kb_source = 0 < source_words <= 18
 
     async def _reformulate_task() -> LlmResult:
-        # Short KB line (e.g. "140 مليار درهم.") — LLM tends to pad/repeat; use source as-is.
-        if short_kb_source:
-            return LlmResult(text="", provider="short_kb", model="kb")
         with time_step("reformulate"):
             return await llm.reformulate(
                 language, reponse_source, question, historique=history
@@ -378,13 +416,7 @@ async def _run_programme_rag(
     )
     guardrails = get_guardrail_service()
 
-    if short_kb_source:
-        if language == "ar":
-            answer = reponse_source.strip()
-        else:
-            with time_step("translate_answer"):
-                answer = await translate_answer_to_language(reponse_source, language)
-    elif llm_result.text.strip():
+    if llm_result.text.strip():
         valid, answer = guardrails.validate_reformulation(
             llm_result.text, reponse_source, language
         )
@@ -398,7 +430,7 @@ async def _run_programme_rag(
             ):
                 answer = llm_result.text.strip()
             elif language == "ar":
-                answer = reponse_source
+                answer = _oral_wrap_fallback(language, reponse_source, question)
             else:
                 with time_step("translate_answer"):
                     answer = await translate_answer_to_language(
@@ -406,32 +438,35 @@ async def _run_programme_rag(
                     )
     else:
         # Never claim "no info" when RAG found a chunk
-        logger.info("llm_empty_after_rag provider=%s — translate source", llm_result.provider)
+        logger.info("llm_empty_after_rag provider=%s — oral wrap source", llm_result.provider)
         if language == "ar":
-            answer = reponse_source
+            answer = _oral_wrap_fallback(language, reponse_source, question)
         else:
             with time_step("translate_answer"):
-                answer = await translate_answer_to_language(reponse_source, language)
+                translated = await translate_answer_to_language(
+                    reponse_source, language
+                )
+            answer = _oral_wrap_fallback(language, translated, question)
 
     # Last safety: empty answer must not become FALLBACK if we have source
     if not (answer or "").strip():
-        answer = (
+        raw = (
             reponse_source
             if language == "ar"
             else await translate_answer_to_language(reponse_source, language)
         )
+        answer = _oral_wrap_fallback(language, raw, question)
 
-    # Prefer longer LLM wording only when the SOURCE itself is long (avoid padding short facts).
-    if (
-        not short_kb_source
-        and llm_result.text.strip()
-        and source_words > 40
-        and len((answer or "").split()) < 40
-    ):
+    # Prefer valid LLM wording whenever it adds natural framing (any source length).
+    if llm_result.text.strip():
         from app.services.guardrails import invented_numbers
 
-        if not invented_numbers(reponse_source, llm_result.text):
-            answer = llm_result.text.strip()
+        candidate = llm_result.text.strip()
+        if not invented_numbers(reponse_source, candidate):
+            if _looks_like_raw_kb_copy(answer or "", reponse_source):
+                answer = candidate
+            elif len(candidate.split()) >= len((answer or "").split()):
+                answer = candidate
 
     return await _finalize(
         db,

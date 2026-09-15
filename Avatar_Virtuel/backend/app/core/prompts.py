@@ -118,29 +118,38 @@ Question :
 
 
 def _reformulation_length_hint(reponse_source: str, language: str) -> str:
-    """Adapt length to source — short KB snippets must stay short."""
+    """Target a medium oral length — neither dry one-liner nor padded essay."""
     n = len((reponse_source or "").split())
-    if n <= 18:
+    if n <= 25:
         return {
-            "fr": "1 à 2 phrases MAXIMUM (~15–35 mots). La source est courte : ne l'allonge pas.",
-            "ar": "1 إلى 2 جمل كحد أقصى. المصدر قصير: لا تطيل ولا تكرر.",
-            "ary": "1 حتى 2 جمل كحد أقصى. المصدر قصير: بلا تكرار.",
-        }.get(language, "1–2 phrases maximum.")
-    if n <= 45:
+            "fr": (
+                "2 à 3 phrases (~35–65 mots) : ni trop court (copie sèche), "
+                "ni trop long. Accroche liée à la question + faits de la source."
+            ),
+            "ar": (
+                "2 إلى 3 جمل (~35–65 كلمة): لا تكن مختصراً جداً (نسخ جاف) "
+                "ولا مطولاً. جملة تربط بالسؤال + جملة أو جملتان بالمعطيات."
+            ),
+            "ary": (
+                "2 حتى 3 جمل (~35–65 كلمة): بلا نسخ جاف ولا طول زايد. "
+                "ربط بالسؤال + المعطيات من المصدر."
+            ),
+        }.get(language, "2–3 phrases, longueur moyenne.")
+    if n <= 55:
         return {
-            "fr": "2 à 4 phrases (~40–80 mots), proportionnelles à la source.",
-            "ar": "2 إلى 4 جمل (~40–80 كلمة) بما يناسب المصدر.",
-            "ary": "2 حتى 4 جمل بما يناسب المصدر.",
-        }.get(language, "2–4 phrases.")
+            "fr": "3 à 4 phrases (~50–90 mots), style entretien, proportionnelles à la source.",
+            "ar": "3 إلى 4 جمل (~50–90 كلمة) بأسلوب حوار واضح ومتوازن.",
+            "ary": "3 حتى 4 جمل (~50–90 كلمة) بأسلوب حوار واضح.",
+        }.get(language, "3–4 phrases.")
     return {
         "fr": (
-            "4 à 6 phrases (~70–110 mots) : direct, professionnel, sans blabla ni introduction."
+            "4 à 6 phrases (~70–120 mots) : développe sans répéter les chiffres."
         ),
         "ar": (
-            "4 إلى 6 جمل (حوالي 70–110 كلمة): مباشر، مهني، بدون حشو أو مقدمة."
+            "4 إلى 6 جمل (~70–120 كلمة): وضّح دون تكرار الأرقام أو الحشو."
         ),
         "ary": (
-            "4 حتى 6 جمل: واضح، مهني، بلا طول زايد."
+            "4 حتى 6 جمل (~70–120 كلمة): وضّح بلا تكرار ولا حشو."
         ),
     }.get(language, "Réponds dans la langue de la question.")
 
@@ -169,12 +178,14 @@ déjà écrit dans la source : plus clair et oral, mais SANS rien ajouter de ta 
 {hist_block}
 RÈGLES :
 1. Langue obligatoire + longueur (selon taille de la source) : {lang_note}
-2. INTERDIT de rallonger une source courte : si la RÉPONSE SOURCE tient en une ligne, ta réponse aussi (1–2 phrases).
+2. Style ORAL naturel : ne recopie pas la source mot pour mot ni en bloc sec.
+   Commence par une accroche courte qui répond à la question (ex. « en matière de… », « بالنسبة لـ… », « بما يخص… »)
+   puis intègre les faits de la source dans une phrase fluide.
 3. Fidélité ABSOLUE : chaque fait, chiffre, date, nom et mesure doit venir TEXTUELLEMENT de la RÉPONSE SOURCE.
    INTERDIT d'inventer, d'extrapoler, de généraliser ou d'ajouter des exemples absents de la source.
 4. Exhaustivité source : cite chaque point important UNE SEULE FOIS — ne répète jamais le même chiffre ou la même date.
 5. INTERDIT les phrases creuses de remplissage (« تؤكد هذه المعطيات », « هذا الرقم الرسمي », « en conclusion », etc.).
-6. Ton : professionnel, chaleureux, oral — comme en entretien citoyen, pas comme un rapport.
+6. Ton : professionnel, chaleureux, oral — comme en entretien citoyen avec un électeur, pas comme une fiche technique.
 7. INTERDIT « je n'ai pas cette information » / « ليس لدي » / « نعتذر » / « لا مقترحات » :
    tu as une source — reformule-la, sans t'excuser.
 8. Conserve EXACTEMENT les chiffres et dates de la source (ne les arrondis pas, ne les changes pas).
@@ -182,6 +193,13 @@ RÈGLES :
    réponds DIRECTEMENT à l'utilisateur (sans labels ni format Q/R).
 10. Texte brut uniquement : INTERDIT le markdown (---, ***, **, *, #, puces - ou *).
    Pas de listes à puces : phrases fluides en prose continue.
+
+EXEMPLE (source courte — viser ce niveau, pas plus sec ni plus long) :
+• Source : « حوالي 25.6%، أي قرابة 4.5 ملايين شاب لا يدرسون ولا يعملون ولا يتابعون تكويناً. »
+• Question : « ما نسبة الشباب المصنفين كـ NEET؟ »
+• BON (milieu) : « بالنسبة لنسبة الشباب المصنفين كـ NEET، تشير المعطيات إلى حوالي 25.6%، أي قرابة 4.5 ملايين شاب لا يدرسون ولا يعملون ولا يتابعون تكويناً. »
+• MAUVAIS (trop sec) : recopier la source sans accroche.
+• MAUVAIS (trop long) : répéter 25.6% ou 4.5 millions une seconde fois avec du remplissage.
 
 RÉPONSE SOURCE (seule vérité — tu ne peux utiliser QUE ceci) :
 {reponse_source}

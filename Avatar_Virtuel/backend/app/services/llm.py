@@ -39,7 +39,7 @@ class GeminiLLMService(LLMService):
                 prompt=prompt,
                 model_name=self.model_name,
                 generation_config={
-                    "temperature": 0.1,
+                    "temperature": 0.2,
                     "max_output_tokens": _REFORMULATE_TOKENS,
                 },
                 timeout=25.0,
@@ -85,7 +85,7 @@ class GeminiLLMService(LLMService):
                         model = genai.GenerativeModel(
                             self.model_name,
                             generation_config={
-                                "temperature": 0.1,
+                                "temperature": 0.2,
                                 "max_output_tokens": _REFORMULATE_TOKENS,
                             },
                         )
