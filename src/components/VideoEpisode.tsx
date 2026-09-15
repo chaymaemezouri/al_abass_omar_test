@@ -39,7 +39,6 @@ export function VideoEpisode({
   const { lang, t } = useLang();
   const ar = lang !== "fr";
   const player = useRef<HTMLVideoElement>(null);
-  const bgPlayer = useRef<HTMLVideoElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const introShown = useRef(false);
   const touch = useRef<{ x: number; y: number; at: number } | null>(null);
@@ -178,46 +177,20 @@ export function VideoEpisode({
     };
   }, [recording.src, shouldPlay, retry, onPlaying]);
 
-  // Sync blur video with main video time
   useEffect(() => {
-    const main = player.current;
-    const bg = bgPlayer.current;
-    if (!main || !bg) return;
-    const syncTime = () => {
-      if (bg && Math.abs(bg.currentTime - main.currentTime) > 0.5) {
-        bg.currentTime = main.currentTime;
-      }
-    };
-    const syncPlay = () => { bg?.play().catch(() => {}); };
-    const syncPause = () => { bg?.pause(); };
-    main.addEventListener("play", syncPlay);
-    main.addEventListener("pause", syncPause);
-    main.addEventListener("seeked", syncTime);
-    const interval = setInterval(syncTime, 2000);
+    const el = player.current;
     return () => {
-      main.removeEventListener("play", syncPlay);
-      main.removeEventListener("pause", syncPause);
-      main.removeEventListener("seeked", syncTime);
-      clearInterval(interval);
+      if (!el) return;
+      el.pause();
+      el.currentTime = 0;
     };
-  }, [retry, recording.src]);
+  }, [recording.src, retry]);
 
   return (
     <>
       <div className="episode-stage">
-        {/* ── Blurred background video ── */}
-        {recording.src && (
-          <video
-            ref={bgPlayer}
-            className="episode-bg-blur"
-            src={recording.src}
-            muted
-            playsInline
-            loop
-            preload="metadata"
-            aria-hidden="true"
-          />
-        )}
+        {/* Lightweight static background */}
+        <div className="episode-bg-blur" aria-hidden="true" />
         <div className="episode-meta">
           <span>
             {video.test
@@ -316,7 +289,7 @@ export function VideoEpisode({
                 poster={recording.poster}
                 controls
                 playsInline
-                preload={shouldPlay ? "auto" : "metadata"}
+                preload="metadata"
                 aria-label={
                   video.test ? (ar ? "فيديو تجريبي" : "Vidéo de démonstration") : t(video.question)
                 }
