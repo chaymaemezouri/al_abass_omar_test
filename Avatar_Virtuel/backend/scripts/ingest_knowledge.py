@@ -134,6 +134,15 @@ async def ingest_qa(db: AsyncSession, path: Path) -> dict:
             await asyncio.sleep(0.7)
         else:
             updated += 1
+        await db.commit()
+        logger.info(
+            "qa_row id=%s external_id=%s new=%s progress=%s/%s",
+            row.get("id"),
+            external_id,
+            is_new,
+            created + updated,
+            len(rows),
+        )
 
     logger.info(
         "ingest_qa done path=%s total=%s created=%s updated=%s",
