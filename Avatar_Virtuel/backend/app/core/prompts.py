@@ -117,6 +117,34 @@ Question :
 """
 
 
+def _reformulation_length_hint(reponse_source: str, language: str) -> str:
+    """Adapt length to source — short KB snippets must stay short."""
+    n = len((reponse_source or "").split())
+    if n <= 18:
+        return {
+            "fr": "1 à 2 phrases MAXIMUM (~15–35 mots). La source est courte : ne l'allonge pas.",
+            "ar": "1 إلى 2 جمل كحد أقصى. المصدر قصير: لا تطيل ولا تكرر.",
+            "ary": "1 حتى 2 جمل كحد أقصى. المصدر قصير: بلا تكرار.",
+        }.get(language, "1–2 phrases maximum.")
+    if n <= 45:
+        return {
+            "fr": "2 à 4 phrases (~40–80 mots), proportionnelles à la source.",
+            "ar": "2 إلى 4 جمل (~40–80 كلمة) بما يناسب المصدر.",
+            "ary": "2 حتى 4 جمل بما يناسب المصدر.",
+        }.get(language, "2–4 phrases.")
+    return {
+        "fr": (
+            "4 à 6 phrases (~70–110 mots) : direct, professionnel, sans blabla ni introduction."
+        ),
+        "ar": (
+            "4 إلى 6 جمل (حوالي 70–110 كلمة): مباشر، مهني، بدون حشو أو مقدمة."
+        ),
+        "ary": (
+            "4 حتى 6 جمل: واضح، مهني، بلا طول زايد."
+        ),
+    }.get(language, "Réponds dans la langue de la question.")
+
+
 def build_reformulation_prompt(
     language: str,
     reponse_source: str,
@@ -124,20 +152,7 @@ def build_reformulation_prompt(
     historique: str = "",
 ) -> str:
     """Prompt: answer the user question using ONLY the RAG source facts."""
-    lang_note = {
-        "fr": (
-            "Réponds en français naturel, oral et clair. "
-            "4 à 6 phrases (~70–110 mots) : direct, professionnel, sans blabla ni introduction."
-        ),
-        "ar": (
-            "أجب بالعربية الفصحى الواضحة. "
-            "4 إلى 6 جمل (حوالي 70–110 كلمة): مباشر، مهني، بدون حشو أو مقدمة."
-        ),
-        "ary": (
-            "جاوب بالدارجة المغربية الطبيعية (كتابة عربية). "
-            "4 حتى 6 جمل: واضح، مهني، بلا طول زايد."
-        ),
-    }.get(language, "Réponds dans la langue de la question.")
+    lang_note = _reformulation_length_hint(reponse_source, language)
 
     hist_block = ""
     if historique and historique.strip() and historique.strip() != "(aucun)":
@@ -153,13 +168,12 @@ Réponds à la QUESTION en REFORMULANT la RÉPONSE SOURCE. Tu ne fais que mettre
 déjà écrit dans la source : plus clair et oral, mais SANS rien ajouter de ta tête.
 {hist_block}
 RÈGLES :
-1. Langue obligatoire : {lang_note}
-2. Longueur : 4 à 6 phrases (~70–110 mots). INTERDIT les longs paragraphes, introductions ou conclusions vides.
+1. Langue obligatoire + longueur (selon taille de la source) : {lang_note}
+2. INTERDIT de rallonger une source courte : si la RÉPONSE SOURCE tient en une ligne, ta réponse aussi (1–2 phrases).
 3. Fidélité ABSOLUE : chaque fait, chiffre, date, nom et mesure doit venir TEXTUELLEMENT de la RÉPONSE SOURCE.
    INTERDIT d'inventer, d'extrapoler, de généraliser ou d'ajouter des exemples absents de la source.
-4. Exhaustivité source : inclure TOUS les points importants de la RÉPONSE SOURCE qui répondent à la question
-   (dates, chiffres, lieux, mesures) — ne les omets pas pour raccourcir.
-5. Structure : 1 phrase directe qui répond + 2–4 phrases qui détaillent les éléments clés DE LA SOURCE.
+4. Exhaustivité source : cite chaque point important UNE SEULE FOIS — ne répète jamais le même chiffre ou la même date.
+5. INTERDIT les phrases creuses de remplissage (« تؤكد هذه المعطيات », « هذا الرقم الرسمي », « en conclusion », etc.).
 6. Ton : professionnel, chaleureux, oral — comme en entretien citoyen, pas comme un rapport.
 7. INTERDIT « je n'ai pas cette information » / « ليس لدي » / « نعتذر » / « لا مقترحات » :
    tu as une source — reformule-la, sans t'excuser.

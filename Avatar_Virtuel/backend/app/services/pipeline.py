@@ -356,8 +356,13 @@ async def _run_programme_rag(
     )
 
     llm = get_llm_service()
+    source_words = len((reponse_source or "").split())
+    short_kb_source = 0 < source_words <= 18
 
     async def _reformulate_task() -> LlmResult:
+        # Short KB line (e.g. "140 مليار درهم.") — LLM tends to pad/repeat; use source as-is.
+        if short_kb_source:
+            return LlmResult(text="", provider="short_kb", model="kb")
         with time_step("reformulate"):
             return await llm.reformulate(
                 language, reponse_source, question, historique=history
@@ -373,7 +378,13 @@ async def _run_programme_rag(
     )
     guardrails = get_guardrail_service()
 
-    if llm_result.text.strip():
+    if short_kb_source:
+        if language == "ar":
+            answer = reponse_source.strip()
+        else:
+            with time_step("translate_answer"):
+                answer = await translate_answer_to_language(reponse_source, language)
+    elif llm_result.text.strip():
         valid, answer = guardrails.validate_reformulation(
             llm_result.text, reponse_source, language
         )
@@ -410,8 +421,13 @@ async def _run_programme_rag(
             else await translate_answer_to_language(reponse_source, language)
         )
 
-    # Prefer longer LLM wording if pipeline fell back to a one-line KB snippet
-    if llm_result.text.strip() and len((answer or "").split()) < 40:
+    # Prefer longer LLM wording only when the SOURCE itself is long (avoid padding short facts).
+    if (
+        not short_kb_source
+        and llm_result.text.strip()
+        and source_words > 40
+        and len((answer or "").split()) < 40
+    ):
         from app.services.guardrails import invented_numbers
 
         if not invented_numbers(reponse_source, llm_result.text):
