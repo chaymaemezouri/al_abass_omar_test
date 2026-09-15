@@ -56,6 +56,16 @@ jobs:
             echo "==> Install dependencies"
             npm install --no-fund --no-audit
 
+            echo "==> Prepare writable build output"
+            if [ -d "$DEPLOY_PATH/.output" ]; then
+              if [ ! -w "$DEPLOY_PATH/.output" ] && command -v sudo >/dev/null 2>&1; then
+                echo "Trying to fix .output permissions with sudo..."
+                sudo -n chown -R "$(id -un)":"$(id -gn)" "$DEPLOY_PATH/.output" || true
+                sudo -n chmod -R u+rwX "$DEPLOY_PATH/.output" || true
+              fi
+              rm -rf "$DEPLOY_PATH/.output" || true
+            fi
+
             echo "==> Build (Nitro node-server)"
             npm run build
 
