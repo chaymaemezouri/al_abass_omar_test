@@ -379,19 +379,17 @@
 .episode-empty p { font-size: 13px; line-height: 1.7; color: #8a95a8; }
 .episode-retry { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 13px; color: #fff; }
 
-/* ── Question overlay (glassmorphism) ── */
+/* ── Question overlay (lightweight — no heavy backdrop-filter) ── */
 .episode-question {
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  background: rgba(8, 12, 18, 0.5);
-  backdrop-filter: blur(40px) saturate(1.6) brightness(0.9);
-  -webkit-backdrop-filter: blur(40px) saturate(1.6) brightness(0.9);
+  background: rgba(8, 12, 18, 0.78);
   color: #fff;
   padding: 32px 28px 40px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   pointer-events: none;
-  animation: vd-question-show 8s ease-in-out both;
+  animation: vd-question-show 2s ease-in-out both;
   z-index: 2;
 }
 .episode-question > span {

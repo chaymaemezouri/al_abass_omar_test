@@ -64,6 +64,8 @@ export function VideoEpisode({
   const hasCaptions = languages.some((item) => hasLanguage(item.id));
   const availableLanguage = languages.find((item) => hasLanguage(item.id))?.id;
 
+  const lastTick = useRef(0);
+
   useEffect(() => {
     setCaptionLang(lang === "fr" ? "fr" : "ar");
   }, [lang]);
@@ -72,6 +74,7 @@ export function VideoEpisode({
     setStarted(false);
     setTime(0);
     setFailed(false);
+    lastTick.current = 0;
   }, [recording.src, retry]);
 
   useEffect(
@@ -118,28 +121,31 @@ export function VideoEpisode({
     onPlaying(true);
   }
 
-  // Show question overlay only when user clicks a question (shouldPlay=true)
+  // Brief question overlay when a clip starts
   useEffect(() => {
     if (!recording.src || !shouldPlay) return;
     setIntro(true);
     introShown.current = true;
-    const mobile = window.matchMedia("(max-width: 1023px)").matches;
-    timer.current = setTimeout(() => setIntro(false), mobile ? 2000 : 10000);
+    timer.current = setTimeout(() => setIntro(false), 1800);
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
   }, [recording.src, shouldPlay]);
 
-  // Autoplay as soon as the user picks a question (retry until the element can play).
+  // Autoplay once when ready — avoid stacked play() retries that jam the decoder
   useEffect(() => {
     if (!recording.src || !shouldPlay) return;
     const el = player.current;
     if (!el) return;
 
     let cancelled = false;
+    let startedPlay = false;
+
     const tryPlay = () => {
-      if (cancelled || !player.current) return;
-      void player.current
+      if (cancelled || startedPlay || !player.current) return;
+      startedPlay = true;
+      const video = player.current;
+      void video
         .play()
         .then(() => {
           if (!cancelled) {
@@ -149,40 +155,40 @@ export function VideoEpisode({
         })
         .catch(() => {
           if (cancelled || !player.current) return;
-          // Some mobile browsers need a muted kickstart within gesture/policy limits.
-          const video = player.current;
-          const wasMuted = video.muted;
           video.muted = true;
           void video
             .play()
             .then(() => {
               if (cancelled) return;
-              video.muted = wasMuted;
+              video.muted = false;
               setStarted(true);
               onPlaying(true);
             })
             .catch(() => {
+              startedPlay = false;
               if (!cancelled) onPlaying(false);
             });
         });
     };
 
-    tryPlay();
-    el.addEventListener("loadeddata", tryPlay);
-    el.addEventListener("canplay", tryPlay);
+    if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) tryPlay();
+    else el.addEventListener("canplay", tryPlay, { once: true });
+
     return () => {
       cancelled = true;
-      el.removeEventListener("loadeddata", tryPlay);
       el.removeEventListener("canplay", tryPlay);
+      el.pause();
     };
   }, [recording.src, shouldPlay, retry, onPlaying]);
 
+  // Fully release the previous decoder when switching clips (fixes lag after N videos)
   useEffect(() => {
     const el = player.current;
     return () => {
       if (!el) return;
       el.pause();
-      el.currentTime = 0;
+      el.removeAttribute("src");
+      el.load();
     };
   }, [recording.src, retry]);
 
@@ -305,7 +311,12 @@ export function VideoEpisode({
                   playing();
                 }}
                 onPause={() => onPlaying(false)}
-                onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)}
+                onTimeUpdate={(event) => {
+                  const now = performance.now();
+                  if (now - lastTick.current < 250) return;
+                  lastTick.current = now;
+                  setTime(event.currentTarget.currentTime);
+                }}
                 onEnded={() => {
                   onPlaying(false);
                   onEnded();

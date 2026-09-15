@@ -422,7 +422,7 @@ function HeroLocalTitle({ title, lang }: { title: string; lang: string }) {
   return (
     <>
       {title.slice(0, wordIndex)}
-      <span className="text-[#00843d]">{word}</span>
+      <span className="text-[#143a66]">{word}</span>
       {title.slice(wordIndex + word.length)}
     </>
   );
