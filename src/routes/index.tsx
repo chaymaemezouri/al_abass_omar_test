@@ -415,16 +415,14 @@ function Reveal({ children, className }: { children: ReactNode; className?: stri
 }
 
 function HeroLocalTitle({ title, lang }: { title: string; lang: string }) {
-  if (lang === "fr") return <>{title}</>;
-
-  const word = "مغرب";
+  const word = lang === "fr" ? "Maroc" : "مغرب";
   const wordIndex = title.indexOf(word);
   if (wordIndex === -1) return <>{title}</>;
 
   return (
     <>
       {title.slice(0, wordIndex)}
-      <span className="text-[#c1121f]">{word}</span>
+      <span className="text-[#00843d]">{word}</span>
       {title.slice(wordIndex + word.length)}
     </>
   );
