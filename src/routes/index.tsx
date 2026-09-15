@@ -414,6 +414,21 @@ function Reveal({ children, className }: { children: ReactNode; className?: stri
   );
 }
 
+function HeroLocalTitle({ title, lang }: { title: string; lang: string }) {
+  if (lang === "fr") return <>{title}</>;
+
+  const word = "مغرب";
+  const wordIndex = title.indexOf(word);
+  if (wordIndex === -1) return <>{title}</>;
+
+  return (
+    <>
+      {title.slice(0, wordIndex)}
+      <span className="text-[#c1121f]">{word}</span>
+      {title.slice(wordIndex + word.length)}
+    </>
+  );
+}
 function SectionHeading({
   kicker,
   title,
@@ -897,7 +912,7 @@ function Page() {
               </p>
 
               <h1 className="mt-3 text-center text-[1.85rem] font-extrabold leading-[1.15] text-navy sm:text-3xl">
-                {t(copy.heroLocalTitle)}
+                <HeroLocalTitle title={t(copy.heroLocalTitle)} lang={lang} />
               </h1>
 
               <div className="hero-portrait relative mx-auto mt-3 w-full max-w-[420px]">
@@ -988,7 +1003,7 @@ function Page() {
                   {t(copy.heroCandidateName)}
                 </p>
                 <h1 className="mt-2 max-w-[16ch] text-[2.35rem] leading-[1.05] text-navy sm:text-5xl lg:max-w-[14ch] lg:text-[2.85rem] xl:text-[3.15rem]">
-                  {t(copy.heroLocalTitle)}
+                  <HeroLocalTitle title={t(copy.heroLocalTitle)} lang={lang} />
                 </h1>
                 <p className="mt-3 max-w-xl text-base leading-snug text-royal sm:text-lg">
                   {t(copy.heroLead)}
