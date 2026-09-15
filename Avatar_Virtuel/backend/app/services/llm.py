@@ -8,15 +8,17 @@ from collections.abc import AsyncIterator
 from app.config import get_settings
 from app.core.prompts import build_reformulation_prompt, build_simplify_prompt
 from app.services.base import LLMService, LlmResult
+from app.services.gemini_client import gemini_generate_content, has_gemini_api_key
 
 logger = logging.getLogger(__name__)
+
+_REFORMULATE_TOKENS = 400
 
 
 class GeminiLLMService(LLMService):
     def __init__(self) -> None:
         settings = get_settings()
         self.model_name = settings.llm_model or settings.translation_model
-        self.api_key = settings.gemini_api_key
 
     async def reformulate(
         self,
@@ -25,30 +27,25 @@ class GeminiLLMService(LLMService):
         question: str,
         historique: str = "",
     ) -> LlmResult:
-        if not self.api_key or self.api_key.startswith("your-"):
+        if not has_gemini_api_key():
             logger.warning("llm_gemini_skip reason=missing_or_placeholder_key")
             return LlmResult(text="", provider="gemini", model=self.model_name)
 
         try:
-            import google.generativeai as genai
-
-            genai.configure(api_key=self.api_key)
-            model = genai.GenerativeModel(
-                self.model_name,
-                generation_config={
-                    "temperature": 0.2,
-                    "max_output_tokens": 384,
-                },
-            )
             prompt = build_reformulation_prompt(
                 language, reponse_source, question, historique=historique
             )
-            response = await asyncio.wait_for(
-                asyncio.to_thread(model.generate_content, prompt),
+            text, key_label = await gemini_generate_content(
+                prompt=prompt,
+                model_name=self.model_name,
+                generation_config={
+                    "temperature": 0.1,
+                    "max_output_tokens": _REFORMULATE_TOKENS,
+                },
                 timeout=25.0,
             )
-            text = (response.text or "").strip()
-            return LlmResult(text=text, provider="gemini", model=self.model_name)
+            provider = f"gemini:{key_label}"
+            return LlmResult(text=text, provider=provider, model=self.model_name)
         except Exception:
             logger.exception("llm_gemini_error")
             return LlmResult(text="", provider="gemini", model=self.model_name)
@@ -61,22 +58,19 @@ class GeminiLLMService(LLMService):
         historique: str = "",
     ) -> AsyncIterator[str]:
         """Yield text chunks as the model writes."""
-        if not self.api_key or self.api_key.startswith("your-"):
+        if not has_gemini_api_key():
             return
         try:
             import google.generativeai as genai
 
-            genai.configure(api_key=self.api_key)
-            model = genai.GenerativeModel(
-                self.model_name,
-                generation_config={
-                    "temperature": 0.2,
-                    "max_output_tokens": 384,
-                },
-            )
+            from app.services.gemini_client import list_gemini_api_keys
+
             prompt = build_reformulation_prompt(
                 language, reponse_source, question, historique=historique
             )
+            keys = list_gemini_api_keys()
+            if not keys:
+                return
 
             import queue
             import threading
@@ -84,16 +78,33 @@ class GeminiLLMService(LLMService):
             out: queue.Queue[str | None] = queue.Queue()
 
             def _produce() -> None:
-                try:
-                    stream = model.generate_content(prompt, stream=True)
-                    for chunk in stream:
-                        t = getattr(chunk, "text", None) or ""
-                        if t:
-                            out.put(t)
-                except Exception:
+                last_exc: Exception | None = None
+                for api_key in keys:
+                    try:
+                        genai.configure(api_key=api_key)
+                        model = genai.GenerativeModel(
+                            self.model_name,
+                            generation_config={
+                                "temperature": 0.1,
+                                "max_output_tokens": _REFORMULATE_TOKENS,
+                            },
+                        )
+                        stream = model.generate_content(prompt, stream=True)
+                        for chunk in stream:
+                            t = getattr(chunk, "text", None) or ""
+                            if t:
+                                out.put(t)
+                        last_exc = None
+                        break
+                    except Exception as exc:
+                        last_exc = exc
+                        logger.warning(
+                            "llm_gemini_stream_key_fail err=%s",
+                            type(exc).__name__,
+                        )
+                if last_exc is not None:
                     logger.exception("llm_gemini_stream_produce_error")
-                finally:
-                    out.put(None)
+                out.put(None)
 
             thread = threading.Thread(target=_produce, daemon=True)
             thread.start()
@@ -107,20 +118,21 @@ class GeminiLLMService(LLMService):
             logger.exception("llm_gemini_stream_error")
 
     async def simplify(self, language: str, answer: str) -> LlmResult:
-        if not self.api_key or self.api_key.startswith("your-"):
+        if not has_gemini_api_key():
             return LlmResult(text=answer, provider="gemini", model=self.model_name)
         try:
-            import google.generativeai as genai
-
-            genai.configure(api_key=self.api_key)
-            model = genai.GenerativeModel(
-                self.model_name,
-                generation_config={"temperature": 0.2, "max_output_tokens": 160},
-            )
             prompt = build_simplify_prompt(language, answer)
-            response = await asyncio.to_thread(model.generate_content, prompt)
-            text = (response.text or "").strip() or answer
-            return LlmResult(text=text, provider="gemini", model=self.model_name)
+            text, key_label = await gemini_generate_content(
+                prompt=prompt,
+                model_name=self.model_name,
+                generation_config={"temperature": 0.2, "max_output_tokens": 256},
+                timeout=20.0,
+            )
+            return LlmResult(
+                text=text or answer,
+                provider=f"gemini:{key_label}",
+                model=self.model_name,
+            )
         except Exception:
             logger.exception("llm_simplify_error")
             return LlmResult(text=answer, provider="gemini", model=self.model_name)

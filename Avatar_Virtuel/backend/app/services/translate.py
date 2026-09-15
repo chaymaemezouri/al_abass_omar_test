@@ -1,22 +1,13 @@
 """Translate user questions to Modern Standard Arabic for RAG retrieval only."""
 from __future__ import annotations
 
-import asyncio
 import logging
-import re
 
 from app.config import get_settings
 from app.core.prompts import build_query_translation_prompt
+from app.services.gemini_client import gemini_generate_content, has_gemini_api_key
 
 logger = logging.getLogger(__name__)
-
-
-def _retry_seconds(exc: BaseException, default: float = 20.0) -> float:
-    msg = str(exc)
-    m = re.search(r"retry in ([0-9]+(?:\.[0-9]+)?)s", msg, re.IGNORECASE)
-    if m:
-        return min(float(m.group(1)) + 1.0, 90.0)
-    return default
 
 
 async def translate_query_to_arabic(question: str, source_language: str) -> str:
@@ -28,7 +19,7 @@ async def translate_query_to_arabic(question: str, source_language: str) -> str:
         return question
 
     settings = get_settings()
-    if not settings.gemini_api_key or settings.gemini_api_key.startswith("your-"):
+    if not has_gemini_api_key():
         logger.warning("translate_skip reason=missing_gemini_key")
         return question
 
@@ -36,42 +27,13 @@ async def translate_query_to_arabic(question: str, source_language: str) -> str:
     model_name = settings.translation_model
 
     try:
-        import google.generativeai as genai
-
-        genai.configure(api_key=settings.gemini_api_key)
-        model = genai.GenerativeModel(
-            model_name,
-            generation_config={
-                "temperature": 0.0,
-                "max_output_tokens": 128,
-            },
+        translated, key_label = await gemini_generate_content(
+            prompt=prompt,
+            model_name=model_name,
+            generation_config={"temperature": 0.0, "max_output_tokens": 128},
+            timeout=15.0,
         )
-
-        last_exc: Exception | None = None
-        response = None
-        for attempt in range(2):
-            try:
-                response = await asyncio.to_thread(model.generate_content, prompt)
-                last_exc = None
-                break
-            except Exception as exc:
-                last_exc = exc
-                msg = str(exc).lower()
-                if "resourceexhausted" in type(exc).__name__.lower() or "429" in msg or "quota" in msg:
-                    delay = min(_retry_seconds(exc, default=8.0), 15.0)
-                    logger.warning(
-                        "translate_rate_limited model=%s attempt=%s sleep=%.1fs",
-                        model_name,
-                        attempt + 1,
-                        delay,
-                    )
-                    await asyncio.sleep(delay)
-                    continue
-                raise
-        if last_exc is not None or response is None:
-            raise last_exc or RuntimeError("translation failed")
-
-        translated = (response.text or "").strip()
+        logger.info("translate_key=%s", key_label)
         if translated.startswith('"') and translated.endswith('"'):
             translated = translated[1:-1].strip()
         if translated.lower().startswith("traduction:"):
@@ -103,29 +65,26 @@ async def translate_answer_to_language(
         return text.strip()
 
     settings = get_settings()
-    if not settings.gemini_api_key or settings.gemini_api_key.startswith("your-"):
+    if not has_gemini_api_key():
         return text.strip()
 
     lang_note = {
-        "fr": "français clair et oral (4 à 6 phrases maximum)",
-        "ary": "darija marocaine naturelle (4–6 جمل كحد أقصى)",
+        "fr": "français clair et oral (4 à 6 phrases)",
+        "ary": "darija marocaine naturelle (4–6 جمل)",
     }.get(target_language, "français clair")
 
     prompt = f"""Traduis fidèlement cette réponse du programme en {lang_note}.
-Règles : conserve TOUS les chiffres et faits, n'invente rien, reste concis.
+Règles : traduction uniquement — conserve TOUS les chiffres, dates et faits, n'invente RIEN, n'ajoute RIEN.
 Texte :
 {text.strip()}
 """
     try:
-        import google.generativeai as genai
-
-        genai.configure(api_key=settings.gemini_api_key)
-        model = genai.GenerativeModel(
-            settings.translation_model or settings.llm_model,
-            generation_config={"temperature": 0.0, "max_output_tokens": 384},
+        out, _key_label = await gemini_generate_content(
+            prompt=prompt,
+            model_name=settings.translation_model or settings.llm_model,
+            generation_config={"temperature": 0.0, "max_output_tokens": 400},
+            timeout=25.0,
         )
-        response = await asyncio.to_thread(model.generate_content, prompt)
-        out = (response.text or "").strip()
         return out or text.strip()
     except Exception:
         logger.exception("translate_answer_failed")
