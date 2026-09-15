@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.request
@@ -25,6 +26,8 @@ fidèles (mêmes faits, chiffres, seuils — n'invente rien).
 
 Réponds UNIQUEMENT en JSON valide:
 {{
+  "ar_question": "... (arabe فصحى — reformulation différente, pas copie mot à mot)",
+  "ar_reponse": "... (arabe فصحى — mêmes faits, formulation différente)",
   "fr_question": "...",
   "fr_reponse": "...",
   "ary_question": "... (darija marocaine, alphabet latin OK)",
@@ -50,6 +53,20 @@ def load_env() -> dict[str, str]:
     return env
 
 
+def _parse_json_response(raw: str) -> dict:
+    text = (raw or "").strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        match = re.search(r"\{[\s\S]*\}", text)
+        if not match:
+            raise
+        return json.loads(match.group(0))
+
+
 def gemini_json(api_key: str, model: str, prompt: str) -> dict:
     url = (
         f"https://generativelanguage.googleapis.com/v1beta/models/{model}"
@@ -57,7 +74,7 @@ def gemini_json(api_key: str, model: str, prompt: str) -> dict:
     )
     body = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 500},
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 2048},
     }
     req = urllib.request.Request(
         url,
@@ -65,31 +82,31 @@ def gemini_json(api_key: str, model: str, prompt: str) -> dict:
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    try:
-        with urllib.request.urlopen(req, timeout=90) as resp:
-            payload = json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        err = e.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"HTTP {e.code}: {err[:300]}") from e
-
-    text = (
-        payload.get("candidates", [{}])[0]
-        .get("content", {})
-        .get("parts", [{}])[0]
-        .get("text", "")
-        .strip()
-    )
-    if text.startswith("```"):
-        text = text.strip("`")
-        if text.startswith("json"):
-            text = text[4:].strip()
-    return json.loads(text)
+    last_exc: Exception | None = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            text = (
+                payload.get("candidates", [{}])[0]
+                .get("content", {})
+                .get("parts", [{}])[0]
+                .get("text", "")
+                .strip()
+            )
+            return _parse_json_response(text)
+        except Exception as exc:
+            last_exc = exc
+            time.sleep(1.5 * (attempt + 1))
+    raise last_exc or RuntimeError("empty gemini response")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--ids", type=str, default=None)
+    parser.add_argument("--id-from", type=int, default=None, help="Inclusive source id start")
+    parser.add_argument("--id-to", type=int, default=None, help="Inclusive source id end")
     parser.add_argument("--sleep", type=float, default=1.5)
     args = parser.parse_args()
 
@@ -107,6 +124,10 @@ def main() -> None:
     if args.ids:
         want = {int(x) for x in args.ids.split(",")}
         rows = [r for r in rows if int(r["id"]) in want]
+    elif args.id_from is not None or args.id_to is not None:
+        lo = args.id_from if args.id_from is not None else 1
+        hi = args.id_to if args.id_to is not None else 999999
+        rows = [r for r in rows if lo <= int(r["id"]) <= hi]
     if args.limit is not None:
         rows = rows[: args.limit]
 
@@ -117,8 +138,13 @@ def main() -> None:
 
     for i, row in enumerate(rows, 1):
         rid = int(row["id"])
-        fr_id, ary_id = rid + 100000, rid + 200000
-        if fr_id in by_id and ary_id in by_id:
+        ar_id, fr_id, ary_id = rid + 300000, rid + 100000, rid + 200000
+        specs = (
+            ("ar", "ar_question", "ar_reponse", ar_id),
+            ("fr", "fr_question", "fr_reponse", fr_id),
+            ("ary", "ary_question", "ary_reponse", ary_id),
+        )
+        if all(oid in by_id for _, _, _, oid in specs):
             print(f"[{i}/{len(rows)}] skip id={rid} (already)")
             continue
         print(f"[{i}/{len(rows)}] paraphrase id={rid}…", flush=True)
@@ -132,10 +158,9 @@ def main() -> None:
                     reponse=row.get("reponse") or "",
                 ),
             )
-            for lang, qk, rk, oid in (
-                ("fr", "fr_question", "fr_reponse", fr_id),
-                ("ary", "ary_question", "ary_reponse", ary_id),
-            ):
+            for lang, qk, rk, oid in specs:
+                if oid in by_id:
+                    continue
                 q = (data.get(qk) or "").strip()
                 r = (data.get(rk) or "").strip()
                 if not q or not r:

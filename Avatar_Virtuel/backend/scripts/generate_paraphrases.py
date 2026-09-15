@@ -62,6 +62,8 @@ fidèles (mêmes faits, chiffres, seuils — n'invente rien). Garde les réponse
 
 Réponds UNIQUEMENT en JSON valide (pas de markdown):
 {{
+  "ar_question": "... (arabe فصحى — reformulation différente de la question source, pas copie mot à mot)",
+  "ar_reponse": "... (arabe فصحى — mêmes faits, formulation différente)",
   "fr_question": "...",
   "fr_reponse": "...",
   "ary_question": "... (darija marocaine)",
@@ -117,6 +119,7 @@ async def paraphrase_one(model, row: dict) -> list[dict]:
     base_id = int(row["id"])
     out: list[dict] = []
     for lang, q_key, r_key, offset in (
+        ("ar", "ar_question", "ar_reponse", 300000),
         ("fr", "fr_question", "fr_reponse", 100000),
         ("ary", "ary_question", "ary_reponse", 200000),
     ):

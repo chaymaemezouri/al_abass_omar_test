@@ -195,7 +195,18 @@ export function AvatarExperience({ initialQuestion = "" }: Props) {
   const heygenVideoEnabled = false;
 
   function normalizeSpeakText(text: string): string {
-    return text.replace(/\s+/g, " ").trim();
+    return text
+      .replace(/^\s*[-*_]{3,}\s*$/gm, "")
+      .replace(/\s*[-*_]{3,}\s*/g, " ")
+      .replace(/^\s*#+\s*/gm, "")
+      .replace(/\*\*(.+?)\*\*/g, "$1")
+      .replace(/__(.+?)__/g, "$1")
+      .replace(/\*(.+?)\*/g, "$1")
+      .replace(/_(.+?)_/g, "$1")
+      .replace(/^\s*[-*•]\s+/gm, "")
+      .replace(/(?<!\S)[*_]{1,2}(?!\S)/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
   /** First sentence so TTS can start while the answer is still streaming. */

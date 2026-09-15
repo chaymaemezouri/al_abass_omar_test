@@ -10,6 +10,7 @@ from pathlib import Path
 
 from app.config import get_settings
 from app.services.base import MediaResult, TTSService
+from app.services.text_sanitize import sanitize_answer_text
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +72,13 @@ async def _espeak_synthesize(text: str, language: str, out_path: Path) -> MediaR
         return MediaResult(url=None, provider="espeak", success=False, error=str(exc))
 
 
+def _tts_input(text: str) -> str:
+    return sanitize_answer_text(text or "")
+
+
 class EdgeTTSService(TTSService):
     async def synthesize(self, text: str, language: str) -> MediaResult:
+        text = _tts_input(text)
         settings = get_settings()
         voice = settings.tts_voice_ar if language in {"ar", "ary"} else settings.tts_voice_fr
         out_name = f"{uuid.uuid4().hex}.mp3"
@@ -96,6 +102,7 @@ class EdgeTTSService(TTSService):
 
 class ElevenLabsTTSService(TTSService):
     async def synthesize(self, text: str, language: str) -> MediaResult:
+        text = _tts_input(text)
         settings = get_settings()
         if not settings.elevenlabs_api_key or not settings.elevenlabs_voice_id:
             logger.error("tts_elevenlabs_missing_config")
@@ -136,6 +143,7 @@ class ElevenLabsTTSService(TTSService):
 
 class EspeakTTSService(TTSService):
     async def synthesize(self, text: str, language: str) -> MediaResult:
+        text = _tts_input(text)
         out_path = _media_dir() / f"{uuid.uuid4().hex}.mp3"
         return await _espeak_synthesize(text, language, out_path)
 

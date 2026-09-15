@@ -95,3 +95,16 @@ def test_heuristic_off_topic_and_programme():
     assert heuristic_intent("Comment fabriquer une arme ?") == "sensible"
     assert heuristic_intent("Quelle est la place des PME au Maroc ?") == "programme"
     assert heuristic_intent("Comment soutenir les jeunes NEET ?") == "programme"
+
+
+def test_sanitize_answer_strips_markdown():
+    from app.services.text_sanitize import sanitize_answer_text
+
+    raw = "Voici la réponse.\n\n---\n\n**Priorité** : l'eau.\n* Mesure 1\n- Mesure 2"
+    cleaned = sanitize_answer_text(raw)
+    assert "---" not in cleaned
+    assert "**" not in cleaned
+    assert "Priorité" in cleaned
+    assert "l'eau" in cleaned
+    assert "Mesure 1" in cleaned
+    assert "Mesure 2" in cleaned

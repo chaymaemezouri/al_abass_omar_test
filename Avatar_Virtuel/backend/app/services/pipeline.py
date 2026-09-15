@@ -48,6 +48,7 @@ from app.services.rag import (
 )
 from app.services.rerank import rerank_hits
 from app.services.translate import translate_answer_to_language, translate_query_to_arabic
+from app.services.text_sanitize import sanitize_answer_text
 from app.services.tts import get_tts_service
 from app.services.rag import hit_is_relevant
 
@@ -176,30 +177,6 @@ async def _enrich_rag_hits(
     return sorted(by_id.values(), key=lambda h: h.score or 0.0, reverse=True)[:3]
 
 
-def _strip_qa_labels(text: str) -> str:
-    """Remove accidental « Question : / Réponse : » formatting from user-facing text."""
-    t = (text or "").strip()
-    if not t:
-        return t
-    if re.search(r"Question\s*:", t, re.IGNORECASE):
-        split = re.split(r"\n\s*Réponse\s*:\s*", t, maxsplit=1, flags=re.IGNORECASE)
-        if len(split) == 2:
-            return split[1].strip()
-        split = re.split(r"\n\s*Reponse\s*:\s*", t, maxsplit=1, flags=re.IGNORECASE)
-        if len(split) == 2:
-            return split[1].strip()
-    for prefix in (
-        r"^Réponse\s*:\s*",
-        r"^Reponse\s*:\s*",
-        r"^Question\s*:\s*",
-        r"^الجواب\s*:\s*",
-        r"^الإجابة\s*:\s*",
-        r"^السؤال\s*:\s*",
-    ):
-        t = re.sub(prefix, "", t, count=1, flags=re.IGNORECASE | re.MULTILINE).strip()
-    return t
-
-
 def _combine_rag_sources(best: RagHit, hits: list[RagHit], max_chunks: int = 2) -> str:
     """Merge nearby RAG hits so the LLM can produce richer, still faithful answers."""
     parts: list[str] = []
@@ -225,7 +202,7 @@ def _combine_rag_sources(best: RagHit, hits: list[RagHit], max_chunks: int = 2) 
 
     if not parts:
         return (best.reponse or "").strip()
-    return "\n\n---\n\n".join(parts)
+    return "\n\n".join(parts)
 
 
 async def _run_programme_rag(
@@ -730,7 +707,7 @@ async def _finalize(
     source_type: Optional[str] = None,
     followups: Optional[list[str]] = None,
 ) -> ChatResponse:
-    answer = _strip_qa_labels(answer or "")
+    answer = sanitize_answer_text(answer or "")
     audio_url = None
     video_url = None
 

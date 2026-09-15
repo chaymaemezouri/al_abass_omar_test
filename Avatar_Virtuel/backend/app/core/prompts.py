@@ -164,6 +164,8 @@ RÈGLES :
 8. Conserve exactement les chiffres de la source.
 9. INTERDIT d'écrire « Question : », « Réponse : », « السؤال », « الجواب » ou de recopier la question :
    réponds DIRECTEMENT à l'utilisateur comme dans un entretien (sans labels ni format Q/R).
+10. Texte brut uniquement : INTERDIT le markdown (---, ***, **, *, #, puces - ou *).
+   Pas de listes à puces ni de séparateurs : phrases fluides en prose continue.
 
 RÉPONSE SOURCE (seule vérité — exploite TOUT) :
 {reponse_source}
