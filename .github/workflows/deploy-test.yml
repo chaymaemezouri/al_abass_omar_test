@@ -56,6 +56,9 @@ jobs:
             echo "==> Install dependencies"
             npm install --no-fund --no-audit
 
+            echo "==> Clean previous build (.output must be writable by deploy)"
+            rm -rf .output
+
             echo "==> Build (Nitro node-server)"
             npm run build
 
