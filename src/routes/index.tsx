@@ -49,7 +49,6 @@ import carte8 from "@/assets/cartes/carte1 (8).png";
 import carte9 from "@/assets/cartes/carte1 (9).png";
 import { ChatWidget, openChat, openChatWithQuestion } from "@/components/ChatWidget";
 import { CandidateVideos } from "@/components/CandidateVideos";
-import { WelcomeIntro } from "@/components/WelcomeIntro";
 import { Logo, BasmaMark, basmaLogo } from "@/components/Logo";
 import {
   axes,
@@ -1535,7 +1534,6 @@ function Page() {
         </div>
       </footer>
 
-      <WelcomeIntro />
       <ChatWidget />
     </div>
   );
