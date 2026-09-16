@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy-test-avatar
-  cancel-in-progress: true
+  group: deploy-vps-main
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -62,6 +62,18 @@ jobs:
             echo "==> Build (Nitro node-server)"
             npm run build
 
+            echo "==> Verify CSS assets exist on disk"
+            ROUTES_CSS=$(ls .output/public/assets/routes-*.css 2>/dev/null | head -1 || true)
+            STYLES_CSS=$(ls .output/public/assets/styles-*.css 2>/dev/null | head -1 || true)
+            if [ -z "$ROUTES_CSS" ] || [ -z "$STYLES_CSS" ]; then
+              echo "ERROR: missing built CSS in .output/public/assets/"
+              ls -la .output/public/assets/ 2>/dev/null || true
+              exit 1
+            fi
+            ROUTES_BASENAME=$(basename "$ROUTES_CSS")
+            STYLES_BASENAME=$(basename "$STYLES_CSS")
+            echo "OK routes=$ROUTES_BASENAME styles=$STYLES_BASENAME"
+
             echo "==> Reload PM2 ($APP_NAME only)"
             if pm2 describe "$APP_NAME" >/dev/null 2>&1; then
               pm2 reload "$APP_NAME" --update-env
@@ -92,6 +104,24 @@ jobs:
             if [ "$ok" != "1" ]; then
               echo "ERROR: healthcheck failed after deploy: $HEALTH_URL"
               pm2 logs "$APP_NAME" --lines 80 --nostream || true
+              exit 1
+            fi
+
+            echo "==> Verify CSS assets are served"
+            css_ok=0
+            for i in 1 2 3 4 5 6 7 8 9 10; do
+              routes_code=$(curl -sS -o /dev/null -w "%{http_code}" "https://test-avatar.academyskills.net/assets/$ROUTES_BASENAME" || true)
+              styles_code=$(curl -sS -o /dev/null -w "%{http_code}" "https://test-avatar.academyskills.net/assets/$STYLES_BASENAME" || true)
+              if [ "$routes_code" = "200" ] && [ "$styles_code" = "200" ]; then
+                echo "CSS OK routes=$routes_code styles=$styles_code attempt $i"
+                css_ok=1
+                break
+              fi
+              echo "CSS check attempt $i failed routes=${routes_code:-000} styles=${styles_code:-000}, retry in 3s..."
+              sleep 3
+            done
+            if [ "$css_ok" != "1" ]; then
+              echo "ERROR: CSS not served — update nginx /assets/ alias then redeploy."
               exit 1
             fi
 

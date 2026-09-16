@@ -70,6 +70,9 @@ pm2 save
 
 ## 5. Nginx (sudo — backup ancien site statique d'abord)
 
+**Important :** le bloc `location /assets/` sert les fichiers CSS/JS depuis `.output/public/assets/`.
+Sans lui, le site peut s'afficher sans mise en page (layout cassé).
+
 ```bash
 sudo cp /var/www/al-abass-omar/app/deploy/nginx/al-abass-omar.academyskills.net.conf \
   /etc/nginx/sites-available/al-abass-omar.conf
