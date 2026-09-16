@@ -160,6 +160,20 @@ export function CandidateVideos() {
       });
   }
 
+  // Warm the next clip in cache so enchaînement feels faster
+  useEffect(() => {
+    const nextSrc = nextAvailable?.src;
+    if (!nextSrc || typeof window === "undefined") return;
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.as = "video";
+    link.href = nextSrc;
+    document.head.appendChild(link);
+    return () => {
+      link.remove();
+    };
+  }, [nextAvailable?.src]);
+
   function togglePriority() {
     if (!active) return;
     const values = priorities.includes(active.id)

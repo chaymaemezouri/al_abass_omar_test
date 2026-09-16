@@ -295,7 +295,7 @@ export function VideoEpisode({
                 poster={recording.poster}
                 controls
                 playsInline
-                preload="metadata"
+                preload={shouldPlay ? "auto" : "metadata"}
                 aria-label={
                   video.test ? (ar ? "فيديو تجريبي" : "Vidéo de démonstration") : t(video.question)
                 }
