@@ -15,7 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from sqlalchemy import text
 
-from app.api.v1.endpoints import admin, chat, health
+from app.api.v1.endpoints import admin, chat, events, health
 from app.config import get_settings
 from app.core.security import limiter
 from app.db.migrate import ensure_embedding_column
@@ -132,6 +132,7 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router, prefix="/api/v1")
     app.include_router(chat.router, prefix="/api/v1")
+    app.include_router(events.router, prefix="/api/v1")
     app.include_router(admin.router, prefix="/api/v1")
 
     media_root = Path(settings.media_root)

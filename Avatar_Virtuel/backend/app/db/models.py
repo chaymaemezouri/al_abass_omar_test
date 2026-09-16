@@ -104,6 +104,32 @@ class Message(Base):
     session: Mapped["ConversationSession"] = relationship(back_populates="messages")
 
 
+class AnalyticsEvent(Base):
+    """Long-lived analytics (page views, PDF downloads, avatar Q&A archive)."""
+
+    __tablename__ = "analytics_events"
+    __table_args__ = (Index("ix_analytics_event_type_created", "event_type", "created_at"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    event_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    client_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    path: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    source: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    language: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    question: Mapped[str | None] = mapped_column(Text, nullable=True)
+    answer_preview: Mapped[str | None] = mapped_column(Text, nullable=True)
+    session_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True
+    )
+    used_fallback: Mapped[bool | None] = mapped_column(nullable=True)
+    similarity_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utcnow, nullable=False
+    )
+
+
 class AppLog(Base):
     """Application logs without sensitive data (no API keys, minimized PII)."""
 

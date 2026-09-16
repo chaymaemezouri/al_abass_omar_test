@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { AvatarExperience } from "@/components/avatar/AvatarExperience";
+import { trackPageView } from "@/lib/analytics";
 import { LangProvider } from "@/lib/i18n";
 
 type AvatarSearch = {
@@ -16,6 +18,11 @@ export const Route = createFileRoute("/avatar")({
 
 function AvatarPage() {
   const search = Route.useSearch();
+
+  useEffect(() => {
+    trackPageView("/avatar");
+  }, []);
+
   return (
     <LangProvider>
       <AvatarExperience initialQuestion={search.q ?? ""} />

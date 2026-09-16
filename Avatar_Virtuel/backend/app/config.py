@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     rate_limit_audio: str = "10/minute"
 
     session_retention_hours: int = 24
+    # Analytics events kept longer than chat sessions (dashboard history).
+    analytics_retention_days: int = 90
+    rate_limit_events: str = "60/minute"
 
     rag_similarity_threshold: float = 0.65
     rag_top_k: int = 5

@@ -1,14 +1,16 @@
 # PRODUCTION — al-abass-omar.academyskills.net
-# Manual trigger ONLY (does not run on push). Test env keeps auto-deploy on push.
 name: Deploy PROD (al-abass-omar)
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       restart_avatar_backend:
-        description: "Also restart Avatar_Virtuel Docker backend (IA / RAG changes)"
+        description: "Also sync & restart Avatar_Virtuel Docker backend"
         required: false
-        default: false
+        default: true
         type: boolean
 
 concurrency:
@@ -39,6 +41,9 @@ jobs:
             APP_NAME="al-abass-omar"
             BRANCH="main"
             RESTART_BACKEND="${{ inputs.restart_avatar_backend }}"
+            if [ "${{ github.event_name }}" = "push" ]; then
+              RESTART_BACKEND="true"
+            fi
 
             echo "==> Deploy PROD path: $DEPLOY_PATH"
             cd "$DEPLOY_PATH"
@@ -73,9 +78,13 @@ jobs:
             pm2 save
 
             if [ "$RESTART_BACKEND" = "true" ]; then
-              echo "==> Restart Avatar backend (shared API)"
-              cd /var/www/avatar-candidat/app/Avatar_Virtuel
-              docker compose restart backend
+              echo "==> Sync & restart Avatar backend (shared API)"
+              cd /var/www/avatar-candidat/app
+              git fetch --prune origin
+              git checkout "$BRANCH"
+              git reset --hard "origin/$BRANCH"
+              cd Avatar_Virtuel
+              docker compose up -d --force-recreate backend
             else
               echo "==> Skipping Avatar backend (frontend-only deploy)"
             fi
@@ -99,6 +108,13 @@ jobs:
               echo "ERROR: healthcheck failed: $HEALTH_URL"
               pm2 logs "$APP_NAME" --lines 80 --nostream || true
               exit 1
+            fi
+
+            echo "==> Verify /admin route"
+            admin_code=$(curl -sS -o /tmp/prod-admin.html -w "%{http_code}" "https://al-abass-omar.academyskills.net/admin" || true)
+            echo "GET /admin => HTTP ${admin_code:-000}"
+            if [ "$admin_code" != "200" ]; then
+              echo "WARN: /admin returned HTTP ${admin_code:-000} (check PM2 build)"
             fi
 
             echo "==> Deploy PROD succeeded"

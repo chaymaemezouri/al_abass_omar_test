@@ -62,6 +62,7 @@ import {
   type Bi,
   type Engagement,
 } from "@/data/program";
+import { trackPageView, trackPdfDownload } from "@/lib/analytics";
 import { LangProvider, useLang, ui } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -744,6 +745,10 @@ function Page() {
   );
 
   useEffect(() => {
+    trackPageView("/", lang);
+  }, [lang]);
+
+  useEffect(() => {
     let frame = 0;
     const showEngagement = (event: Event) => {
       if (
@@ -935,6 +940,7 @@ function Page() {
               <a
                 href={programmePdf}
                 download="programme-electoral-2026.pdf"
+                onClick={() => trackPdfDownload("hero-mobile", lang)}
                 className="mt-1 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-morocco px-4 text-sm font-extrabold text-white shadow-card transition-colors hover:bg-morocco-dark"
               >
                 <FileText className="h-4 w-4" />
@@ -1029,6 +1035,7 @@ function Page() {
                   <a
                     href={programmePdf}
                     download="programme-electoral-2026.pdf"
+                    onClick={() => trackPdfDownload("hero-desktop", lang)}
                     className="inline-flex w-full items-center justify-center gap-3 rounded-md border border-navy/70 bg-white/76 px-5 py-2.5 text-sm font-extrabold text-navy shadow-card transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy sm:w-auto"
                   >
                     <Download className="h-5 w-5" />
@@ -1493,6 +1500,7 @@ function Page() {
                 <a
                   href={programmePdf}
                   download="programme-electoral-2026.pdf"
+                  onClick={() => trackPdfDownload("footer", lang)}
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-morocco px-4 text-sm font-extrabold text-white transition-colors hover:bg-morocco-dark lg:justify-start"
                 >
                   <Download className="h-4 w-4" />
