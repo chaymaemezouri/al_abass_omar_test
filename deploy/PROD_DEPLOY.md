@@ -100,18 +100,22 @@ Navigateur : `https://al-abass-omar.academyskills.net/avatar`
 
 ## Mises à jour ultérieures
 
+**Automatique :** chaque push sur `main` déclenche GitHub Actions → **Deploy PROD (al-abass-omar)** (frontend prod + backend API).
+
+**Manuel (SSH) si besoin :**
+
 ```bash
 # Frontend prod
 cd /var/www/al-abass-omar/app
-git pull origin main
+git fetch origin && git reset --hard origin/main
 npm install --no-fund --no-audit
-npm run build
+rm -rf .output && npm run build
 pm2 reload al-abass-omar --update-env
 
-# Backend API (réponses longues, RAG)
+# Backend API (analytics, RAG, réponses IA)
 cd /var/www/avatar-candidat/app
-git pull origin main
+git fetch origin && git reset --hard origin/main
 cd Avatar_Virtuel
-docker compose up -d --build backend
+docker compose up -d --force-recreate backend
 curl -sS http://127.0.0.1:8001/api/v1/health
 ```
