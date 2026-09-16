@@ -21,6 +21,7 @@ from app.core.prompts import (
 )
 from app.db.models import ConversationSession, KnowledgeChunk, Message
 from app.schemas.chat import ChatResponse
+from app.services.analytics import purge_old_events, record_chat_exchange
 from app.services.avatar import get_avatar_service
 from app.services.base import LlmResult, RagHit, RagResult
 from app.services.followups import build_followups
@@ -116,6 +117,7 @@ async def purge_expired_sessions(db: AsyncSession) -> int:
         result = await db.execute(
             delete(ConversationSession).where(ConversationSession.expires_at < now)
         )
+        await purge_old_events(db)
         return result.rowcount or 0
     except Exception:
         logger.warning("purge_expired_sessions_skipped", exc_info=True)
@@ -787,6 +789,21 @@ async def _finalize(
     )
     db.add(assistant_msg)
     await db.flush()
+
+    if question.strip() and answer.strip():
+        try:
+            await record_chat_exchange(
+                db,
+                client_hash=session.client_hash,
+                session_id=session.id,
+                question=question,
+                answer=answer,
+                language=language,
+                used_fallback=used_fallback or blocked,
+                similarity_score=similarity,
+            )
+        except Exception:
+            logger.warning("analytics_record_chat_skipped", exc_info=True)
 
     latency = finish_latency_profile()
     latency_out = latency if get_settings().app_debug else None
