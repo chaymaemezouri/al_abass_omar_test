@@ -11,9 +11,12 @@ from app.config import get_settings
 from app.db.models import AnalyticsEvent, ConversationSession, Message
 from app.schemas.analytics import (
     AnalyticsStatsOut,
+    DailyActivity,
     DailyCount,
     EventRowOut,
     EventsListOut,
+    HourOfDayCount,
+    HourlyCount,
     MessageRowOut,
     MessagesListOut,
 )
@@ -166,8 +169,64 @@ async def get_stats(db: AsyncSession, days: int = 7) -> AnalyticsStatsOut:
         (lang or "unknown"): count for lang, count in lang_rows
     }
 
+    today_start = datetime.now(timezone.utc).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+
+    questions_today = await db.scalar(
+        select(func.count()).where(
+            Message.created_at >= today_start,
+            Message.role == "user",
+        )
+    ) or 0
+
+    page_views_today = await db.scalar(
+        select(func.count()).where(
+            AnalyticsEvent.created_at >= today_start,
+            AnalyticsEvent.event_type == "page_view",
+        )
+    ) or 0
+
+    pdf_downloads_today = await db.scalar(
+        select(func.count()).where(
+            AnalyticsEvent.created_at >= today_start,
+            AnalyticsEvent.event_type == "pdf_download",
+        )
+    ) or 0
+
+    pdf_source_rows = (
+        await db.execute(
+            select(AnalyticsEvent.source, func.count())
+            .where(
+                AnalyticsEvent.created_at >= since,
+                AnalyticsEvent.event_type == "pdf_download",
+            )
+            .group_by(AnalyticsEvent.source)
+        )
+    ).all()
+    pdf_downloads_by_source = {
+        (source or "unknown"): count for source, count in pdf_source_rows
+    }
+
     events_by_day = await _daily_counts(db, AnalyticsEvent.created_at, since)
     questions_by_day = await _daily_question_counts(db, since)
+    page_views_by_day = await _daily_event_counts(db, since, "page_view")
+    pdf_downloads_by_day = await _daily_event_counts(db, since, "pdf_download")
+
+    hourly_since = max(since, datetime.now(timezone.utc) - timedelta(days=min(days, 3)))
+    questions_by_hour = await _hourly_question_counts(db, hourly_since)
+    page_views_by_hour = await _hourly_event_counts(db, hourly_since, "page_view")
+    pdf_downloads_by_hour = await _hourly_event_counts(db, hourly_since, "pdf_download")
+
+    questions_by_hour_of_day = await _hour_of_day_question_counts(db, since)
+    page_views_by_hour_of_day = await _hour_of_day_event_counts(db, since, "page_view")
+
+    daily_activity = _merge_daily_activity(
+        events_by_day,
+        questions_by_day,
+        page_views_by_day,
+        pdf_downloads_by_day,
+    )
 
     return AnalyticsStatsOut(
         period_days=days,
@@ -179,9 +238,21 @@ async def get_stats(db: AsyncSession, days: int = 7) -> AnalyticsStatsOut:
         pdf_downloads=pdf_downloads,
         page_views=page_views,
         avatar_page_views=avatar_page_views,
+        questions_today=questions_today,
+        page_views_today=page_views_today,
+        pdf_downloads_today=pdf_downloads_today,
         questions_by_language=questions_by_language,
+        pdf_downloads_by_source=pdf_downloads_by_source,
         events_by_day=events_by_day,
         questions_by_day=questions_by_day,
+        page_views_by_day=page_views_by_day,
+        pdf_downloads_by_day=pdf_downloads_by_day,
+        questions_by_hour=questions_by_hour,
+        page_views_by_hour=page_views_by_hour,
+        pdf_downloads_by_hour=pdf_downloads_by_hour,
+        questions_by_hour_of_day=questions_by_hour_of_day,
+        page_views_by_hour_of_day=page_views_by_hour_of_day,
+        daily_activity=daily_activity,
     )
 
 
@@ -220,6 +291,155 @@ async def _daily_question_counts(db: AsyncSession, since: datetime) -> list[Dail
         DailyCount(date=day.date().isoformat(), count=count)
         for day, count in rows
         if day is not None
+    ]
+
+
+async def _daily_event_counts(
+    db: AsyncSession, since: datetime, event_type: str
+) -> list[DailyCount]:
+    rows = (
+        await db.execute(
+            select(
+                func.date_trunc("day", AnalyticsEvent.created_at).label("day"),
+                func.count(),
+            )
+            .where(
+                AnalyticsEvent.created_at >= since,
+                AnalyticsEvent.event_type == event_type,
+            )
+            .group_by(text("1"))
+            .order_by(text("1"))
+        )
+    ).all()
+    return [
+        DailyCount(date=day.date().isoformat(), count=count)
+        for day, count in rows
+        if day is not None
+    ]
+
+
+async def _hourly_question_counts(db: AsyncSession, since: datetime) -> list[HourlyCount]:
+    rows = (
+        await db.execute(
+            select(
+                func.date_trunc("hour", Message.created_at).label("hour"),
+                func.count(),
+            )
+            .where(Message.created_at >= since, Message.role == "user")
+            .group_by(text("1"))
+            .order_by(text("1"))
+        )
+    ).all()
+    return [
+        HourlyCount(hour=hour.replace(tzinfo=timezone.utc).isoformat(), count=count)
+        for hour, count in rows
+        if hour is not None
+    ]
+
+
+async def _hourly_event_counts(
+    db: AsyncSession, since: datetime, event_type: str
+) -> list[HourlyCount]:
+    rows = (
+        await db.execute(
+            select(
+                func.date_trunc("hour", AnalyticsEvent.created_at).label("hour"),
+                func.count(),
+            )
+            .where(
+                AnalyticsEvent.created_at >= since,
+                AnalyticsEvent.event_type == event_type,
+            )
+            .group_by(text("1"))
+            .order_by(text("1"))
+        )
+    ).all()
+    return [
+        HourlyCount(hour=hour.replace(tzinfo=timezone.utc).isoformat(), count=count)
+        for hour, count in rows
+        if hour is not None
+    ]
+
+
+async def _hour_of_day_question_counts(
+    db: AsyncSession, since: datetime
+) -> list[HourOfDayCount]:
+    rows = (
+        await db.execute(
+            select(
+                func.extract("hour", Message.created_at).label("hour"),
+                func.count(),
+            )
+            .where(Message.created_at >= since, Message.role == "user")
+            .group_by(text("1"))
+            .order_by(text("1"))
+        )
+    ).all()
+    return [
+        HourOfDayCount(hour=int(hour), count=count)
+        for hour, count in rows
+        if hour is not None
+    ]
+
+
+async def _hour_of_day_event_counts(
+    db: AsyncSession, since: datetime, event_type: str
+) -> list[HourOfDayCount]:
+    rows = (
+        await db.execute(
+            select(
+                func.extract("hour", AnalyticsEvent.created_at).label("hour"),
+                func.count(),
+            )
+            .where(
+                AnalyticsEvent.created_at >= since,
+                AnalyticsEvent.event_type == event_type,
+            )
+            .group_by(text("1"))
+            .order_by(text("1"))
+        )
+    ).all()
+    return [
+        HourOfDayCount(hour=int(hour), count=count)
+        for hour, count in rows
+        if hour is not None
+    ]
+
+
+def _merge_daily_activity(
+    events_by_day: list[DailyCount],
+    questions_by_day: list[DailyCount],
+    page_views_by_day: list[DailyCount],
+    pdf_downloads_by_day: list[DailyCount],
+) -> list[DailyActivity]:
+    dates: set[str] = set()
+    events_map: dict[str, int] = {}
+    questions_map: dict[str, int] = {}
+    page_views_map: dict[str, int] = {}
+    pdf_map: dict[str, int] = {}
+
+    for row in events_by_day:
+        dates.add(row.date)
+        events_map[row.date] = row.count
+    for row in questions_by_day:
+        dates.add(row.date)
+        questions_map[row.date] = row.count
+    for row in page_views_by_day:
+        dates.add(row.date)
+        page_views_map[row.date] = row.count
+    for row in pdf_downloads_by_day:
+        dates.add(row.date)
+        pdf_map[row.date] = row.count
+
+    return [
+        DailyActivity(
+            date=date,
+            page_views=page_views_map.get(date, 0),
+            questions=questions_map.get(date, 0),
+            pdf_downloads=pdf_map.get(date, 0),
+            total_events=events_map.get(date, 0),
+        )
+        for date in sorted(dates)
     ]
 
 

@@ -19,6 +19,24 @@ class DailyCount(BaseModel):
     count: int
 
 
+class HourlyCount(BaseModel):
+    hour: str
+    count: int
+
+
+class HourOfDayCount(BaseModel):
+    hour: int
+    count: int
+
+
+class DailyActivity(BaseModel):
+    date: str
+    page_views: int
+    questions: int
+    pdf_downloads: int
+    total_events: int
+
+
 class AnalyticsStatsOut(BaseModel):
     period_days: int
     unique_visitors: int
@@ -29,9 +47,21 @@ class AnalyticsStatsOut(BaseModel):
     pdf_downloads: int
     page_views: int
     avatar_page_views: int
+    questions_today: int
+    page_views_today: int
+    pdf_downloads_today: int
     questions_by_language: dict[str, int]
+    pdf_downloads_by_source: dict[str, int]
     events_by_day: list[DailyCount]
     questions_by_day: list[DailyCount]
+    page_views_by_day: list[DailyCount]
+    pdf_downloads_by_day: list[DailyCount]
+    questions_by_hour: list[HourlyCount]
+    page_views_by_hour: list[HourlyCount]
+    pdf_downloads_by_hour: list[HourlyCount]
+    questions_by_hour_of_day: list[HourOfDayCount]
+    page_views_by_hour_of_day: list[HourOfDayCount]
+    daily_activity: list[DailyActivity]
 
 
 class MessageRowOut(BaseModel):
