@@ -9,12 +9,12 @@ export const Route = createFileRoute("/suspension")({
   component: SuspensionPage,
   head: () => ({
     meta: [
-      { title: "تعليق التطبيق — انتهاء الحملة الانتخابية" },
+      { title: "تم تعليق التطبيق — ECC" },
       {
         name: "description",
-        content: "إشعار بتعليق الخدمة الرقمية بعد انتهاء الحملة الانتخابية",
+        content: "إشعار بتعليق الخدمة الرقمية بعد انتهاء الحملة الانتخابية — Expertise & Consulting Company",
       },
-      { name: "robots", content: "noindex" },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
 });
