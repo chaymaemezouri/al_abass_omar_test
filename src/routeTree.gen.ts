@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AvatarRouteImport } from './routes/avatar'
+import { Route as SuspensionRouteImport } from './routes/suspension'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 
@@ -30,6 +31,11 @@ const AvatarRoute = AvatarRouteImport.update({
   path: '/avatar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuspensionRoute = SuspensionRouteImport.update({
+  id: '/suspension',
+  path: '/suspension',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/avatar': typeof AvatarRoute
+  '/suspension': typeof SuspensionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/avatar': typeof AvatarRoute
+  '/suspension': typeof SuspensionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
 }
@@ -60,21 +68,31 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/avatar': typeof AvatarRoute
+  '/suspension': typeof SuspensionRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/avatar' | '/api/chat' | '/api/health'
+  fullPaths:
+    '/' | '/admin' | '/avatar' | '/suspension' | '/api/chat' | '/api/health'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/avatar' | '/api/chat' | '/api/health'
-  id: '__root__' | '/' | '/admin' | '/avatar' | '/api/chat' | '/api/health'
+  to: '/' | '/admin' | '/avatar' | '/suspension' | '/api/chat' | '/api/health'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/avatar'
+    | '/suspension'
+    | '/api/chat'
+    | '/api/health'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AvatarRoute: typeof AvatarRoute
+  SuspensionRoute: typeof SuspensionRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiHealthRoute: typeof ApiHealthRoute
 }
@@ -102,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AvatarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/suspension': {
+      id: '/suspension'
+      path: '/suspension'
+      fullPath: '/suspension'
+      preLoaderRoute: typeof SuspensionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -123,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AvatarRoute: AvatarRoute,
+  SuspensionRoute: SuspensionRoute,
   ApiChatRoute: ApiChatRoute,
   ApiHealthRoute: ApiHealthRoute,
 }

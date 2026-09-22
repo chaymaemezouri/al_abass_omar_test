@@ -23,6 +23,7 @@ import assistantAvatar from "@/assets/assistant-avatar.png";
 import fabBallotLogo from "@/assets/image.png";
 import { Logo, BasmaMark } from "@/components/Logo";
 import { identity } from "@/data/program";
+import { isCampaignSuspended } from "@/lib/campaign-suspension";
 import { suggestions, ui, useLang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -44,16 +45,18 @@ export const OPEN_CHAT_EVENT = "open-campaign-chat";
 
 /** Ouvre la page Avatar Virtuel IA (intégration Avatar_Virtuel). */
 export const openChat = () => {
-  if (typeof window !== "undefined") {
-    window.location.assign("/avatar");
-  }
+  if (typeof window === "undefined") return;
+  window.location.assign(isCampaignSuspended() ? "/suspension" : "/avatar");
 };
 
 export const openChatWithQuestion = (question: string) => {
-  if (typeof window !== "undefined") {
-    const q = question.trim();
-    window.location.assign(q ? `/avatar?q=${encodeURIComponent(q)}` : "/avatar");
+  if (typeof window === "undefined") return;
+  if (isCampaignSuspended()) {
+    window.location.assign("/suspension");
+    return;
   }
+  const q = question.trim();
+  window.location.assign(q ? `/avatar?q=${encodeURIComponent(q)}` : "/avatar");
 };
 
 const bi = (fr: string, ar: string): Bi => ({ fr, ar });
