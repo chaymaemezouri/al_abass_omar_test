@@ -43,6 +43,12 @@ HOST=127.0.0.1
 VITE_AVATAR_API_URL=https://api-avatar.academyskills.net
 VITE_HEYGEN_VIDEO=false
 VITE_PRERECORDED_AVATAR=true
+
+# Suspension page /avatar → /suspension (Vite: pris au build, pas au simple pm2 reload)
+# Activer tout de suite sans attendre l'heure :
+VITE_CAMPAIGN_SUSPENDED=true
+# Ou fixer une autre heure (ISO avec fuseau) :
+# VITE_CAMPAIGN_SUSPENSION_AT=2026-09-22T22:55:00+01:00
 ```
 
 Vidéos (trop lourdes pour Git — copier une fois sur le VPS) :
