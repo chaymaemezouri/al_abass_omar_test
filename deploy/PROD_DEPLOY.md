@@ -44,10 +44,10 @@ VITE_AVATAR_API_URL=https://api-avatar.academyskills.net
 VITE_HEYGEN_VIDEO=false
 VITE_PRERECORDED_AVATAR=true
 
-# Suspension page /avatar → /suspension (Vite: pris au build, pas au simple pm2 reload)
-# Activer tout de suite sans attendre l'heure :
-VITE_CAMPAIGN_SUSPENDED=true
-# Ou fixer une autre heure (ISO avec fuseau) :
+# Suspension du site → /suspension (Vite: pris au build, pas au simple pm2 reload)
+# Désactivée : CAMPAIGN_SUSPENSION_ENABLED = false dans src/lib/campaign-suspension.ts
+# ignore les variables ci-dessous. Passer à true pour pouvoir réactiver.
+# VITE_CAMPAIGN_SUSPENDED=true
 # VITE_CAMPAIGN_SUSPENSION_AT=2026-09-22T22:55:00+01:00
 ```
 

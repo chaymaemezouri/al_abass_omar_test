@@ -1,5 +1,8 @@
 /** Campaign Avatar suspension — cutoff and optional env overrides (Vite build-time). */
 
+/** Master switch: false keeps the whole site normal, even if VITE_CAMPAIGN_SUSPENDED=true. */
+export const CAMPAIGN_SUSPENSION_ENABLED = false;
+
 const DEFAULT_SUSPENSION_AT = "2026-09-22T22:55:00+01:00";
 
 function readSuspensionAt(): Date {
@@ -20,6 +23,7 @@ function isForceSuspended(): boolean {
 }
 
 export function isCampaignSuspended(now: Date = new Date()): boolean {
+  if (!CAMPAIGN_SUSPENSION_ENABLED) return false;
   if (isForceSuspended()) return true;
   return now.getTime() >= CAMPAIGN_SUSPENSION_AT.getTime();
 }
